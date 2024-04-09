@@ -3,6 +3,7 @@ from typing import Optional, List, Dict
 from aind_data_schema.models.modalities import Modality
 from datetime import datetime
 
+
 class WatchConfig(BaseModel):
     """Configuration for rig"""
 
