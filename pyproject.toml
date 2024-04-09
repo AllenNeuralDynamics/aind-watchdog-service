@@ -17,6 +17,11 @@ readme = "README.md"
 dynamic = ["version"]
 
 dependencies = [
+    'watchdog',
+    'pyyaml',
+    'pydantic',
+    'aind-data-schema',
+    'aind-data-transfer-service'
 ]
 
 [project.optional-dependencies]

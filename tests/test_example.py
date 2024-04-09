@@ -1,15 +1,22 @@
 """Example test template."""
 
 import unittest
-
-
-class ExampleTest(unittest.TestCase):
+import yaml
+from aind_watchdog_service import config
+class TestConfig(unittest.TestCase):
     """Example Test Class"""
 
-    def test_assert_example(self):
-        """Example of how to test the truth of a statement."""
+    @classmethod
+    def setUp(cls) -> None:
+        cls.path_to_config = "resources/rig_config.yml"
 
-        self.assertTrue(1 == 1)
+
+    def test_config(self):
+        """Example of how to test the truth of a statement."""
+        with open(self.path_to_config) as yam:
+            data = yaml.safe_load(yam)
+        watchdog_config = config.WatchConfig(**data)
+        self.assertEqual(watchdog_config.model_dump, data)
 
 
 if __name__ == "__main__":
