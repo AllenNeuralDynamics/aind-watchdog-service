@@ -1,0 +1,55 @@
+from pydantic import BaseModel, ValidationError, Field, FilePath, field_validator
+from typing import Optional, List, Dict
+from aind_data_schema.models.modalities import Modality
+from datetime import datetime
+
+class WatchConfig(BaseModel):
+    """Configuration for rig"""
+
+    flag_dir: str = Field(
+        description="Directory for watchdog to poll", title="Poll directory"
+    )
+    flag_file: Optional[str] = Field(
+        default="FINISHED", description="flag file to watch for", title="Flag file"
+    )
+    schemas: Optional[str] = Field(
+        description="Location of static schemas like rig / instrumentation json",
+        title="Schema location",
+    )
+    schema_map: Optional[str] = Field(
+        description="json file used for mapping", title="Schema map configuration"
+    )
+    rig_type: str = Field(
+        description="Rig for data transfer and metdata mapping", title="Rig type"
+    )
+    webhook_url: Optional[str] = Field(
+        description="Teams webhook url for notification after initiation of data transfer or error reporting",
+        title="Teams webhook url",
+    )
+    transfer_time: Optional[str] = Field(
+        description="Transfer time to schedule copy and upload, defaults to immediately",
+        title="APScheduler transfer time",
+    )
+    destination: str = Field(
+        description="where to send data to on VAST",
+        title="VAST destination and maybe S3?",
+    )
+    modalities: Dict[str, List[str]] = Field(
+        description="list of ModalityFile objects containing modality names and associated files",
+        title="modality files",
+    )
+
+    @field_validator("modalities")
+    def verify_valid_modality(cls, data: Dict[str, List[str]]) -> Dict[str, List[str]]:
+        for key in data.keys():
+            if key.lower() not in Modality._abbreviation_map:
+                raise ValueError(f"{key} not in accepted modalities")
+        return data
+
+    @field_validator("transfer_time")
+    def verify_datetime(cls, data: str) -> str:
+        try:
+            datetime.strptime(data, "%H:%M").time()
+        except ValueError:
+            raise ValueError(f"Configure time to be in HH:MM format")
+        return data
