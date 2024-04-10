@@ -24,15 +24,15 @@ class EventHandler(PatternMatchingEventHandler):
             trigger_time = trigger_time + timedelta(days=1)
         return trigger_time
 
-    def on_created(self) -> None:
+    def on_created(self, event) -> None:
         if self.config.transfer_time:
             trigger = self._get_trigger_time(self.config.transfer_time)
-        self.scheduler.add_job(run_job, trigger, args=(self.scheduler, self.config))
+        self.scheduler.add_job(run_job, trigger, args=(event, self.config))
 
-    def on_modified(self) -> None:
+    def on_modified(self, event) -> None:
         if self.config.transfer_time:
             trigger = self._get_trigger_time(self.config.transfer_time)
-        self.scheduler.add_job(run_job, trigger, args=(self.scheduler, self.config))
+        self.scheduler.add_job(run_job, trigger, args=(event, self.config))
 
 
 def initiate_scheduler(config: WatchConfig) -> BackgroundScheduler:

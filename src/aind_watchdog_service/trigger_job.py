@@ -7,7 +7,7 @@ from aind_watchdog_service.alert_bot import AlertBot
 import aind_data_transfer_service
 
 
-def check_files():
+def check_files(event: str, modality_src: dict) -> bool:
     pass
 
 
@@ -19,7 +19,7 @@ def trigger_transfer_service():
     pass
 
 
-def run_job(scheduler: BackgroundScheduler, config: WatchConfig) -> None:
+def run_job(event: str, config: WatchConfig) -> None:
     check_files()
     copy_to_destination()
     trigger_transfer_service()
