@@ -39,6 +39,8 @@ class TestConfig(unittest.TestCase):
             mock_dir.return_value = True
             with self.assertRaises(ValueError):
                  job_config.WatchConfig(**data)
+        
+
 
 class TestUpload(unittest.TestCase):
     """test upload"""
