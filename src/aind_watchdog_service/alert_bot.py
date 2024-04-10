@@ -47,8 +47,6 @@ class AlertBot:
         ]
         if extra_text is not None:
             body.append({"type": "TextBlock", "text": extra_text})
-        if color:
-            body.append()
         contents = {
             "type": "message",
             "attachments": [

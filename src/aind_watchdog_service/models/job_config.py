@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ValidationError, Field, FilePath, field_validator, validator
+from pydantic import BaseModel, Field, field_validator, validator
 from typing import Optional, List, Dict, Union
 from aind_data_schema.models.modalities import Modality
 from datetime import datetime
