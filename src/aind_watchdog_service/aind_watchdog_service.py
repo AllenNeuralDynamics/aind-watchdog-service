@@ -4,11 +4,9 @@ from watchdog.events import PatternMatchingEventHandler
 from datetime import datetime as dt
 from datetime import timedelta
 import os
-from pathlib import Path
 import yaml
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from aind_watchdog_service import alert_bot
 from aind_watchdog_service.trigger_job import run_job
 from aind_watchdog_service.models.job_config import WatchConfig
 
@@ -17,7 +15,6 @@ class EventHandler(PatternMatchingEventHandler):
     def __init__(self, scheduler: BackgroundScheduler, pattern: str, config: WatchConfig):
         super(EventHandler, self).__init__(self, pattern=pattern)
         self.scheduler = scheduler
-        self.alert_bot = alert_bot.AlertBot()
         self.config = config
 
     def _get_trigger_time(self, transfer_time: str) -> dt:
@@ -26,7 +23,7 @@ class EventHandler(PatternMatchingEventHandler):
         if (trigger_time - dt.now()).total_seconds() < 0:
             trigger_time = trigger_time + timedelta(days=1)
         return trigger_time
-    
+
     def on_created(self) -> None:
         if self.config.transfer_time:
             trigger = self._get_trigger_time(self.config.transfer_time)
@@ -62,8 +59,11 @@ def initiate_observer(config: WatchConfig, scheduler: BackgroundScheduler) -> No
 
 
 def main(config: dict) -> None:
+    # Load configuration
     watch_config = WatchConfig(**config)
+    # Start APScheduler
     initiate_scheduler(watch_config)
+    # Start watchdog observer
     initiate_observer(watch_config)
 
 
