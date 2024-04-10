@@ -34,6 +34,12 @@ class TestConfig(unittest.TestCase):
             with self.assertRaises(ValueError):
                  job_config.WatchConfig(**data)
 
+        data['transfer_time'] = "1"
+        with patch.object(Path, "is_dir") as mock_dir:
+            mock_dir.return_value = True
+            with self.assertRaises(ValueError):
+                 job_config.WatchConfig(**data)
+
 class TestUpload(unittest.TestCase):
     """test upload"""
 
