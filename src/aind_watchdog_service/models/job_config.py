@@ -1,8 +1,8 @@
-from pydantic import BaseModel, ValidationError, Field, FilePath, field_validator
-from typing import Optional, List, Dict
+from pydantic import BaseModel, ValidationError, Field, FilePath, field_validator, validator
+from typing import Optional, List, Dict, Union
 from aind_data_schema.models.modalities import Modality
 from datetime import datetime
-
+from pathlib import Path
 
 class WatchConfig(BaseModel):
     """Configuration for rig"""
@@ -35,22 +35,35 @@ class WatchConfig(BaseModel):
         description="where to send data to on VAST",
         title="VAST destination and maybe S3?",
     )
+    modality_source: Dict[str, str] = Field(description="Where to find the modality source directories", title="Modality directories")
     modalities: Dict[str, List[str]] = Field(
         description="list of ModalityFile objects containing modality names and associated files",
         title="modality files",
     )
 
-    @field_validator("modalities")
-    def verify_valid_modality(cls, data: Dict[str, List[str]]) -> Dict[str, List[str]]:
+    @validator("modalities", "modality_source")
+    def verify_modality_dirs(cls, data: Dict[str, str]) -> Dict[str, str]:
         for key in data.keys():
             if key.lower() not in Modality._abbreviation_map:
                 raise ValueError(f"{key} not in accepted modalities")
         return data
+    
 
     @field_validator("transfer_time")
     def verify_datetime(cls, data: str) -> str:
         try:
             datetime.strptime(data, "%H:%M").time()
         except ValueError:
-            raise ValueError(f"Configure time to be in HH:MM format")
+            raise ValueError(f"Specify time in HH:MM format, not {data}")
+        return data
+    
+    @validator("modality_source", "flag_dir", "destination")
+    def verify_directories_exist(cls, data: Union[Dict[str, str], str]) -> Union[Dict[str, str], str]:
+        if type(data) == dict:
+            for k, v in data.items():
+                if not Path(v).is_dir():
+                    raise ValueError(f"Provide correct path for {data}")
+        else:
+            if not Path(data).is_dir():
+                raise ValueError(f"Provide correct path for {data}")
         return data

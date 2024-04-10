@@ -1,12 +1,16 @@
 flag_dir: /some/dir # Directory to configure watchdog to poll
 flag_file: user_settings.json # OPTIONAL
+modality_source:
+  ophys: some/path
+  behavior: some/path
 modalities: # What files and modalities service is expected to move; glob patterns OK
-  OPHYS: 
-    - file1.txt
-    - file2.txt
-  BEHAVIOR:
-    - file1.txt
-    - file2.txt
+  ophys: 
+    - acquisition.tiff
+    - depth.tiff
+    - user_setting.json
+  behavior:
+    - behavior_vid.mp4
+    - behavior_vid.json
 schemas: /some/dir # OPTIONAL: If not provided will pull from the acquisition directory
 schema_map: user_settings.json #OPTIONAL If expected to use mapping service, which file containing argument parameters
 rig_type: multiplane-ophys # to know which data transfer and mapping to call
