@@ -16,6 +16,7 @@ class TestConfig(unittest.TestCase):
     @classmethod
     def setUp(cls) -> None:
         cls.path_to_config = TEST_DIRECTORY / "resources" / "rig_config.yml"
+        cls.path_to_incorrect_config = TEST_DIRECTORY / "resources" / "incorrect_rig_config.yml"
     
     def test_config(self):
         """Example of how to test the truth of a statement."""
@@ -40,7 +41,12 @@ class TestConfig(unittest.TestCase):
             with self.assertRaises(ValueError):
                  job_config.WatchConfig(**data)
         
-
+        with open(self.path_to_incorrect_config) as yam:
+            data = yaml.safe_load(yam)
+            with patch.object(Path, "is_dir") as mock_dir:
+                mock_dir.return_value = True
+                with self.assertRaises(ValueError):
+                    job_config.WatchConfig(**data)
 
 class TestUpload(unittest.TestCase):
     """test upload"""
