@@ -8,6 +8,7 @@ import aind_data_transfer_service
 
 
 def check_files(event: str, modality_src: dict) -> bool:
+    
     pass
 
 

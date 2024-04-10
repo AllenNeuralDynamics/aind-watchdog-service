@@ -3,7 +3,7 @@
 from typing import Optional
 
 import requests
-
+# From Alessio Buccino - pulled from aind-codeocean-utils 
 
 class AlertBot:
     """Class to handle sending alerts and messages in MS Teams."""
