@@ -13,7 +13,7 @@ from aind_watchdog_service.models.job_config import WatchConfig
 
 class EventHandler(PatternMatchingEventHandler):
     def __init__(self, scheduler: BackgroundScheduler, pattern: str, config: WatchConfig):
-        super().__init__(patterns=pattern)
+        super().__init__(patterns=[pattern])
         self.scheduler = scheduler
         self.config = config
 
@@ -24,15 +24,14 @@ class EventHandler(PatternMatchingEventHandler):
             trigger_time = trigger_time + timedelta(days=1)
         return trigger_time
 
-    def on_created(self, event) -> None:
-        if self.config.transfer_time:
-            trigger = self._get_trigger_time(self.config.transfer_time)
-        self.scheduler.add_job(run_job, trigger, args=(event, self.config))
-
     def on_modified(self, event) -> None:
         if self.config.transfer_time:
             trigger = self._get_trigger_time(self.config.transfer_time)
-        self.scheduler.add_job(run_job, trigger, args=(event, self.config))
+        else:
+            trigger = None
+        self.scheduler.add_job(
+            run_job, "date", run_date=trigger, args=[event, self.config]
+        )
 
 
 def initiate_scheduler() -> BackgroundScheduler:
@@ -43,15 +42,16 @@ def initiate_scheduler() -> BackgroundScheduler:
 
 def initiate_observer(config: WatchConfig, scheduler: BackgroundScheduler) -> None:
     observer = Observer()
-    pattern = config.flag_dir
+    watch_directory = config.flag_dir
+    flag_file = "FINISHED"
     if config.flag_file:
-        pattern = os.path.join(config.flag_dir, config.flag_file)
-    event_handler = EventHandler(scheduler, pattern, config)
-    observer.schedule(event_handler, config, recursive=True)
+        flag_file = config.flag_file
+    event_handler = EventHandler(scheduler, flag_file, config)
+    observer.schedule(event_handler, watch_directory, recursive=True)
     observer.start()
     try:
         while True:
-            time.sleep(5)
+            time.sleep(3)
     except (KeyboardInterrupt, SyntaxError, SystemExit):
         observer.stop()
         scheduler.shutdown()

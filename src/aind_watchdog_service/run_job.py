@@ -8,7 +8,7 @@ import aind_data_transfer_service
 
 
 def check_files(event: str, modality_src: dict) -> bool:
-    pass
+    print("I MADE IT HERE")
 
 
 def copy_to_destination():
@@ -20,6 +20,7 @@ def trigger_transfer_service():
 
 
 def run_job(event: str, config: WatchConfig) -> None:
-    check_files()
+    print("I MADE IT HERE")
+    check_files(event, config)
     copy_to_destination()
     trigger_transfer_service()

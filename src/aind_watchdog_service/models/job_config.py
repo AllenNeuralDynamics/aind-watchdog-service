@@ -4,6 +4,7 @@ from aind_data_schema.models.modalities import Modality
 from datetime import datetime
 from pathlib import Path
 
+
 class WatchConfig(BaseModel):
     """Configuration for rig"""
 
@@ -14,20 +15,25 @@ class WatchConfig(BaseModel):
         default="FINISHED", description="flag file to watch for", title="Flag file"
     )
     schemas: Optional[str] = Field(
+        defualt=None,
         description="Location of static schemas like rig / instrumentation json",
         title="Schema location",
     )
     schema_map: Optional[str] = Field(
-        description="json file used for mapping", title="Schema map configuration"
+        default=None,
+        description="json file used for mapping",
+        title="Schema map configuration",
     )
     rig_type: str = Field(
         description="Rig for data transfer and metdata mapping", title="Rig type"
     )
     webhook_url: Optional[str] = Field(
+        default=None,
         description="Teams webhook url for notification after initiation of data transfer or error reporting",
         title="Teams webhook url",
     )
     transfer_time: Optional[str] = Field(
+        default=None,
         description="Transfer time to schedule copy and upload, defaults to immediately",
         title="APScheduler transfer time",
     )
@@ -35,7 +41,10 @@ class WatchConfig(BaseModel):
         description="where to send data to on VAST",
         title="VAST destination and maybe S3?",
     )
-    modality_source: Dict[str, str] = Field(description="Where to find the modality source directories", title="Modality directories")
+    modality_source: Dict[str, str] = Field(
+        description="Where to find the modality source directories",
+        title="Modality directories",
+    )
     modalities: Dict[str, List[str]] = Field(
         description="list of ModalityFile objects containing modality names and associated files",
         title="modality files",
@@ -47,7 +56,6 @@ class WatchConfig(BaseModel):
             if key.lower() not in Modality._abbreviation_map:
                 raise ValueError(f"{key} not in accepted modalities")
         return data
-    
 
     @field_validator("transfer_time")
     def verify_datetime(cls, data: str) -> str:
@@ -56,9 +64,11 @@ class WatchConfig(BaseModel):
         except ValueError:
             raise ValueError(f"Specify time in HH:MM format, not {data}")
         return data
-    
+
     @validator("modality_source", "flag_dir", "destination")
-    def verify_directories_exist(cls, data: Union[Dict[str, str], str]) -> Union[Dict[str, str], str]:
+    def verify_directories_exist(
+        cls, data: Union[Dict[str, str], str]
+    ) -> Union[Dict[str, str], str]:
         if type(data) == dict:
             for k, v in data.items():
                 if not Path(v).is_dir():

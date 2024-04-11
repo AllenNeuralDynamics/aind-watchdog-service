@@ -3,7 +3,9 @@
 from typing import Optional
 
 import requests
-# From Alessio Buccino - pulled from aind-codeocean-utils 
+
+# From Alessio Buccino - pulled from aind-codeocean-utils
+
 
 class AlertBot:
     """Class to handle sending alerts and messages in MS Teams."""
@@ -56,8 +58,7 @@ class AlertBot:
                         "type": "AdaptiveCard",
                         "body": body,
                         "$schema": (
-                            "http://adaptivecards.io/schemas/"
-                            "adaptive-card.json"
+                            "http://adaptivecards.io/schemas/" "adaptive-card.json"
                         ),
                         "version": "1.0",
                     },
