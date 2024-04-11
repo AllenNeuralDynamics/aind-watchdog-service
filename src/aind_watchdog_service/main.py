@@ -7,13 +7,13 @@ import os
 import yaml
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from aind_watchdog_service.trigger_job import run_job
+from aind_watchdog_service.run_job import run_job
 from aind_watchdog_service.models.job_config import WatchConfig
 
 
 class EventHandler(PatternMatchingEventHandler):
     def __init__(self, scheduler: BackgroundScheduler, pattern: str, config: WatchConfig):
-        super(EventHandler, self).__init__(self, pattern=pattern)
+        super().__init__(patterns=pattern)
         self.scheduler = scheduler
         self.config = config
 
@@ -35,7 +35,7 @@ class EventHandler(PatternMatchingEventHandler):
         self.scheduler.add_job(run_job, trigger, args=(event, self.config))
 
 
-def initiate_scheduler(config: WatchConfig) -> BackgroundScheduler:
+def initiate_scheduler() -> BackgroundScheduler:
     scheduler = BackgroundScheduler()
     scheduler.start()
     return scheduler
@@ -46,7 +46,7 @@ def initiate_observer(config: WatchConfig, scheduler: BackgroundScheduler) -> No
     pattern = config.flag_dir
     if config.flag_file:
         pattern = os.path.join(config.flag_dir, config.flag_file)
-    event_handler = EventHandler(scheduler, pattern)
+    event_handler = EventHandler(scheduler, pattern, config)
     observer.schedule(event_handler, config, recursive=True)
     observer.start()
     try:
@@ -62,9 +62,9 @@ def main(config: dict) -> None:
     # Load configuration
     watch_config = WatchConfig(**config)
     # Start APScheduler
-    initiate_scheduler(watch_config)
+    scheduler = initiate_scheduler()
     # Start watchdog observer
-    initiate_observer(watch_config)
+    initiate_observer(watch_config, scheduler)
 
 
 if __name__ == "__main__":
@@ -75,5 +75,4 @@ if __name__ == "__main__":
         )
     with open(configuration) as y:
         data = yaml.safe_load(y)
-
     main(data)
