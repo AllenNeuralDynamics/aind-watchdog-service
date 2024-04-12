@@ -8,19 +8,24 @@ import yaml
 from apscheduler.schedulers.background import BackgroundScheduler
 
 from aind_watchdog_service.run_job import run_job, run_script
-from aind_watchdog_service.models.job_config import WatchConfig, RunScriptConfig, VastTransferConfig
+from aind_watchdog_service.models.job_config import (
+    WatchConfig,
+    RunScriptConfig,
+    VastTransferConfig,
+)
 from aind_watchdog_service.alert_bot import AlertBot
 
 
 class EventHandler(FileSystemEventHandler):
     """Event handler for watchdog observer"""
+
     def __init__(self, scheduler: BackgroundScheduler, config: WatchConfig):
         super().__init__()
         self.scheduler = scheduler
         self.config = config
         self.jobs = {}
-        self.alert =  AlertBot(config.webhook_url)
-    
+        self.alert = AlertBot(config.webhook_url)
+
     def _load_vast_transfer_manifest(self, event: FileModifiedEvent) -> dict:
         """Instructions to transfer to VAST
 
@@ -36,11 +41,12 @@ class EventHandler(FileSystemEventHandler):
         """
         with open(event.src_path, "r") as f:
             try:
-                config = VastTransferConfig(**yaml.safe_load(f))
+                data = yaml.safe_load(f)
+                config = VastTransferConfig(**data)
+                return config
             except Exception as e:
-                self.alert.send_message(f"Error loading manifest: {e}")
-        return config
-    
+                self.alert.send_message("Error loading config", e)
+
     def _load_run_script_manifest(self, event: FileModifiedEvent) -> dict:
         """Instructions to run a script
 
@@ -58,9 +64,9 @@ class EventHandler(FileSystemEventHandler):
             try:
                 config = RunScriptConfig(**yaml.safe_load(f))
             except Exception as e:
-                self.alert.send_message(f"Error loading manifest: {e}")
+                self.alert.send_message("Error loading config", e)
         return config
-    
+
     def _remove_job(self, event: FileModifiedEvent) -> None:
         """Removes job from scheduler queue
 
@@ -102,18 +108,24 @@ class EventHandler(FileSystemEventHandler):
         config : dict
             configuration for the job
         """
-        trigger = self._get_trigger_time(config.transfer_time)
-        job_id = self.scheduler.add_job(run_job, "date", run_date=trigger, args=[event, config])
+        if config.transfer_time == "now":
+            job_id = self.scheduler.add_job(run_job, args=[event, config, self.config])
+
+        else:
+            trigger = self._get_trigger_time(config.transfer_time)
+            job_id = self.scheduler.add_job(
+                run_job, "date", run_date=trigger, args=[event, config]
+            )
         self.jobs[event.src_path] = job_id
-    
+
     def on_modified(self, event: FileModifiedEvent) -> None:
         """Event handler for file modified event
-        
+
         Parameters
         ----------
         event : FileModifiedEvent
             file modified event
-            
+
         Returns
         -------
         None
@@ -130,6 +142,7 @@ class EventHandler(FileSystemEventHandler):
         else:
             vast_transfer_config = self._load_vast_transfer_manifest(event)
             self.schedule_job(event, vast_transfer_config)
+
 
 def initiate_scheduler() -> BackgroundScheduler:
     """Starts APScheduler

@@ -17,40 +17,16 @@ class WatchConfig(BaseModel):
         description="json file used for mapping",
         title="Schema map configuration",
     )
-    platform: Platform.ONE_OF = Field(description="Platform type", title="Platform type")
     webhook_url: Optional[str] = Field(
         default=None,
-        description="Teams webhook url for notification after initiation of data transfer or error reporting",
+        description="Teams webhook url for user notification",
         title="Teams webhook url",
     )
-    modalities: list = Field(
-        description="list of ModalityFile objects containing modality names and associated files",
-        title="modality files",
+    run_script: bool = Field(
+        description="Run custom script for upload", title="Run script"
     )
-    s3_bucket: str = Field(description="s3 endpoint", title="S3 endpoint")
-    destination: str = Field(
-        description="where to send data to on VAST",
-        title="VAST destination and maybe S3?",
-    )
-    run_script: bool = Field(description="Run custom upload script", title="Run script")
 
-    @field_validator("modalities")
-    @classmethod
-    def verify_modality_dirs(cls, data: list) -> list:
-        for modality in data:
-            if modality.lower() not in Modality._abbreviation_map:
-                raise ValueError(f"{modality} not in accepted modalities")
-        return data
-
-    @field_validator("platform")
-    @classmethod
-    def verify_modality_dirs(cls, data: Dict[str, str]) -> Dict[str, str]:
-        for key in data.keys():
-            if key.lower() not in Platform._abbreviation_map:
-                raise ValueError(f"{key} not in accepted modalities")
-        return data
-    
-    @field_validator("flag_dir", "destination")
+    @field_validator("flag_dir")
     @classmethod
     def verify_directories_exist(
         cls, data: Union[Dict[str, str], str]
@@ -69,7 +45,7 @@ class ManifestConfig(BaseModel):
     """Configuration for session: based on engineerings lims_scheduler_d manifest files"""
 
     name: str = Field(
-        description="Unique name for session data assets. Should follow AINDs schema for naming data assets",
+        description="Unique name for session data assets",
         title="Unique name",
     )
     subject_id: int = Field(description="Subject ID", title="Subject ID")
@@ -78,7 +54,6 @@ class ManifestConfig(BaseModel):
         title="Acquisition datetime",
     )
     transfer_time: Optional[str] = Field(
-        default="23:00",
         description="Transfer time to schedule copy and upload, defaults to immediately",
         title="APScheduler transfer time",
     )
@@ -87,6 +62,8 @@ class ManifestConfig(BaseModel):
     @field_validator("transfer_time")
     @classmethod
     def verify_datetime(cls, data: str) -> str:
+        if data == "now":
+            return data
         try:
             datetime.strptime(data, "%H:%M").time()
         except ValueError:
@@ -96,9 +73,13 @@ class ManifestConfig(BaseModel):
     @field_validator("platform")
     @classmethod
     def verify_platform(cls, data: str) -> str:
+        if "_" in data:
+            data = data.replace("_", "-")
         if data.lower() not in Platform._abbreviation_map:
             raise ValueError(f"{data} not in accepted platforms")
         return data
+
+
 class VastTransferConfig(ManifestConfig):
     """Template to verify all files that need to be uploaded"""
 
@@ -110,24 +91,25 @@ class VastTransferConfig(ManifestConfig):
     capsule_id: Optional[str] = Field(
         description="Capsule ID of pipeline to run", title="Capsule"
     )
-    modalities: Dict[Modality.ONE_OF, List[str]] = Field(
+    modalities: Dict[str, list] = Field(
         description="list of ModalityFile objects containing modality names and associated files",
         title="modality files",
     )
 
-    @field_validator("transfer_time")
+    @field_validator("destination")
     @classmethod
-    def verify_datetime(cls, data: str) -> str:
-        try:
-            datetime.strptime(data, "%H:%M").time()
-        except ValueError:
-            raise ValueError(f"Specify time in HH:MM format, not {data}")
+    def verify_destination(cls, data: str) -> str:
+        if not Path(data).is_dir():
+            try:
+                Path(data).mkdir(parents=True)
+            except:
+                raise ValueError(f"Could not create destination directory")
         return data
 
 
 class RunScriptConfig(ManifestConfig):
     """Upload data directly to cloud"""
 
-    commands: Dict[Dict[str, list]] = Field(
+    commands: Dict[str, list] = Field(
         description="Set of commands to run in subprocess", title="Commands"
     )
