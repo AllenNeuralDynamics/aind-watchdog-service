@@ -11,7 +11,10 @@ from aind_watchdog_service.models.job_config import (
     VastTransferConfig,
 )
 from aind_watchdog_service.alert_bot import AlertBot
-from aind_data_transfer_service.configs.job_configs import ModalityConfigs, BasicUploadJobConfigs
+from aind_data_transfer_service.configs.job_configs import (
+    ModalityConfigs,
+    BasicUploadJobConfigs,
+)
 
 
 if platform.system() == "Windows":
@@ -19,12 +22,12 @@ if platform.system() == "Windows":
 else:
     PLATFORM = "linux"
 
+
 def _check_schemas():
     pass
 
-def copy_to_vast(
-        vast_config: VastTransferConfig, config: WatchConfig
-) -> bool:
+
+def copy_to_vast(vast_config: VastTransferConfig, config: WatchConfig) -> bool:
     parent_directory = vast_config.name
     destination = vast_config.destination
     modalities = vast_config.modalities
@@ -49,6 +52,7 @@ def copy_to_vast(
                 return False
         return True
 
+
 def subprocess_linux(src: str, dest: str) -> bool:
     """copy files using linux cp command
 
@@ -72,6 +76,7 @@ def subprocess_linux(src: str, dest: str) -> bool:
         return False
     return True
 
+
 def subprocess_windows(src: str, dest: str) -> bool:
     """copy files using windows robocopy command
 
@@ -93,20 +98,32 @@ def subprocess_windows(src: str, dest: str) -> bool:
         )
     else:
         run = subprocess.run(
-            ["robocopy", os.path.dirname(src), dest, os.path.basename(src), "/mt", "/z", "/r:5"], check=False
+            [
+                "robocopy",
+                os.path.dirname(src),
+                dest,
+                os.path.basename(src),
+                "/mt",
+                "/z",
+                "/r:5",
+            ],
+            check=False,
         )
     if run.returncode != 1:
         return False
     return True
 
-def trigger_transfer_service(vast_config: VastTransferConfig, watch_config: WatchConfig) -> None:
+
+def trigger_transfer_service(
+    vast_config: VastTransferConfig, watch_config: WatchConfig
+) -> None:
     upload_job_configs = BasicUploadJobConfigs(
         s3_bucket=vast_config.s3_bucket,
         platform=vast_config.platform,
         subject_id=vast_config.subject_id,
         acquisition_datetime=vast_config.acquisition_datetime,
         modalities=[k for k in vast_config.modalities.keys()],
-        metadata_dir="Come back to this", # TODO: Add metadata directory
+        metadata_dir="Come back to this",  # TODO: Add metadata directory
     )
 
 
@@ -117,7 +134,7 @@ def run_job(
     if not transfer:
         alert = AlertBot(watch_config.webhook_url)
         alert.send_message("Error copying files", vast_config.name)
-    trigger_transfer_service(vast_config,watch_config)
+    trigger_transfer_service(vast_config, watch_config)
 
 
 def run_script(event: str, config: WatchConfig) -> None:
