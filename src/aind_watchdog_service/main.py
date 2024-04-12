@@ -1,6 +1,6 @@
 import time
 from watchdog.observers import Observer
-from watchdog.events import PatternMatchingEventHandler, FileModifiedEvent
+from watchdog.events import FileSystemEventHandler, FileModifiedEvent
 from datetime import datetime as dt
 from datetime import timedelta
 import os
@@ -9,15 +9,17 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 from aind_watchdog_service.run_job import run_job, run_script
 from aind_watchdog_service.models.job_config import WatchConfig, RunScriptConfig, VastTransferConfig
+from aind_watchdog_service.alert_bot import AlertBot
 
 
-class EventHandler(PatternMatchingEventHandler):
+class EventHandler(FileSystemEventHandler):
     """Event handler for watchdog observer"""
-    def __init__(self, scheduler: BackgroundScheduler, pattern: str, config: WatchConfig):
-        super().__init__(patterns=[pattern])
+    def __init__(self, scheduler: BackgroundScheduler, config: WatchConfig):
+        super().__init__()
         self.scheduler = scheduler
         self.config = config
         self.jobs = {}
+        self.alert =  AlertBot(config.webhook_url)
     
     def _load_vast_transfer_manifest(self, event: FileModifiedEvent) -> dict:
         """Instructions to transfer to VAST
@@ -33,7 +35,10 @@ class EventHandler(PatternMatchingEventHandler):
            manifest configuration
         """
         with open(event.src_path, "r") as f:
-            config = VastTransferConfig(**yaml.safe_load(f))
+            try:
+                config = VastTransferConfig(**yaml.safe_load(f))
+            except Exception as e:
+                self.alert.send_message(f"Error loading manifest: {e}")
         return config
     
     def _load_run_script_manifest(self, event: FileModifiedEvent) -> dict:
@@ -50,7 +55,10 @@ class EventHandler(PatternMatchingEventHandler):
             manifest configuration
         """
         with open(event.src_path, "r") as f:
-            config = RunScriptConfig(**yaml.safe_load(f))
+            try:
+                config = RunScriptConfig(**yaml.safe_load(f))
+            except Exception as e:
+                self.alert.send_message(f"Error loading manifest: {e}")
         return config
     
     def _remove_job(self, event: FileModifiedEvent) -> None:
@@ -84,6 +92,20 @@ class EventHandler(PatternMatchingEventHandler):
             trigger_time = trigger_time + timedelta(days=1)
         return trigger_time
 
+    def schedule_job(self, event: FileModifiedEvent, config: dict) -> None:
+        """Schedule job to run
+
+        Parameters
+        ----------
+        event : FileModifiedEvent
+            event to trigger job
+        config : dict
+            configuration for the job
+        """
+        trigger = self._get_trigger_time(config.transfer_time)
+        job_id = self.scheduler.add_job(run_job, "date", run_date=trigger, args=[event, config])
+        self.jobs[event.src_path] = job_id
+    
     def on_modified(self, event: FileModifiedEvent) -> None:
         """Event handler for file modified event
         
@@ -96,18 +118,18 @@ class EventHandler(PatternMatchingEventHandler):
         -------
         None
         """
+        # Check if manifest file is being modified / created
+        if not "manifest" in event.src_path:
+            return
+        # If scheduled manifest is being modified, remove original job
         if self.jobs.get(event.src_path, ""):
             self._remove_job(event)
         if self.config.run_script:
             run_script_config = self._load_run_script_manifest(event)
-            trigger = self._get_trigger_time(run_script_config.transfer_time)
-            job_id = self.scheduler.add_job(run_script, "data", run_date=trigger, args=[event, run_script_config])
+            self.schedule_job(event, run_script_config)
         else:
             vast_transfer_config = self._load_vast_transfer_manifest(event)
-            trigger = self._get_trigger_time(vast_transfer_config.transfer_time)
-            job_id = self.scheduler.add_job(run_job, "date", run_date=trigger, args=[event, vast_transfer_config])
-        self.jobs[event.src_path] = job_id
-
+            self.schedule_job(event, vast_transfer_config)
 
 def initiate_scheduler() -> BackgroundScheduler:
     """Starts APScheduler
@@ -134,10 +156,7 @@ def initiate_observer(config: WatchConfig, scheduler: BackgroundScheduler) -> No
     """
     observer = Observer()
     watch_directory = config.flag_dir
-    flag_file = "FINISHED"
-    if config.flag_file:
-        flag_file = config.flag_file
-    event_handler = EventHandler(scheduler, flag_file, config)
+    event_handler = EventHandler(scheduler, config)
     observer.schedule(event_handler, watch_directory, recursive=True)
     observer.start()
     try:

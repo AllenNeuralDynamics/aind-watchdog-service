@@ -82,7 +82,7 @@ class ManifestConfig(BaseModel):
         description="Transfer time to schedule copy and upload, defaults to immediately",
         title="APScheduler transfer time",
     )
-    platform: Platform.ONE_OF = Field(description="Platform type", title="Platform type")
+    platform: str = Field(description="Platform type", title="Platform type")
 
     @field_validator("transfer_time")
     @classmethod
@@ -93,7 +93,12 @@ class ManifestConfig(BaseModel):
             raise ValueError(f"Specify time in HH:MM format, not {data}")
         return data
 
-
+    @field_validator("platform")
+    @classmethod
+    def verify_platform(cls, data: str) -> str:
+        if data.lower() not in Platform._abbreviation_map:
+            raise ValueError(f"{data} not in accepted platforms")
+        return data
 class VastTransferConfig(ManifestConfig):
     """Template to verify all files that need to be uploaded"""
 
