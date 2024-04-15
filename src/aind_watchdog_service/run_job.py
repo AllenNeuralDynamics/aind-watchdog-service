@@ -12,7 +12,6 @@ from aind_watchdog_service.models.job_config import (
 )
 from aind_watchdog_service.alert_bot import AlertBot
 from aind_data_transfer_service.configs.job_configs import (
-    ModalityConfigs,
     BasicUploadJobConfigs,
 )
 
@@ -24,7 +23,7 @@ else:
 
 
 def copy_to_vast(
-    vast_config: VastTransferConfig, config: WatchConfig, alert=AlertBot
+    vast_config: VastTransferConfig, alert=AlertBot
 ) -> bool:
     """Determine platform and copy files to VAST
 
@@ -32,8 +31,8 @@ def copy_to_vast(
     ----------
     vast_config : VastTransferConfig
         configuration for VAST transfer
-    config : WatchConfig
-        Configuration for the watch service
+    alert : AlertBot
+        Message service
 
     Returns
     -------
@@ -147,7 +146,7 @@ def trigger_transfer_service(vast_config: VastTransferConfig, alert: AlertBot) -
     vast_config : VastTransferConfig
         VAST configuration
     alert : AlertBot
-        Teams messenger
+        Teams message service
     """
     upload_job_configs = BasicUploadJobConfigs(
         s3_bucket=vast_config.s3_bucket,
@@ -199,7 +198,7 @@ def run_job(
     """
     alert = AlertBot(watch_config.webhook_url)
     alert.send_message("Running job", f"Triggering event from {event.src_path}")
-    transfer = copy_to_vast(vast_config, watch_config, alert)
+    transfer = copy_to_vast(vast_config, alert)
     if transfer:
         trigger_transfer_service(vast_config, alert)
 
@@ -223,7 +222,7 @@ def run_script(event: str, config: RunScriptConfig, watch_config: WatchConfig) -
             stderr=subprocess.PIPE,
             stdout=subprocess.PIPE,
         )
-        if run.retruncode != 1:
+        if run.returncode != 1:
             alert.send_message(
                 "Error running script", f"Could not execute {command} for {config.name}"
             )
