@@ -89,7 +89,7 @@ class VastTransferConfig(ManifestConfig):
         title="VAST destination and maybe S3?",
     )
     capsule_id: Optional[str] = Field(
-        description="Capsule ID of pipeline to run", title="Capsule"
+        default=None, description="Capsule ID of pipeline to run", title="Capsule"
     )
     modalities: Dict[str, list] = Field(
         description="list of ModalityFile objects containing modality names and associated files",
