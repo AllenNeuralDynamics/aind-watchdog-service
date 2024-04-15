@@ -23,7 +23,9 @@ else:
     PLATFORM = "linux"
 
 
-def copy_to_vast(vast_config: VastTransferConfig, config: WatchConfig) -> bool:
+def copy_to_vast(
+    vast_config: VastTransferConfig, config: WatchConfig, alert=AlertBot
+) -> bool:
     """Determine platform and copy files to VAST
 
     Parameters
@@ -51,13 +53,11 @@ def copy_to_vast(vast_config: VastTransferConfig, config: WatchConfig) -> bool:
                 else:
                     transfer = subprocess_linux(file, destination_directory)
                 if not transfer:
-                    alert_message = AlertBot(config.webhook_url)
-                    alert_message.send_message("Error copying files", file)
+                    alert.send_message("Error copying files", file)
 
                     return False
             else:
-                alert_message = AlertBot(config.webhook_url)
-                alert_message.send_message("File not found", file)
+                alert.send_message("File not found", file)
 
                 return False
         return True
@@ -197,14 +197,14 @@ def run_job(
     watch_config : WatchConfig
         Watchdog configuration
     """
-    transfer = copy_to_vast(vast_config, watch_config)
-    if not transfer:
-        alert = AlertBot(watch_config.webhook_url)
-        alert.send_message("Error copying files", vast_config.name)
-    trigger_transfer_service(vast_config, alert)
+    alert = AlertBot(watch_config.webhook_url)
+    alert.send_message("Running job", f"Triggering event from {event.src_path}")
+    transfer = copy_to_vast(vast_config, watch_config, alert)
+    if transfer:
+        trigger_transfer_service(vast_config, alert)
 
 
-def run_script(event: str, config: WatchConfig) -> None:
+def run_script(event: str, config: RunScriptConfig, watch_config: WatchConfig) -> None:
     """Run a custom script on file modification
 
     Parameters
@@ -214,4 +214,19 @@ def run_script(event: str, config: WatchConfig) -> None:
     config : WatchConfig
         Watchdog configuration
     """
-    pass
+    alert = AlertBot(watch_config.webhook_url)
+    alert.send_message("Running job", f"Triggering event from {event.src_path}")
+    for command in config.script:
+        run = subprocess.run(
+            config.script[command],
+            check=False,
+            stderr=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+        )
+        if run.retruncode != 1:
+            alert.send_message(
+                "Error running script", f"Could not execute {command} for {config.name}"
+            )
+            return
+        else:
+            alert.send_message("Script executed", f"Ran {command} for {config.name}")

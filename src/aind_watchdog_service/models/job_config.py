@@ -14,7 +14,7 @@ class WatchConfig(BaseModel):
     )
     schema_map: Optional[str] = Field(
         default=None,
-        description="json file used for mapping",
+        description="json file used for mapping; ignored for now until metadata mapper is implemented",
         title="Schema map configuration",
     )
     webhook_url: Optional[str] = Field(
@@ -38,6 +38,13 @@ class WatchConfig(BaseModel):
         else:
             if not Path(data).is_dir():
                 raise ValueError(f"Provide correct path for {data}")
+        return data
+
+    @field_validator("run_script")
+    @classmethod
+    def verify_run_script(cls, data: bool) -> bool:
+        if type(data) != bool:
+            raise ValueError("run_script must be a boolean")
         return data
 
 
@@ -67,7 +74,9 @@ class ManifestConfig(BaseModel):
         try:
             datetime.strptime(data, "%H:%M").time()
         except ValueError:
-            raise ValueError(f"Specify time in HH:MM format, not {data}")
+            raise ValueError(
+                "Specify time in HH:MM format or use 'now' to transfer data now"
+            )
         return data
 
     @field_validator("platform")
@@ -104,6 +113,17 @@ class VastTransferConfig(ManifestConfig):
                 Path(data).mkdir(parents=True)
             except:
                 raise ValueError(f"Could not create destination directory")
+        return data
+
+    @field_validator("modalities")
+    @classmethod
+    def verify_modalities(cls, data: Dict[str, list]) -> Dict[str, list]:
+        for modality, files in data.items():
+            if not isinstance(files, list):
+                raise ValueError(f"Files for {modality} must be a list")
+            for file in files:
+                if not Path(file).is_file():
+                    raise ValueError(f"{file} does not exist")
         return data
 
 
