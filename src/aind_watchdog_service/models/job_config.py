@@ -65,6 +65,11 @@ class ManifestConfig(BaseModel):
         title="APScheduler transfer time",
     )
     platform: str = Field(description="Platform type", title="Platform type")
+    schema_directory: Optional[str] = Field(
+        default=None,
+        description="Directory containing schema files",
+        title="Schema directory",
+    )
 
     @field_validator("transfer_time")
     @classmethod

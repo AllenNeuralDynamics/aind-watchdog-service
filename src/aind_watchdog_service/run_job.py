@@ -4,6 +4,11 @@ import platform
 import os
 import json
 import requests
+from typing import Union
+from aind_data_transfer_service.configs.job_configs import (
+    BasicUploadJobConfigs,
+    ModalityConfigs,
+)
 
 from aind_watchdog_service.models.job_config import (
     WatchConfig,
@@ -11,9 +16,7 @@ from aind_watchdog_service.models.job_config import (
     VastTransferConfig,
 )
 from aind_watchdog_service.alert_bot import AlertBot
-from aind_data_transfer_service.configs.job_configs import (
-    BasicUploadJobConfigs,
-)
+
 
 
 if platform.system() == "Windows":
@@ -22,9 +25,7 @@ else:
     PLATFORM = "linux"
 
 
-def copy_to_vast(
-    vast_config: VastTransferConfig, alert=AlertBot
-) -> bool:
+def copy_to_vast(vast_config: VastTransferConfig, alert=AlertBot) -> bool:
     """Determine platform and copy files to VAST
 
     Parameters
@@ -138,24 +139,36 @@ def subprocess_windows(src: str, dest: str) -> bool:
     return True
 
 
-def trigger_transfer_service(vast_config: VastTransferConfig, alert: AlertBot) -> None:
+def trigger_transfer_service(
+    config: Union[VastTransferConfig, RunScriptConfig], alert: AlertBot
+) -> None:
     """Triggers aind-data-transfer-service
 
     Parameters
     ----------
-    vast_config : VastTransferConfig
+    config : VastTransferConfig
         VAST configuration
     alert : AlertBot
         Teams message service
     """
+    modality_configs = []
+    for modality in config.modalities.keys():
+        m = ModalityConfigs(
+            source=os.path.join(
+                config.destination, config.name, config.modalities[modality]
+            )
+        )
+        modality_configs.append(m)
+    if not config.schema_directory:
+        config.schema_directory = os.path.join(config.destination, config.name)
     upload_job_configs = BasicUploadJobConfigs(
-        s3_bucket=vast_config.s3_bucket,
-        platform=vast_config.platform,
-        subject_id=vast_config.subject_id,
-        acquisition_datetime=vast_config.acquisition_datetime,
-        modalities=[k for k in vast_config.modalities.keys()],
-        metadata_dir="Come back to this",  # TODO: Add metadata directory
-        model_config={"codeocean-process-capsule-id": vast_config.capsule_id},
+        s3_bucket=config.s3_bucket,
+        platform=config.platform,
+        subject_id=config.subject_id,
+        acquisition_datetime=config.acquisition_datetime,
+        modalities=modality_configs,
+        metadata_dir=config.schema_directory,
+        model_config={"codeocean-process-capsule-id": config.capsule_id},
     )
 
     # From aind-data-transfer-service README
@@ -177,9 +190,9 @@ def trigger_transfer_service(vast_config: VastTransferConfig, alert: AlertBot) -
         json=post_request_content,
     )
     if submit_job_response.status_code != 200:
-        alert.send_message("Error submitting job", vast_config.name)
+        alert.send_message("Error submitting job", config.name)
     else:
-        alert.send_message("Job submitted", vast_config.name)
+        alert.send_message("Job submitted", config.name)
 
 
 def run_job(
@@ -229,3 +242,5 @@ def run_script(event: str, config: RunScriptConfig, watch_config: WatchConfig) -
             return
         else:
             alert.send_message("Script executed", f"Ran {command} for {config.name}")
+
+    trigger_transfer_service(config, alert)
