@@ -4,6 +4,7 @@ import platform
 import os
 import json
 import requests
+from pathlib import Path
 from typing import Union
 from aind_data_transfer_service.configs.job_configs import (
     BasicUploadJobConfigs,
@@ -49,9 +50,9 @@ def copy_to_vast(vast_config: VastTransferConfig, alert=AlertBot) -> bool:
         for file in modalities[modality]:
             if os.path.isfile(file):
                 if PLATFORM == "windows":
-                    transfer = subprocess_windows(file, destination_directory)
+                    transfer = execute_windows_command(file, destination_directory)
                 else:
-                    transfer = subprocess_linux(file, destination_directory)
+                    transfer = execute_linux_command(file, destination_directory)
                 if not transfer:
                     alert.send_message("Error copying files", file)
 
@@ -63,41 +64,23 @@ def copy_to_vast(vast_config: VastTransferConfig, alert=AlertBot) -> bool:
         return True
 
 
-def subprocess_linux(src: str, dest: str) -> bool:
-    """copy files using linux cp command
+def run_subprocess(cmd: list) -> subprocess.CompletedProcess:
+    """subprocess run command
 
     Parameters
     ----------
-    src : str
-        source file or directory
-    dest : str
-        destination directory
+    cmd : list
+        command to execute
 
     Returns
     -------
-    bool
-        True if copy was successful, False otherwise
+    subprocess.CompletedProcess
+        subprocess completed process
     """
-    if os.path.isdir(src):
-        run = subprocess.run(
-            ["rsync", "-r", src, dest],
-            check=False,
-            stderr=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-        )
-    else:
-        run = subprocess.run(
-            ["rsync", src, dest],
-            check=False,
-            stderr=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-        )
-    if run.returncode != 1:
-        return False
-    return True
+    return subprocess.run(cmd, check=False, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
 
 
-def subprocess_windows(src: str, dest: str) -> bool:
+def execute_windows_command(src: str, dest: str) -> bool:
     """copy files using windows robocopy command
 
     Parameters
@@ -112,31 +95,60 @@ def subprocess_windows(src: str, dest: str) -> bool:
     bool
         True if copy was successful, False otherwise
     """
+    # Robocopy used over xcopy for better performance
     # /mt: multi-threaded, /z: restartable mode, 
     # /e: copy subdirectories (includes empty subdirs), /r:5: retry 5 times
-    if os.path.isdir(src):
-        run = subprocess.run(
+    if not Path(src).exists():
+        return False
+    if Path(src).is_dir():
+        run = run_subprocess(
             ["robocopy", src, dest, "/mt", "/z", "/e", "/r:5"],
-            check=False,
-            stderr=subprocess.PIPE,
-            stdout=subprocess.PIPE,
         )
     else:
-        run = subprocess.run(
+        run = run_subprocess(
             [
                 "robocopy",
-                os.path.dirname(src),
+                Path(src).parent.name,
                 dest,
-                os.path.basename(src),
+                Path(src).name,
                 "/mt",
                 "/z",
                 "/r:5",
-            ],
-            check=False,
-            stderr=subprocess.PIPE,
-            stdout=subprocess.PIPE,
+            ]
         )
-    if run.returncode != 1:
+    if run.returncode != 0:
+        return False
+    return True
+
+
+def execute_linux_command(src: str, dest: str) -> bool:
+    """copy files using linux cp command
+
+    Parameters
+    ----------
+    src : str
+        source file or directory
+    dest : str
+        destination directory
+
+    Returns
+    -------
+    bool
+        True if copy was successful, False otherwise
+    """
+    # Rsync used over cp for better performance
+    # -r: recursive, -t: preserve modification times
+    if not Path(src).exists():
+        return False
+    if Path(src).is_dir():
+        run = run_subprocess(
+            ["rsync", "-r", "-t", src, dest]
+        )
+    else:
+        run = run_subprocess(
+            ["rsync", "-t", src, dest]
+        )
+    if run.returncode != 0:
         return False
     return True
 
