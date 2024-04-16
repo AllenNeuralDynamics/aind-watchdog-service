@@ -14,9 +14,11 @@ from aind_watchdog_service import run_job
 
 TEST_DIRECTORY = Path(__file__).resolve().parent
 
+
 class MockFileModifiedEvent(FileModifiedEvent):
     def __init__(self, src_path):
         super().__init__(src_path)
+
 
 class TestRunSubprocess(unittest.TestCase):
     @patch("subprocess.run")
@@ -171,8 +173,8 @@ class TestTriggerTransferService(unittest.TestCase):
         response = run_job.trigger_transfer_service(vast_config)
         self.assertEqual(response, False)
 
-class TestRunJob(unittest.TestCase):
 
+class TestRunJob(unittest.TestCase):
     @classmethod
     def setUp(cls) -> None:
         cls.path_to_config = TEST_DIRECTORY / "resources" / "rig_config_no_run_script.yml"
@@ -204,7 +206,7 @@ class TestRunJob(unittest.TestCase):
                 mock_copy_to_vast.return_value = True
                 mock_alert.return_value = requests.Response
                 run_job.run_job(mock_event, vast_config, watch_config)
-                
+
                 mock_alert.assert_called_with("Job complete", mock_event.src_path)
 
                 mock_trigger_transfer.return_value = False
@@ -237,6 +239,7 @@ class TestRunJob(unittest.TestCase):
 
     #     watch_config = job_config.WatchConfig(**config_data)
 
-# TODO: Test run_job and run_script 
+
+# TODO: Test run_job and run_script
 if __name__ == "__main__":
     unittest.main()

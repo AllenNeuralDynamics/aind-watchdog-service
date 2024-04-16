@@ -69,6 +69,7 @@ class ManifestConfig(BaseModel):
         description="Capsule ID of pipeline to run", title="Capsule"
     )
     s3_bucket: str = Field(None, description="s3 endpoint", title="S3 endpoint")
+
     @field_validator("transfer_time")
     @classmethod
     def verify_datetime(cls, data: str) -> str:
@@ -90,6 +91,7 @@ class ManifestConfig(BaseModel):
         if data.lower() not in Platform._abbreviation_map:
             raise ValueError(f"{data} not in accepted platforms")
         return data
+
 
 class VastTransferConfig(ManifestConfig):
     """Template to verify all files that need to be uploaded"""
@@ -135,7 +137,7 @@ class VastTransferConfig(ManifestConfig):
             if not Path(schema).is_file():
                 raise ValueError(f"{schema} does not exist")
         return data
-    
+
 
 class RunScriptConfig(ManifestConfig):
     """Upload data directly to cloud"""

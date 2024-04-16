@@ -18,7 +18,9 @@ class TestConfig(unittest.TestCase):
     def setUp(cls) -> None:
         cls.path_to_config = TEST_DIRECTORY / "resources" / "rig_config_no_run_script.yml"
         cls.path_to_manifest = TEST_DIRECTORY / "resources" / "manifest_file.yml"
-        cls.path_to_run_script_manifest = TEST_DIRECTORY / "resources" / "manifest_run_script.yml"
+        cls.path_to_run_script_manifest = (
+            TEST_DIRECTORY / "resources" / "manifest_run_script.yml"
+        )
 
     def test_rig_config(self):
         """Example of how to test the truth of a statement."""
@@ -36,7 +38,7 @@ class TestConfig(unittest.TestCase):
             mock_dir.return_value = False
             with self.assertRaises(ValueError):
                 job_config.WatchConfig(**data)
-        
+
         # Check run_script set to non-bool
         data["run_script"] = 12
         with patch.object(Path, "is_dir") as mock_dir:
@@ -73,7 +75,6 @@ class TestConfig(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     job_config.VastTransferConfig(**data)
 
-        
         # Check transfer_time varities
         data["transfer_time"] = "12:00:00"
         with patch.object(Path, "is_file") as mock_file:
@@ -82,7 +83,7 @@ class TestConfig(unittest.TestCase):
                 mock_dir.return_value = True
                 with self.assertRaises(ValueError):
                     job_config.VastTransferConfig(**data)
-        
+
         data["transfer_time"] = "11:00"
         with patch.object(Path, "is_file") as mock_file:
             mock_file.return_value = True
@@ -94,7 +95,7 @@ class TestConfig(unittest.TestCase):
     def test_run_script_config(self):
         with open(self.path_to_run_script_manifest) as yam:
             data = yaml.safe_load(yam)
-        
+
         with patch.object(Path, "is_file") as mock_file:
             mock_file.return_value = True
             with patch.object(Path, "is_dir") as mock_dir:
