@@ -19,7 +19,6 @@ from aind_watchdog_service.models.job_config import (
 from aind_watchdog_service.alert_bot import AlertBot
 
 
-
 if platform.system() == "Windows":
     PLATFORM = "windows"
 else:
@@ -77,7 +76,9 @@ def run_subprocess(cmd: list) -> subprocess.CompletedProcess:
     subprocess.CompletedProcess
         subprocess completed process
     """
-    return subprocess.run(cmd, check=False, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+    return subprocess.run(
+        cmd, check=False, stderr=subprocess.PIPE, stdout=subprocess.PIPE
+    )
 
 
 def execute_windows_command(src: str, dest: str) -> bool:
@@ -96,7 +97,7 @@ def execute_windows_command(src: str, dest: str) -> bool:
         True if copy was successful, False otherwise
     """
     # Robocopy used over xcopy for better performance
-    # /mt: multi-threaded, /z: restartable mode, 
+    # /mt: multi-threaded, /z: restartable mode,
     # /e: copy subdirectories (includes empty subdirs), /r:5: retry 5 times
     if not Path(src).exists():
         return False
@@ -141,13 +142,9 @@ def execute_linux_command(src: str, dest: str) -> bool:
     if not Path(src).exists():
         return False
     if Path(src).is_dir():
-        run = run_subprocess(
-            ["rsync", "-r", "-t", src, dest]
-        )
+        run = run_subprocess(["rsync", "-r", "-t", src, dest])
     else:
-        run = run_subprocess(
-            ["rsync", "-t", src, dest]
-        )
+        run = run_subprocess(["rsync", "-t", src, dest])
     if run.returncode != 0:
         return False
     return True

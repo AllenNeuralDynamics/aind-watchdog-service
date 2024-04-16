@@ -99,7 +99,8 @@ class ManifestConfig(BaseModel):
             if not Path(schema).is_file():
                 raise ValueError(f"{schema} does not exist")
         return data
-    
+
+
 class VastTransferConfig(ManifestConfig):
     """Template to verify all files that need to be uploaded"""
 
