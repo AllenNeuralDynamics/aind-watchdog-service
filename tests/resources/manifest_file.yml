@@ -27,7 +27,9 @@ modalities:
   - D:\data\1330132892\1330132892_timeseries.roi
   - D:\data\1330132892\1330132892_timeseries.tiff
   - D:\data\1330132892\1330132892_vasculature.tif
-  - D:\data\1330132892\user_settings.json
+schemas:
+  - D:\data\1330132892\session.json
+  - D:/data/1330132892\rig.json
 name: multiplane-ophys_704576_2024-04-12_15-22-44
 platform: multiplane-ophys
 s3_bucket: s3://aind-watchdog-service

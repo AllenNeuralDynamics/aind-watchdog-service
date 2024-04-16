@@ -112,6 +112,8 @@ def subprocess_windows(src: str, dest: str) -> bool:
     bool
         True if copy was successful, False otherwise
     """
+    # /mt: multi-threaded, /z: restartable mode, 
+    # /e: copy subdirectories (includes empty subdirs), /r:5: retry 5 times
     if os.path.isdir(src):
         run = subprocess.run(
             ["robocopy", src, dest, "/mt", "/z", "/e", "/r:5"],

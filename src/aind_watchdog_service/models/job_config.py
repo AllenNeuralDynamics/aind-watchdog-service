@@ -65,9 +65,8 @@ class ManifestConfig(BaseModel):
         title="APScheduler transfer time",
     )
     platform: str = Field(description="Platform type", title="Platform type")
-    schema_directory: Optional[str] = Field(
-        default=None,
-        description="Directory containing schema files",
+    schemas: list = Field(
+        description="Where schema files to be uploaded are saved",
         title="Schema directory",
     )
 
@@ -93,7 +92,14 @@ class ManifestConfig(BaseModel):
             raise ValueError(f"{data} not in accepted platforms")
         return data
 
-
+    @field_validator("schemas")
+    @classmethod
+    def verify_schemas(cls, data: list) -> list:
+        for schema in data:
+            if not Path(schema).is_file():
+                raise ValueError(f"{schema} does not exist")
+        return data
+    
 class VastTransferConfig(ManifestConfig):
     """Template to verify all files that need to be uploaded"""
 
