@@ -54,11 +54,9 @@ def copy_to_vast(vast_config: VastTransferConfig, alert=AlertBot) -> bool:
                     transfer = execute_linux_command(file, destination_directory)
                 if not transfer:
                     alert.send_message("Error copying files", file)
-
                     return False
             else:
                 alert.send_message("File not found", file)
-
                 return False
         return True
 
@@ -150,35 +148,28 @@ def execute_linux_command(src: str, dest: str) -> bool:
     return True
 
 
-def trigger_transfer_service(
-    config: Union[VastTransferConfig, RunScriptConfig], alert: AlertBot
-) -> None:
+def trigger_transfer_service(config: Union[VastTransferConfig, RunScriptConfig]) -> None:
     """Triggers aind-data-transfer-service
 
     Parameters
     ----------
     config : VastTransferConfig
         VAST configuration
-    alert : AlertBot
-        Teams message service
     """
     modality_configs = []
     for modality in config.modalities.keys():
         m = ModalityConfigs(
-            source=os.path.join(
-                config.destination, config.name, config.modalities[modality]
-            )
+            source=os.path.join(config.destination, config.name, modality),
+            modality=modality,
         )
         modality_configs.append(m)
-    if not config.schema_directory:
-        config.schema_directory = os.path.join(config.destination, config.name)
     upload_job_configs = BasicUploadJobConfigs(
         s3_bucket=config.s3_bucket,
         platform=config.platform,
-        subject_id=config.subject_id,
-        acquisition_datetime=config.acquisition_datetime,
+        subject_id=str(config.subject_id),
+        acq_datetime=config.acquisition_datetime,
         modalities=modality_configs,
-        metadata_dir=config.schema_directory,
+        metadata_dir=os.path.join(config.destination, config.name),
         model_config={"codeocean-process-capsule-id": config.capsule_id},
     )
 
@@ -200,10 +191,10 @@ def trigger_transfer_service(
         url="http://aind-data-transfer-service/api/submit_hpc_jobs",
         json=post_request_content,
     )
-    if submit_job_response.status_code != 200:
-        alert.send_message("Error submitting job", config.name)
+    if submit_job_response.status_code == 200:
+        return True
     else:
-        alert.send_message("Job submitted", config.name)
+        return False
 
 
 def run_job(
@@ -221,10 +212,15 @@ def run_job(
         Watchdog configuration
     """
     alert = AlertBot(watch_config.webhook_url)
-    alert.send_message("Running job", f"Triggering event from {event.src_path}")
+    alert.send_message("Running job", event.src_path)
     transfer = copy_to_vast(vast_config, alert)
-    if transfer:
-        trigger_transfer_service(vast_config, alert)
+    if not transfer:
+        alert.send_message("Could not copy data to destination", event.src_path)
+        return
+    if not trigger_transfer_service(vast_config):
+        alert.send_message("Could not trigger aind-data-transfer-service", event.src_path)
+        return
+    alert.send_message("Job complete", event.src_path)
 
 
 def run_script(event: str, config: RunScriptConfig, watch_config: WatchConfig) -> None:
@@ -238,7 +234,7 @@ def run_script(event: str, config: RunScriptConfig, watch_config: WatchConfig) -
         Watchdog configuration
     """
     alert = AlertBot(watch_config.webhook_url)
-    alert.send_message("Running job", f"Triggering event from {event.src_path}")
+    alert.send_message("Running job", event.src_path)
     for command in config.script:
         run = subprocess.run(
             config.script[command],
@@ -254,4 +250,7 @@ def run_script(event: str, config: RunScriptConfig, watch_config: WatchConfig) -
         else:
             alert.send_message("Script executed", f"Ran {command} for {config.name}")
 
-    trigger_transfer_service(config, alert)
+    if not trigger_transfer_service(config):
+        alert.send_message("Could not trigger aind-data-transfer-service", event.src_path)
+        return
+    alert.send_message("Job complete", event.src_path)

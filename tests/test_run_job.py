@@ -4,12 +4,14 @@ import yaml
 from pathlib import Path
 import subprocess
 import requests
+import json
 
 from aind_watchdog_service.models import job_config
 from aind_watchdog_service import run_job
 
 
 TEST_DIRECTORY = Path(__file__).resolve().parent
+
 
 class TestRunSubprocess(unittest.TestCase):
     @patch("subprocess.run")
@@ -136,5 +138,34 @@ class TestCopyToVast(unittest.TestCase):
         self.assertEqual(response, False)
 
 
+class TestTriggerTransferService(unittest.TestCase):
+    @classmethod
+    def setUp(cls) -> None:
+        cls.path_to_manifest = TEST_DIRECTORY / "resources" / "manifest_file.yml"
+
+    @patch("requests.post")
+    def test_trigger_transfer_service(self, mock_post: MagicMock):
+        mock_response = requests.Response()
+        mock_response.status_code = 200
+        body = json.dumps(
+            [
+                {"_id": "abc123", "message": "hi"},
+                {"_id": "efg456", "message": "hello"},
+            ]
+        )
+        mock_response._content = json.dumps({"body": body}).encode("utf-8")
+        mock_post.return_value = mock_response
+        with open(self.path_to_manifest) as yam:
+            manifest_data = yaml.safe_load(yam)
+        vast_config = job_config.VastTransferConfig(**manifest_data)
+        response = run_job.trigger_transfer_service(vast_config)
+        self.assertEqual(response, True)
+
+        mock_response.status_code = 404
+        mock_post.return_value = mock_response
+        response = run_job.trigger_transfer_service(vast_config)
+        self.assertEqual(response, False)
+
+# TODO: Test run_job and run_script 
 if __name__ == "__main__":
     unittest.main()
