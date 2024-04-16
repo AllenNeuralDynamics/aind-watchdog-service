@@ -1,10 +1,12 @@
 import unittest
 from unittest.mock import patch, MagicMock
+import watchdog.events
 import yaml
 from pathlib import Path
 import subprocess
 import requests
 import json
+from watchdog.events import FileModifiedEvent
 
 from aind_watchdog_service.models import job_config
 from aind_watchdog_service import run_job
@@ -12,6 +14,9 @@ from aind_watchdog_service import run_job
 
 TEST_DIRECTORY = Path(__file__).resolve().parent
 
+class MockFileModifiedEvent(FileModifiedEvent):
+    def __init__(self, src_path):
+        super().__init__(src_path)
 
 class TestRunSubprocess(unittest.TestCase):
     @patch("subprocess.run")
@@ -165,6 +170,72 @@ class TestTriggerTransferService(unittest.TestCase):
         mock_post.return_value = mock_response
         response = run_job.trigger_transfer_service(vast_config)
         self.assertEqual(response, False)
+
+class TestRunJob(unittest.TestCase):
+
+    @classmethod
+    def setUp(cls) -> None:
+        cls.path_to_config = TEST_DIRECTORY / "resources" / "rig_config_no_run_script.yml"
+        cls.path_to_manifest = TEST_DIRECTORY / "resources" / "manifest_file.yml"
+
+    @patch("aind_watchdog_service.alert_bot.AlertBot.send_message")
+    @patch("aind_watchdog_service.run_job.copy_to_vast")
+    @patch("aind_watchdog_service.run_job.trigger_transfer_service")
+    def test_run_job(
+        self,
+        mock_trigger_transfer: MagicMock,
+        mock_copy_to_vast: MagicMock,
+        mock_alert: MagicMock,
+    ):
+        with open(self.path_to_config) as yam:
+            config_data = yaml.safe_load(yam)
+        with open(self.path_to_manifest) as yam:
+            manifest_data = yaml.safe_load(yam)
+
+        with patch.object(Path, "is_dir") as mock_dir:
+            mock_dir.return_value = True
+            with patch.object(Path, "is_file") as mock_file:
+                mock_file.return_value = True
+                # with patch.object(watchdog.events, "FileModifiedEvent") as mock_event:
+                watch_config = job_config.WatchConfig(**config_data)
+                vast_config = job_config.VastTransferConfig(**manifest_data)
+                mock_event = MockFileModifiedEvent("/path/to/file.txt")
+                mock_trigger_transfer.return_value = True
+                mock_copy_to_vast.return_value = True
+                mock_alert.return_value = requests.Response
+                run_job.run_job(mock_event, vast_config, watch_config)
+                
+                mock_alert.assert_called_with("Job complete", mock_event.src_path)
+
+                mock_trigger_transfer.return_value = False
+                mock_copy_to_vast.return_value = True
+                run_job.run_job(mock_event, vast_config, watch_config)
+                mock_alert.assert_called_with(
+                    "Could not trigger aind-data-transfer-service", mock_event.src_path
+                )
+
+                mock_trigger_transfer.return_value = True
+                mock_copy_to_vast.return_value = False
+                run_job.run_job(mock_event, vast_config, watch_config)
+                mock_alert.assert_called_with(
+                    "Could not copy data to destination", mock_event.src_path
+                )
+
+                mock_trigger_transfer.return_value = False
+                mock_copy_to_vast.return_value = False
+                run_job.run_job(mock_event, vast_config, watch_config)
+                mock_alert.assert_called_with(
+                    "Could not copy data to destination", mock_event.src_path
+                )
+
+    # @patch("aind_watchdog_service.run_job.run_subprocess")
+    # def test_run_script(self, mock_run_subproc: MagicMock):
+    #     with open(self.path_to_config) as yam:
+    #         config_data = yaml.safe_load(yam)
+    #     with open(self.path_to_manifest) as yam:
+    #         manifest_data = yaml.safe_load(yam)
+
+    #     watch_config = job_config.WatchConfig(**config_data)
 
 # TODO: Test run_job and run_script 
 if __name__ == "__main__":

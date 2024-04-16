@@ -34,10 +34,10 @@ class WatchConfig(BaseModel):
         if type(data) == dict:
             for k, v in data.items():
                 if not Path(v).is_dir():
-                    raise ValueError(f"Provide correct path for {data}")
+                    raise ValueError(f"Provide valid path for {data}")
         else:
             if not Path(data).is_dir():
-                raise ValueError(f"Provide correct path for {data}")
+                raise ValueError(f"Provide valid path for {data}")
         return data
 
     @field_validator("run_script")
@@ -65,11 +65,10 @@ class ManifestConfig(BaseModel):
         title="APScheduler transfer time",
     )
     platform: str = Field(description="Platform type", title="Platform type")
-    schemas: list = Field(
-        description="Where schema files to be uploaded are saved",
-        title="Schema directory",
+    capsule_id: Optional[str] = Field(
+        description="Capsule ID of pipeline to run", title="Capsule"
     )
-
+    s3_bucket: str = Field(None, description="s3 endpoint", title="S3 endpoint")
     @field_validator("transfer_time")
     @classmethod
     def verify_datetime(cls, data: str) -> str:
@@ -92,29 +91,20 @@ class ManifestConfig(BaseModel):
             raise ValueError(f"{data} not in accepted platforms")
         return data
 
-    @field_validator("schemas")
-    @classmethod
-    def verify_schemas(cls, data: list) -> list:
-        for schema in data:
-            if not Path(schema).is_file():
-                raise ValueError(f"{schema} does not exist")
-        return data
-
-
 class VastTransferConfig(ManifestConfig):
     """Template to verify all files that need to be uploaded"""
 
-    s3_bucket: str = Field(description="s3 endpoint", title="S3 endpoint")
     destination: str = Field(
         description="where to send data to on VAST",
         title="VAST destination and maybe S3?",
     )
-    capsule_id: Optional[str] = Field(
-        default=None, description="Capsule ID of pipeline to run", title="Capsule"
-    )
     modalities: Dict[str, list] = Field(
         description="list of ModalityFile objects containing modality names and associated files",
         title="modality files",
+    )
+    schemas: list = Field(
+        description="Where schema files to be uploaded are saved",
+        title="Schema directory",
     )
 
     @field_validator("destination")
@@ -138,10 +128,18 @@ class VastTransferConfig(ManifestConfig):
                     raise ValueError(f"{file} does not exist")
         return data
 
+    @field_validator("schemas")
+    @classmethod
+    def verify_schemas(cls, data: list) -> list:
+        for schema in data:
+            if not Path(schema).is_file():
+                raise ValueError(f"{schema} does not exist")
+        return data
+    
 
 class RunScriptConfig(ManifestConfig):
     """Upload data directly to cloud"""
 
-    commands: Dict[str, list] = Field(
+    script: Dict[str, list] = Field(
         description="Set of commands to run in subprocess", title="Commands"
     )
