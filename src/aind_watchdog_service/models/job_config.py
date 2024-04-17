@@ -56,7 +56,7 @@ class ManifestConfig(BaseModel):
         title="Unique name",
     )
     subject_id: int = Field(description="Subject ID", title="Subject ID")
-    acquisition_datetime: str = Field(
+    acquisition_datetime: datetime = Field(
         description="acquisition datetime in YYYY-MM-DD HH:mm:ss format",
         title="Acquisition datetime",
     )

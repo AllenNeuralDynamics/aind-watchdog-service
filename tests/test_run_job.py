@@ -1,6 +1,5 @@
 import unittest
 from unittest.mock import patch, MagicMock
-import watchdog.events
 import yaml
 from pathlib import Path
 import subprocess
@@ -179,6 +178,9 @@ class TestRunJob(unittest.TestCase):
     def setUp(cls) -> None:
         cls.path_to_config = TEST_DIRECTORY / "resources" / "rig_config_no_run_script.yml"
         cls.path_to_manifest = TEST_DIRECTORY / "resources" / "manifest_file.yml"
+        cls.path_to_config_run_script = (
+            TEST_DIRECTORY / "resources" / "manifest_run_script.yml"
+        )
 
     @patch("aind_watchdog_service.alert_bot.AlertBot.send_message")
     @patch("aind_watchdog_service.run_job.copy_to_vast")
@@ -230,14 +232,64 @@ class TestRunJob(unittest.TestCase):
                     "Could not copy data to destination", mock_event.src_path
                 )
 
-    # @patch("aind_watchdog_service.run_job.run_subprocess")
-    # def test_run_script(self, mock_run_subproc: MagicMock):
-    #     with open(self.path_to_config) as yam:
-    #         config_data = yaml.safe_load(yam)
-    #     with open(self.path_to_manifest) as yam:
-    #         manifest_data = yaml.safe_load(yam)
+    @patch("subprocess.run")
+    @patch("aind_watchdog_service.run_job.trigger_transfer_service")
+    @patch("aind_watchdog_service.alert_bot.AlertBot.send_message")
+    def test_run_script(
+        self,
+        mock_alert: MagicMock,
+        mock_trigger_transfer: MagicMock,
+        mock_subproc: MagicMock,
+    ):
+        with open(self.path_to_config) as yam:
+            config_data = yaml.safe_load(yam)
+        with open(self.path_to_config_run_script) as yam:
+            manifest_data = yaml.safe_load(yam)
+        mock_subproc.return_value = subprocess.CompletedProcess(
+            args=[], returncode=0, stdout=b"Mock stdout", stderr=b"Mock stderr"
+        )
+        mock_alert.return_value = requests.Response
+        mock_trigger_transfer.return_value = True
+        with patch.object(Path, "is_dir") as mock_dir:
+            mock_dir.return_value = True
+            with patch.object(Path, "is_file") as mock_file:
+                mock_file.return_value = True
+                watch_config = job_config.WatchConfig(**config_data)
+                run_config = job_config.RunScriptConfig(**manifest_data)
+                mock_event = MockFileModifiedEvent("/path/to/file.txt")
+                run_job.run_script(mock_event, run_config, watch_config)
+                # mock_subproc.assert_called(
+                #     [run_config.script["cmd1"]],
+                # )
+                mock_alert.assert_called_with("Job complete", mock_event.src_path)
 
-    #     watch_config = job_config.WatchConfig(**config_data)
+        mock_trigger_transfer.return_value = False
+        with patch.object(Path, "is_dir") as mock_dir:
+            mock_dir.return_value = True
+            with patch.object(Path, "is_file") as mock_file:
+                mock_file.return_value = True
+                watch_config = job_config.WatchConfig(**config_data)
+                run_config = job_config.RunScriptConfig(**manifest_data)
+                mock_event = MockFileModifiedEvent("/path/to/file.txt")
+                run_job.run_script(mock_event, run_config, watch_config)
+                mock_alert.assert_called_with(
+                    "Could not trigger aind-data-transfer-service", mock_event.src_path
+                )
+        mock_subproc.return_value = subprocess.CompletedProcess(
+            args=[], returncode=1, stdout=b"Mock stdout", stderr=b"Mock stderr"
+        )
+        with patch.object(Path, "is_dir") as mock_dir:
+            mock_dir.return_value = True
+            with patch.object(Path, "is_file") as mock_file:
+                mock_file.return_value = True
+                watch_config = job_config.WatchConfig(**config_data)
+                run_config = job_config.RunScriptConfig(**manifest_data)
+                mock_event = MockFileModifiedEvent("/path/to/file.txt")
+                run_job.run_script(mock_event, run_config, watch_config)
+                mock_alert.assert_called_with(
+                    "Error running script",
+                    f"Could not execute cmd1 for {run_config.name}",
+                )
 
 
 # TODO: Test run_job and run_script

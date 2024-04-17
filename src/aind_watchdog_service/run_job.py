@@ -223,12 +223,12 @@ def run_job(
     alert.send_message("Job complete", event.src_path)
 
 
-def run_script(event: str, config: RunScriptConfig, watch_config: WatchConfig) -> None:
+def run_script(event: FileModifiedEvent, config: RunScriptConfig, watch_config: WatchConfig) -> None:
     """Run a custom script on file modification
 
     Parameters
     ----------
-    event : str
+    event : FileModifiedEvent
         modified event file
     config : WatchConfig
         Watchdog configuration
@@ -242,7 +242,7 @@ def run_script(event: str, config: RunScriptConfig, watch_config: WatchConfig) -
             stderr=subprocess.PIPE,
             stdout=subprocess.PIPE,
         )
-        if run.returncode != 1:
+        if run.returncode != 0:
             alert.send_message(
                 "Error running script", f"Could not execute {command} for {config.name}"
             )
