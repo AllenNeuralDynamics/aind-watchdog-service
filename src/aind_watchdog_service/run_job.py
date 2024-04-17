@@ -43,11 +43,14 @@ def copy_to_vast(vast_config: VastTransferConfig, alert=AlertBot) -> bool:
     parent_directory = vast_config.name
     destination = vast_config.destination
     modalities = vast_config.modalities
+    print(f"Modalities: {modalities}")
     for modality in modalities.keys():
         destination_directory = os.path.join(destination, parent_directory, modality)
         os.makedirs(destination_directory, exist_ok=True)
+        print(f"Copying modality: {modality}")
         for file in modalities[modality]:
             if os.path.isfile(file):
+                print(f"FILE: {file}")
                 if PLATFORM == "windows":
                     transfer = execute_windows_command(file, destination_directory)
                 else:
@@ -58,7 +61,7 @@ def copy_to_vast(vast_config: VastTransferConfig, alert=AlertBot) -> bool:
             else:
                 alert.send_message("File not found", file)
                 return False
-        return True
+    return True
 
 
 def run_subprocess(cmd: list) -> subprocess.CompletedProcess:
@@ -74,10 +77,11 @@ def run_subprocess(cmd: list) -> subprocess.CompletedProcess:
     subprocess.CompletedProcess
         subprocess completed process
     """
-    return subprocess.run(
+    print(f"Executing command: {cmd}")
+    subproc =  subprocess.run(
         cmd, check=False, stderr=subprocess.PIPE, stdout=subprocess.PIPE
     )
-
+    return subproc
 
 def execute_windows_command(src: str, dest: str) -> bool:
     """copy files using windows robocopy command
@@ -107,7 +111,7 @@ def execute_windows_command(src: str, dest: str) -> bool:
         run = run_subprocess(
             [
                 "robocopy",
-                Path(src).parent.name,
+                str(Path(src).parent),
                 dest,
                 Path(src).name,
                 "/mt",
@@ -115,7 +119,9 @@ def execute_windows_command(src: str, dest: str) -> bool:
                 "/r:5",
             ]
         )
-    if run.returncode != 0:
+    # Robocopy return code documentation:
+    # https://learn.microsoft.com/en-us/troubleshoot/windows-server/backup-and-storage/return-codes-used-robocopy-utility
+    if run.returncode > 7:
         return False
     return True
 
@@ -211,19 +217,22 @@ def run_job(
     watch_config : WatchConfig
         Watchdog configuration
     """
+    print("I MADE IT TO RUN JOB")
     alert = AlertBot(watch_config.webhook_url)
     alert.send_message("Running job", event.src_path)
     transfer = copy_to_vast(vast_config, alert)
     if not transfer:
         alert.send_message("Could not copy data to destination", event.src_path)
         return
-    if not trigger_transfer_service(vast_config):
-        alert.send_message("Could not trigger aind-data-transfer-service", event.src_path)
-        return
+    # if not trigger_transfer_service(vast_config):
+    #     alert.send_message("Could not trigger aind-data-transfer-service", event.src_path)
+    #     return
     alert.send_message("Job complete", event.src_path)
 
 
-def run_script(event: FileModifiedEvent, config: RunScriptConfig, watch_config: WatchConfig) -> None:
+def run_script(
+    event: FileModifiedEvent, config: RunScriptConfig, watch_config: WatchConfig
+) -> None:
     """Run a custom script on file modification
 
     Parameters

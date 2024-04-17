@@ -7,14 +7,21 @@
 ![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen?logo=codecov)
 ![Python](https://img.shields.io/badge/python->=3.7-blue?logo=python)
 
+## Summary
 
+Aind-watchdog-service can watch a specific folder for a flag or manifest file to copy data to a location on VAST, then trigger the aind-data-transfer-service via the REST API. It can also be configured to run a custom script and bypass the VAST copy portion of the service. See below for configurations
 
 ## Usage
- - To use this template, click the green `Use this template` button and `Create new repository`.
- - After github initially creates the new repository, please wait an extra minute for the initialization scripts to finish organizing the repo.
- - To enable the automatic semantic version increments: in the repository go to `Settings` and `Collaborators and teams`. Click the green `Add people` button. Add `svc-aindscicomp` as an admin. Modify the file in `.github/workflows/tag_and_publish.yml` and remove the if statement in line 10. The semantic version will now be incremented every time a code is committed into the main branch.
- - To publish to PyPI, enable semantic versioning and uncomment the publish block in `.github/workflows/tag_and_publish.yml`. The code will now be published to PyPI every time the code is committed into the main branch.
- - The `.github/workflows/test_and_lint.yml` file will run automated tests and style checks every time a Pull Request is opened. If the checks are undesired, the `test_and_lint.yml` can be deleted. The strictness of the code coverage level, etc., can be modified by altering the configurations in the `pyproject.toml` file and the `.flake8` file.
+ - Create a yaml file and specify it's location with an environment variable called WATCH_CONFIG
+ - WATCH_CONFIG must contain the following paramters: 
+ 
+    **flag_dir** - (string) path where watchdog event handler should watch
+    
+    **webhook_url** - (Optional(str) for Teams notifications on events  
+    
+    **run_script** (bool) if custom script will be run
+- Flag (or manifest file) should contain the word "manifest" in the file name and the parameters according to the configurations set in aind-watchdog-service/models/job_config.py using either VastTransferConfig or RunScriptConfig for VAST transfer or custom script instructions, respectively. 
+- Can be configured to run in the background through Windows Task Scheduler or Linux's systemd; these services will make sure that the watchdog service is always running while the machine is on
 
 ## Installation
 To use the software, in the root directory, run

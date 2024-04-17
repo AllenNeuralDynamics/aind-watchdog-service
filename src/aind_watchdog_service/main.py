@@ -118,6 +118,22 @@ class EventHandler(FileSystemEventHandler):
             )
         self.jobs[event.src_path] = job_id
 
+    def on_deleted(self, event: FileModifiedEvent) -> None:
+        """Event handler for file deleted event
+
+        Parameters
+        ----------
+        event : FileModifiedEvent
+            file deleted event
+
+        Returns
+        -------
+        None
+        """
+        print("IN ON DELETED")
+        if self.jobs.get(event.src_path, ""):
+            self._remove_job(event)
+        
     def on_modified(self, event: FileModifiedEvent) -> None:
         """Event handler for file modified event
 
@@ -134,6 +150,7 @@ class EventHandler(FileSystemEventHandler):
         if not "manifest" in event.src_path:
             return
         # If scheduled manifest is being modified, remove original job
+        print("IN ON MODIFIED")
         if self.jobs.get(event.src_path, ""):
             self._remove_job(event)
         if self.config.run_script:
