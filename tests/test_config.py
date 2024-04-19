@@ -43,6 +43,7 @@ class TestConfig(unittest.TestCase):
         data["run_script"] = 12
         with patch.object(Path, "is_dir") as mock_dir:
             mock_dir.return_value = True
+            # with patch.object(Path, "mkdir") as mock_mkdir:
             with self.assertRaises(ValueError):
                 job_config.WatchConfig(**data)
 

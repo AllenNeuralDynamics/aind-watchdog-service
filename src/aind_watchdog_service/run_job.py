@@ -61,6 +61,15 @@ def copy_to_vast(vast_config: VastTransferConfig, alert=AlertBot) -> bool:
             else:
                 alert.send_message("File not found", file)
                 return False
+    for schema in vast_config.schemas:
+        destination_directory = os.path.join(destination, parent_directory)
+        if PLATFORM == "windows":
+            transfer = execute_windows_command(schema, destination_directory)
+        else:
+            transfer = execute_linux_command(schema, destination_directory)
+        if not transfer:
+            alert.send_message("Error copying schema", schema)
+            return False
     return True
 
 
@@ -78,10 +87,11 @@ def run_subprocess(cmd: list) -> subprocess.CompletedProcess:
         subprocess completed process
     """
     print(f"Executing command: {cmd}")
-    subproc =  subprocess.run(
+    subproc = subprocess.run(
         cmd, check=False, stderr=subprocess.PIPE, stdout=subprocess.PIPE
     )
     return subproc
+
 
 def execute_windows_command(src: str, dest: str) -> bool:
     """copy files using windows robocopy command
@@ -105,7 +115,7 @@ def execute_windows_command(src: str, dest: str) -> bool:
         return False
     if Path(src).is_dir():
         run = run_subprocess(
-            ["robocopy", src, dest, "/mt", "/z", "/e", "/r:5"],
+            ["robocopy", src, dest, "/z", "/e", "/r:5"],
         )
     else:
         run = run_subprocess(
@@ -114,7 +124,6 @@ def execute_windows_command(src: str, dest: str) -> bool:
                 str(Path(src).parent),
                 dest,
                 Path(src).name,
-                "/mt",
                 "/z",
                 "/r:5",
             ]
@@ -203,6 +212,22 @@ def trigger_transfer_service(config: Union[VastTransferConfig, RunScriptConfig])
         return False
 
 
+def move_manifest_to_archive(src_path: str, archive: str) -> None:
+    """Move manifest file to archive
+
+    Parameters
+    ----------
+    src_path : str
+        source path
+    archive : str
+        archive path
+    """
+    if PLATFORM == "windows":
+        run_subprocess(["move", src_path, archive])
+    else:
+        run_subprocess(["mv", src_path, archive])
+
+
 def run_job(
     event: FileModifiedEvent, vast_config: VastTransferConfig, watch_config: WatchConfig
 ) -> None:
@@ -224,10 +249,11 @@ def run_job(
     if not transfer:
         alert.send_message("Could not copy data to destination", event.src_path)
         return
-    # if not trigger_transfer_service(vast_config):
-    #     alert.send_message("Could not trigger aind-data-transfer-service", event.src_path)
-    #     return
+    if not trigger_transfer_service(vast_config):
+        alert.send_message("Could not trigger aind-data-transfer-service", event.src_path)
+        return
     alert.send_message("Job complete", event.src_path)
+    move_manifest_to_archive(event.src_path, watch_config.manifest_complete)
 
 
 def run_script(
@@ -263,3 +289,4 @@ def run_script(
         alert.send_message("Could not trigger aind-data-transfer-service", event.src_path)
         return
     alert.send_message("Job complete", event.src_path)
+    move_manifest_to_archive(event.src_path, watch_config.manifest_complete)

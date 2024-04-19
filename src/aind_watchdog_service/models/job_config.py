@@ -12,6 +12,10 @@ class WatchConfig(BaseModel):
     flag_dir: str = Field(
         description="Directory for watchdog to poll", title="Poll directory"
     )
+    manifest_complete: str = Field(
+        description="Manifest directory for triggered data",
+        title="Manifest complete directory",
+    )
     schema_map: Optional[str] = Field(
         default=None,
         description="json file used for mapping; ignored for now until metadata mapper is implemented",
@@ -45,6 +49,16 @@ class WatchConfig(BaseModel):
     def verify_run_script(cls, data: bool) -> bool:
         if type(data) != bool:
             raise ValueError("run_script must be a boolean")
+        return data
+
+    @field_validator("manifest_complete")
+    @classmethod
+    def verify_manifest_complete(cls, data: str) -> str:
+        if not Path(data).is_dir():
+            try:
+                Path(data).mkdir(parents=True)
+            except:
+                raise ValueError(f"Could not create manifest complete directory")
         return data
 
 

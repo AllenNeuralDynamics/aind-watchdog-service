@@ -5,6 +5,8 @@ from datetime import datetime as dt
 from datetime import timedelta
 import os
 import yaml
+from typing import Union
+from pathlib import Path
 from apscheduler.schedulers.background import BackgroundScheduler
 
 from aind_watchdog_service.run_job import run_job, run_script
@@ -75,9 +77,10 @@ class EventHandler(FileSystemEventHandler):
         event : FileModifiedEvent
            event being cancelled
         """
-        job_id = self.jobs[event.src_path]
-        del self.jobs[event.src_path]
-        self.scheduler.remove_job(job_id)
+        if self.jobs.get(event.src_path, ""):
+            job_id = self.jobs[event.src_path]
+            del self.jobs[event.src_path]
+            self.scheduler.remove_job(job_id)
 
     def _get_trigger_time(self, transfer_time: str) -> dt:
         """Get trigger time from the job
@@ -98,7 +101,9 @@ class EventHandler(FileSystemEventHandler):
             trigger_time = trigger_time + timedelta(days=1)
         return trigger_time
 
-    def schedule_job(self, event: FileModifiedEvent, config: dict) -> None:
+    def schedule_job(
+        self, event: FileModifiedEvent, config: Union[VastTransferConfig, RunScriptConfig]
+    ) -> None:
         """Schedule job to run
 
         Parameters
@@ -114,7 +119,7 @@ class EventHandler(FileSystemEventHandler):
         else:
             trigger = self._get_trigger_time(config.transfer_time)
             job_id = self.scheduler.add_job(
-                run_job, "date", run_date=trigger, args=[event, config]
+                run_job, "date", run_date=trigger, args=[event, config, self.config]
             )
         self.jobs[event.src_path] = job_id
 
@@ -131,9 +136,14 @@ class EventHandler(FileSystemEventHandler):
         None
         """
         print("IN ON DELETED")
+        print(f"{self.jobs}")
+        if event.src_path in self.jobs:
+            del self.jobs[event.src_path]
         if self.jobs.get(event.src_path, ""):
-            self._remove_job(event)
-        
+            self._remove_job(self.jobs[event.src_path].id)
+        print("DONE DELETING")
+        print(f"{self.jobs}")
+
     def on_modified(self, event: FileModifiedEvent) -> None:
         """Event handler for file modified event
 
@@ -147,18 +157,24 @@ class EventHandler(FileSystemEventHandler):
         None
         """
         # Check if manifest file is being modified / created
+        if Path(event.src_path).is_dir():
+            return
         if not "manifest" in event.src_path:
             return
         # If scheduled manifest is being modified, remove original job
         print("IN ON MODIFIED")
-        if self.jobs.get(event.src_path, ""):
-            self._remove_job(event)
+        if (
+            self.jobs.get(event.src_path, "")
+            and self.jobs.get(event.src_path, "") in self.scheduler.get_jobs()
+        ):
+            self._remove_job(self.jobs[event.src_path].id)
         if self.config.run_script:
             run_script_config = self._load_run_script_manifest(event)
             self.schedule_job(event, run_script_config)
         else:
             vast_transfer_config = self._load_vast_transfer_manifest(event)
             self.schedule_job(event, vast_transfer_config)
+        print(f"JOBS {self.jobs}")
 
 
 def initiate_scheduler() -> BackgroundScheduler:
@@ -187,7 +203,7 @@ def initiate_observer(config: WatchConfig, scheduler: BackgroundScheduler) -> No
     observer = Observer()
     watch_directory = config.flag_dir
     event_handler = EventHandler(scheduler, config)
-    observer.schedule(event_handler, watch_directory, recursive=True)
+    observer.schedule(event_handler, watch_directory)
     observer.start()
     try:
         while True:

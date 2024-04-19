@@ -1,4 +1,4 @@
-"""Module with Alert Bot for notifications on MS Teams"""
+"""Module with Alert Bot for notifications on MS Teams: Alessio B"""
 
 from typing import Optional
 

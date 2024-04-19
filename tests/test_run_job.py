@@ -5,6 +5,7 @@ from pathlib import Path
 import subprocess
 import requests
 import json
+import os
 from watchdog.events import FileModifiedEvent
 
 from aind_watchdog_service.models import job_config
@@ -71,7 +72,7 @@ class TestRunSubprocess(unittest.TestCase):
         with patch.object(Path, "exists") as mock_file:
             mock_file.return_value = True
             run_job.run_subprocess = MagicMock(
-                return_value=subprocess.CompletedProcess(args=[], returncode=1)
+                return_value=subprocess.CompletedProcess(args=[], returncode=8)
             )
             winx_dir = run_job.execute_windows_command(src_dir, dest)
             winx_file = run_job.execute_windows_command(src_file, dest)
@@ -101,7 +102,7 @@ class TestRunSubprocess(unittest.TestCase):
         with patch.object(Path, "exists") as mock_file:
             mock_file.return_value = True
             run_job.run_subprocess = MagicMock(
-                return_value=subprocess.CompletedProcess(args=[], returncode=1)
+                return_value=subprocess.CompletedProcess(args=[], returncode=8)
             )
             winx_dir = run_job.execute_linux_command(src_dir, dest)
             winx_file = run_job.execute_linux_command(src_file, dest)
@@ -185,8 +186,10 @@ class TestRunJob(unittest.TestCase):
     @patch("aind_watchdog_service.alert_bot.AlertBot.send_message")
     @patch("aind_watchdog_service.run_job.copy_to_vast")
     @patch("aind_watchdog_service.run_job.trigger_transfer_service")
+    @patch("subprocess.run")
     def test_run_job(
         self,
+        mock_subproc: MagicMock,
         mock_trigger_transfer: MagicMock,
         mock_copy_to_vast: MagicMock,
         mock_alert: MagicMock,
@@ -195,12 +198,13 @@ class TestRunJob(unittest.TestCase):
             config_data = yaml.safe_load(yam)
         with open(self.path_to_manifest) as yam:
             manifest_data = yaml.safe_load(yam)
-
+        mock_subproc.return_value = subprocess.CompletedProcess(
+            args=[], returncode=0, stdout=b"Mock stdout", stderr=b"Mock stderr"
+        )
         with patch.object(Path, "is_dir") as mock_dir:
             mock_dir.return_value = True
             with patch.object(Path, "is_file") as mock_file:
                 mock_file.return_value = True
-                # with patch.object(watchdog.events, "FileModifiedEvent") as mock_event:
                 watch_config = job_config.WatchConfig(**config_data)
                 vast_config = job_config.VastTransferConfig(**manifest_data)
                 mock_event = MockFileModifiedEvent("/path/to/file.txt")
@@ -228,10 +232,12 @@ class TestRunJob(unittest.TestCase):
                 mock_trigger_transfer.return_value = False
                 mock_copy_to_vast.return_value = False
                 run_job.run_job(mock_event, vast_config, watch_config)
+
                 mock_alert.assert_called_with(
                     "Could not copy data to destination", mock_event.src_path
                 )
 
+    @patch("os.mkdir")
     @patch("subprocess.run")
     @patch("aind_watchdog_service.run_job.trigger_transfer_service")
     @patch("aind_watchdog_service.alert_bot.AlertBot.send_message")
@@ -240,6 +246,7 @@ class TestRunJob(unittest.TestCase):
         mock_alert: MagicMock,
         mock_trigger_transfer: MagicMock,
         mock_subproc: MagicMock,
+        mock_dir: MagicMock,
     ):
         with open(self.path_to_config) as yam:
             config_data = yaml.safe_load(yam)
@@ -250,6 +257,7 @@ class TestRunJob(unittest.TestCase):
         )
         mock_alert.return_value = requests.Response
         mock_trigger_transfer.return_value = True
+        mock_dir.return_value = True
         with patch.object(Path, "is_dir") as mock_dir:
             mock_dir.return_value = True
             with patch.object(Path, "is_file") as mock_file:
@@ -276,7 +284,7 @@ class TestRunJob(unittest.TestCase):
                     "Could not trigger aind-data-transfer-service", mock_event.src_path
                 )
         mock_subproc.return_value = subprocess.CompletedProcess(
-            args=[], returncode=1, stdout=b"Mock stdout", stderr=b"Mock stderr"
+            args=[], returncode=8, stdout=b"Mock stdout", stderr=b"Mock stderr"
         )
         with patch.object(Path, "is_dir") as mock_dir:
             mock_dir.return_value = True
@@ -292,6 +300,5 @@ class TestRunJob(unittest.TestCase):
                 )
 
 
-# TODO: Test run_job and run_script
 if __name__ == "__main__":
     unittest.main()
