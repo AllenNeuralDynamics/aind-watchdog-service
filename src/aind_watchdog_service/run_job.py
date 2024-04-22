@@ -4,8 +4,10 @@ import platform
 import os
 import json
 import requests
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Union
+from pprint import pprint
+
 from aind_data_transfer_service.configs.job_configs import (
     BasicUploadJobConfigs,
     ModalityConfigs,
@@ -43,14 +45,11 @@ def copy_to_vast(vast_config: VastTransferConfig, alert=AlertBot) -> bool:
     parent_directory = vast_config.name
     destination = vast_config.destination
     modalities = vast_config.modalities
-    print(f"Modalities: {modalities}")
     for modality in modalities.keys():
         destination_directory = os.path.join(destination, parent_directory, modality)
         os.makedirs(destination_directory, exist_ok=True)
-        print(f"Copying modality: {modality}")
         for file in modalities[modality]:
             if os.path.isfile(file):
-                print(f"FILE: {file}")
                 if PLATFORM == "windows":
                     transfer = execute_windows_command(file, destination_directory)
                 else:
@@ -90,6 +89,7 @@ def run_subprocess(cmd: list) -> subprocess.CompletedProcess:
     subproc = subprocess.run(
         cmd, check=False, stderr=subprocess.PIPE, stdout=subprocess.PIPE
     )
+    pprint(subproc.stdout)
     return subproc
 
 
@@ -128,7 +128,7 @@ def execute_windows_command(src: str, dest: str) -> bool:
                 "/r:5",
             ]
         )
-    # Robocopy return code documentation:
+    # Robocopy return code documenttion:
     # https://learn.microsoft.com/en-us/troubleshoot/windows-server/backup-and-storage/return-codes-used-robocopy-utility
     if run.returncode > 7:
         return False
@@ -174,7 +174,7 @@ def trigger_transfer_service(config: Union[VastTransferConfig, RunScriptConfig])
     modality_configs = []
     for modality in config.modalities.keys():
         m = ModalityConfigs(
-            source=os.path.join(config.destination, config.name, modality),
+            source=PurePosixPath(config.destination) / config.name / modality,
             modality=modality,
         )
         modality_configs.append(m)
@@ -182,10 +182,10 @@ def trigger_transfer_service(config: Union[VastTransferConfig, RunScriptConfig])
         s3_bucket=config.s3_bucket,
         platform=config.platform,
         subject_id=str(config.subject_id),
-        acq_datetime=config.acquisition_datetime,
+        acq_datetime=config.acquisition_datetime.strftime("%Y-%m-%d %H:%M:%S"),
         modalities=modality_configs,
-        metadata_dir=os.path.join(config.destination, config.name),
-        model_config={"codeocean-process-capsule-id": config.capsule_id},
+        metadata_dir=PurePosixPath(config.destination) / config.name,
+        # model_config=json.dumps({"codeocean-process-capsule-id":config.capsule_id})
     )
 
     # From aind-data-transfer-service README
@@ -200,12 +200,12 @@ def trigger_transfer_service(config: Union[VastTransferConfig, RunScriptConfig])
     }
 
     hpc_jobs = [hpc_job]
-
     post_request_content = {"jobs": hpc_jobs}
     submit_job_response = requests.post(
         url="http://aind-data-transfer-service/api/submit_hpc_jobs",
         json=post_request_content,
     )
+    print(submit_job_response.json())
     if submit_job_response.status_code == 200:
         return True
     else:
@@ -223,7 +223,15 @@ def move_manifest_to_archive(src_path: str, archive: str) -> None:
         archive path
     """
     if PLATFORM == "windows":
-        run_subprocess(["move", src_path, archive])
+        run_subprocess(
+            [
+                "robocopy",
+                "/mov",
+                os.path.dirname(src_path),
+                archive,
+                os.path.basename(src_path),
+            ]
+        )
     else:
         run_subprocess(["mv", src_path, archive])
 
@@ -273,9 +281,6 @@ def run_script(
     for command in config.script:
         run = subprocess.run(
             config.script[command],
-            check=False,
-            stderr=subprocess.PIPE,
-            stdout=subprocess.PIPE,
         )
         if run.returncode != 0:
             alert.send_message(

@@ -5,8 +5,8 @@ from pathlib import Path
 import subprocess
 import requests
 import json
-import os
 from watchdog.events import FileModifiedEvent
+import shutil
 
 from aind_watchdog_service.models import job_config
 from aind_watchdog_service import run_job
@@ -23,7 +23,6 @@ class MockFileModifiedEvent(FileModifiedEvent):
 class TestRunSubprocess(unittest.TestCase):
     @patch("subprocess.run")
     def test_run_subprocess(self, mock_subproc: MagicMock):
-        # Command to execute
         cmd = ["ls", "-l"]
 
         # Mock mock_subproc to return a CompletedProcess object
@@ -31,7 +30,6 @@ class TestRunSubprocess(unittest.TestCase):
             args=cmd, returncode=0, stdout=b"Mock stdout", stderr=b"Mock stderr"
         )
 
-        # Call the function
         result = run_job.run_subprocess(cmd)
 
         # Assert that mock_subproc was called with the correct arguments
@@ -44,7 +42,7 @@ class TestRunSubprocess(unittest.TestCase):
         self.assertEqual(result.stdout, b"Mock stdout")
         self.assertEqual(result.stderr, b"Mock stderr")
 
-    def test_windows_call(self):
+    def test_os_calls(self):
         src_dir = "/path/to/some_directory"
         src_file = "/path/to/some_file.txt"
         dest = "/some_place/on_a/hardrive"
@@ -212,7 +210,6 @@ class TestRunJob(unittest.TestCase):
                 mock_copy_to_vast.return_value = True
                 mock_alert.return_value = requests.Response
                 run_job.run_job(mock_event, vast_config, watch_config)
-
                 mock_alert.assert_called_with("Job complete", mock_event.src_path)
 
                 mock_trigger_transfer.return_value = False
