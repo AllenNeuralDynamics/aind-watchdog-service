@@ -16,6 +16,7 @@ class TestConfig(unittest.TestCase):
 
     @classmethod
     def setUp(cls) -> None:
+        """Set up the test environment by defining the test data."""
         cls.path_to_config = TEST_DIRECTORY / "resources" / "rig_config_no_run_script.yml"
         cls.path_to_manifest = TEST_DIRECTORY / "resources" / "manifest_file.yml"
         cls.path_to_run_script_manifest = (
@@ -94,6 +95,7 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(manifest_config.model_dump(), data)
 
     def test_run_script_config(self):
+        """test the runscript congig"""
         with open(self.path_to_run_script_manifest) as yam:
             data = yaml.safe_load(yam)
 

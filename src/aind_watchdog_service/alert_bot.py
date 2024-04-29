@@ -45,6 +45,7 @@ class AlertBot:
                 "size": "Medium",
                 "weight": "Bolder",
                 "text": message,
+                "style": {"borderTopWidth": 1, "borderTopColor": "#D2042D"},
             }
         ]
         if extra_text is not None:

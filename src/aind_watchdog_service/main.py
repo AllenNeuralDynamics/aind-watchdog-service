@@ -1,3 +1,5 @@
+""" Main module to start the watchdog observer and scheduler """
+
 import time
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler, FileModifiedEvent
@@ -9,7 +11,7 @@ from typing import Union
 from pathlib import Path
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from aind_watchdog_service.run_job import run_job, run_script
+from aind_watchdog_service.run_job import run_job
 from aind_watchdog_service.models.job_config import (
     WatchConfig,
     RunScriptConfig,
@@ -22,6 +24,7 @@ class EventHandler(FileSystemEventHandler):
     """Event handler for watchdog observer"""
 
     def __init__(self, scheduler: BackgroundScheduler, config: WatchConfig):
+        """Initialize event handler"""
         super().__init__()
         self.scheduler = scheduler
         self.config = config
@@ -159,7 +162,7 @@ class EventHandler(FileSystemEventHandler):
         # Check if manifest file is being modified / created
         if Path(event.src_path).is_dir():
             return
-        if not "manifest" in event.src_path:
+        if "manifest" not in event.src_path:
             return
         # If scheduled manifest is being modified, remove original job
         print("IN ON MODIFIED")

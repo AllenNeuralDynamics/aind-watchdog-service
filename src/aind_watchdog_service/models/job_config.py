@@ -1,6 +1,7 @@
+""" Configuration for watchdog service"""
+
 from pydantic import BaseModel, Field, field_validator
-from typing import Optional, List, Dict, Union
-from aind_data_schema.models.modalities import Modality
+from typing import Optional, Dict, Union
 from aind_data_schema.models.platforms import Platform
 from datetime import datetime
 from pathlib import Path
@@ -18,7 +19,7 @@ class WatchConfig(BaseModel):
     )
     schema_map: Optional[str] = Field(
         default=None,
-        description="json file used for mapping; ignored for now until metadata mapper is implemented",
+        description="json file used for mapping; ignored for now until metadata mapper is implemented",  # noqa
         title="Schema map configuration",
     )
     webhook_url: Optional[str] = Field(
@@ -35,30 +36,33 @@ class WatchConfig(BaseModel):
     def verify_directories_exist(
         cls, data: Union[Dict[str, str], str]
     ) -> Union[Dict[str, str], str]:
-        if type(data) == dict:
+        """Verify that directories exist"""
+        if isinstance(data, dict):
             for k, v in data.items():
-                if not Path(v).is_dir():
+                if Path(v).is_dir() is False:
                     raise ValueError(f"Provide valid path for {data}")
         else:
-            if not Path(data).is_dir():
+            if Path(data).is_dir() is False:
                 raise ValueError(f"Provide valid path for {data}")
         return data
 
     @field_validator("run_script")
     @classmethod
     def verify_run_script(cls, data: bool) -> bool:
-        if type(data) != bool:
+        """Verify that run_script is a boolean"""
+        if not isinstance(data, bool):
             raise ValueError("run_script must be a boolean")
         return data
 
     @field_validator("manifest_complete")
     @classmethod
     def verify_manifest_complete(cls, data: str) -> str:
+        """Verify that manifest complete directory exists"""
         if not Path(data).is_dir():
             try:
                 Path(data).mkdir(parents=True)
-            except:
-                raise ValueError(f"Could not create manifest complete directory")
+            except Exception:
+                raise ValueError("Could not create manifest complete directory")
         return data
 
 
@@ -87,6 +91,7 @@ class ManifestConfig(BaseModel):
     @field_validator("transfer_time")
     @classmethod
     def verify_datetime(cls, data: str) -> str:
+        """Verify that datetime is in correct format"""
         if data == "now":
             return data
         try:
@@ -100,6 +105,7 @@ class ManifestConfig(BaseModel):
     @field_validator("platform")
     @classmethod
     def verify_platform(cls, data: str) -> str:
+        """Verify that platform is in accepted platforms list"""
         if "_" in data:
             data = data.replace("_", "-")
         if data.lower() not in Platform._abbreviation_map:
@@ -115,7 +121,7 @@ class VastTransferConfig(ManifestConfig):
         title="VAST destination and maybe S3?",
     )
     modalities: Dict[str, list] = Field(
-        description="list of ModalityFile objects containing modality names and associated files",
+        description="list of ModalityFile objects containing modality names and associated files",  # noqa
         title="modality files",
     )
     schemas: list = Field(
@@ -126,16 +132,18 @@ class VastTransferConfig(ManifestConfig):
     @field_validator("destination")
     @classmethod
     def verify_destination(cls, data: str) -> str:
+        """Verify that destination directory exists"""
         if not Path(data).is_dir():
             try:
                 Path(data).mkdir(parents=True)
-            except:
-                raise ValueError(f"Could not create destination directory")
+            except Exception:
+                raise ValueError("Could not create destination directory")
         return data
 
     @field_validator("modalities")
     @classmethod
     def verify_modalities(cls, data: Dict[str, list]) -> Dict[str, list]:
+        """Verify that modalities are in correct format"""
         for modality, files in data.items():
             if not isinstance(files, list):
                 raise ValueError(f"Files for {modality} must be a list")
@@ -147,6 +155,7 @@ class VastTransferConfig(ManifestConfig):
     @field_validator("schemas")
     @classmethod
     def verify_schemas(cls, data: list) -> list:
+        """Verify that schema files are in correct format"""
         for schema in data:
             if not Path(schema).is_file():
                 raise ValueError(f"{schema} does not exist")

@@ -1,3 +1,5 @@
+""" Module to run jobs on file modification"""
+
 import subprocess
 from watchdog.events import FileModifiedEvent
 import platform
@@ -6,7 +8,6 @@ import json
 import requests
 from pathlib import Path, PurePosixPath
 from typing import Union
-from pprint import pprint
 
 from aind_data_transfer_service.configs.job_configs import (
     BasicUploadJobConfigs,
@@ -89,7 +90,6 @@ def run_subprocess(cmd: list) -> subprocess.CompletedProcess:
     subproc = subprocess.run(
         cmd, check=False, stderr=subprocess.PIPE, stdout=subprocess.PIPE
     )
-    pprint(subproc.stdout)
     return subproc
 
 
@@ -205,7 +205,6 @@ def trigger_transfer_service(config: Union[VastTransferConfig, RunScriptConfig])
         url="http://aind-data-transfer-service/api/submit_hpc_jobs",
         json=post_request_content,
     )
-    print(submit_job_response.json())
     if submit_job_response.status_code == 200:
         return True
     else:
@@ -250,7 +249,6 @@ def run_job(
     watch_config : WatchConfig
         Watchdog configuration
     """
-    print("I MADE IT TO RUN JOB")
     alert = AlertBot(watch_config.webhook_url)
     alert.send_message("Running job", event.src_path)
     transfer = copy_to_vast(vast_config, alert)

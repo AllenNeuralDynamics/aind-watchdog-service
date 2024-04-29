@@ -29,53 +29,35 @@ TEST_DIRECTORY = Path(__file__).resolve().parent
 
 
 class MockFileModifiedEvent(FileModifiedEvent):
+    """Mock FileModifiedEvent for testing EventHandler"""
+
     def __init__(self, src_path):
+        """init"""
         super().__init__(src_path)
 
 
-class MockObserver(Observer):
-    def __init__(self):
-        super().__init__()
-
-    def start(self):
-        pass
-
-    def schedule(self, event_handler, watch_dir):
-        pass
-
-    def stop(self):
-        pass
-
-    def join(self):
-        pass
-
-
 class MockEventHandler(EventHandler):
-    def __init(self, scheduler, config):
+    """mock EventHandler for testing EventHandler"""
+
+    def __init__(self, scheduler, config):
+        """init"""
         super().__init__(scheduler, config)
-        pass
 
 
 class MockScheduler(BackgroundScheduler):
+    """Mock Scheduler for testing EventHandler"""
+
     def __init__(self):
+        """init"""
         super().__init__({})
-
-    def add_job(self, func, trigger, args):
-        pass
-
-    def start(self):
-        pass
-
-    def shutdown(self):
-        pass
-
-    def get_jobs(self):
-        pass
 
 
 class TestInitiate(unittest.TestCase):
+    """Test initiate functions"""
+
     @classmethod
     def setUp(cls) -> None:
+        """Set up the test environment by defining the test data."""
         cls.path_to_config = TEST_DIRECTORY / "resources" / "rig_config_no_run_script.yml"
 
     @patch("aind_watchdog_service.main.EventHandler")
@@ -89,6 +71,7 @@ class TestInitiate(unittest.TestCase):
         mock_sleep: MagicMock,
         mock_event_handler: MagicMock,
     ):
+        """initiate observer test"""
         with open(self.path_to_config) as yam:
             config = yaml.safe_load(yam)
         with patch.object(Path, "is_dir") as mock_dir:
@@ -109,17 +92,22 @@ class TestInitiate(unittest.TestCase):
                     signal.raise_signal(signal.SIGINT)
 
     def test_initiate_scheduler(self):
+        """initiate scheduler test"""
         scheduler = initiate_scheduler()
         self.assertIsInstance(scheduler, BackgroundScheduler)
 
 
 class TestDatetime(unittest.TestCase):
+    """testing scheduler"""
+
     @classmethod
     def setUp(cls) -> None:
+        """Set up the test environment by defining the test data."""
         cls.path_to_config = TEST_DIRECTORY / "resources" / "rig_config_no_run_script.yml"
 
     @patch("apscheduler.schedulers.background.BackgroundScheduler")
     def test_datetime(self, mock_scheduler: MagicMock):
+        """testing scheduler trigger time"""
         # mock_scheduler.return_value = MockScheduler()
         with open(self.path_to_config) as yam:
             config = yaml.safe_load(yam)
@@ -153,8 +141,11 @@ class TestDatetime(unittest.TestCase):
 
 
 class TestLoadManifest(unittest.TestCase):
+    """Load manifest test"""
+
     @classmethod
     def setUp(cls) -> None:
+        """set up the test environment by defining the test data."""
         cls.path_to_config = TEST_DIRECTORY / "resources" / "rig_config_no_run_script.yml"
         cls.path_to_manifest = TEST_DIRECTORY / "resources" / "manifest_file.yml"
         cls.path_to_run_script_manifest = (
@@ -164,6 +155,7 @@ class TestLoadManifest(unittest.TestCase):
     @patch("aind_watchdog_service.alert_bot.AlertBot.send_message")
     @patch("apscheduler.schedulers.background.BackgroundScheduler")
     def test_load_vast_manifest(self, mock_scheduler: MagicMock, mock_alert: MagicMock):
+        """Test load manifest"""
         with open(self.path_to_manifest) as yam:
             manifest = yaml.safe_load(yam)
         with open(self.path_to_config) as yam:
@@ -193,6 +185,7 @@ class TestLoadManifest(unittest.TestCase):
     def test_load_run_script_manifest(
         self, mock_scheduler: MagicMock, mock_alert: MagicMock
     ):
+        """Test load run script manifest"""
         with open(self.path_to_run_script_manifest) as yam:
             manifest = yaml.safe_load(yam)
         with open(self.path_to_config) as yam:
@@ -219,8 +212,11 @@ class TestLoadManifest(unittest.TestCase):
 
 
 class TestMain(unittest.TestCase):
+    """Test main function"""
+
     @classmethod
     def setUp(cls) -> None:
+        """set up the test environment by defining the test data."""
         cls.path_to_config = TEST_DIRECTORY / "resources" / "rig_config_no_run_script.yml"
         cls.path_to_run_script_config = (
             TEST_DIRECTORY / "resources" / "rig_config_with_run_script.yml"
@@ -229,6 +225,7 @@ class TestMain(unittest.TestCase):
     @patch("aind_watchdog_service.main.initiate_scheduler")
     @patch("aind_watchdog_service.main.initiate_observer")
     def test_main_vast_config(self, mock_observer: MagicMock, mock_scheduler: MagicMock):
+        """test main function with vast config"""
         with open(self.path_to_config) as yam:
             config = yaml.safe_load(yam)
         mock_observer.return_value = True
@@ -242,6 +239,7 @@ class TestMain(unittest.TestCase):
     def test_main_script_config(
         self, mock_observer: MagicMock, mock_scheduler: MagicMock
     ):
+        """test main function with run script config"""
         with open(self.path_to_run_script_config) as yam:
             run_script_config = yaml.safe_load(yam)
         mock_observer.return_value = True
@@ -252,13 +250,17 @@ class TestMain(unittest.TestCase):
 
 
 class TestEventHandlerEvents(unittest.TestCase):
+    """Test event handler events"""
+
     @classmethod
     def setUp(cls) -> None:
+        """Set up the test environment by defining the test data."""
         cls.path_to_config = TEST_DIRECTORY / "resources" / "rig_config_no_run_script.yml"
         cls.path_to_manifest = TEST_DIRECTORY / "resources" / "manifest_file.yml"
 
     @patch("apscheduler.schedulers.background.BackgroundScheduler")
     def test_event_handler(self, mock_scheduler: MagicMock):
+        """test event handler events"""
         mock_scheduler.return_value = MockScheduler
         with open(self.path_to_config) as yam:
             config = yaml.safe_load(yam)
