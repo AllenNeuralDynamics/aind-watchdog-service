@@ -38,6 +38,9 @@ class ManifestConfig(BaseModel):
     name: str = Field(
         description="Unique name for session data assets",
         title="Unique name",
+    ),
+    processor_full_name: str = Field(
+        description="User who processed the data", title="Processor name"
     )
     subject_id: int = Field(description="Subject ID", title="Subject ID")
     acquisition_datetime: datetime = Field(
@@ -52,7 +55,10 @@ class ManifestConfig(BaseModel):
     capsule_id: Optional[str] = Field(
         description="Capsule ID of pipeline to run", title="Capsule"
     )
-    s3_bucket: str = Field(None, description="s3 endpoint", title="S3 endpoint")
+    s3_bucket: str = Field(None, description="s3 endpoint", title="S3 endpoint"),
+    project_name: str = Field(
+        description="Project name", title="Project name"
+    )
 
     @field_validator("transfer_time")
     @classmethod

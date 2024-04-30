@@ -185,7 +185,9 @@ def trigger_transfer_service(config: Union[VastTransferConfig, RunScriptConfig])
         acq_datetime=config.acquisition_datetime.strftime("%Y-%m-%d %H:%M:%S"),
         modalities=modality_configs,
         metadata_dir=PurePosixPath(config.destination) / config.name,
-        # model_config=json.dumps({"codeocean-process-capsule-id":config.capsule_id})
+        process_capsule_id=config.capsule_id,
+        project_name=config.project_name,
+        processor_full_name=config.processor_full_name,
     )
 
     # From aind-data-transfer-service README
