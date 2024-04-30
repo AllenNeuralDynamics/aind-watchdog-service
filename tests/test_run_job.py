@@ -296,6 +296,30 @@ class TestRunJob(unittest.TestCase):
                     f"Could not execute cmd1 for {run_config.name}",
                 )
 
+    @patch("aind_watchdog_service.run_job.run_subprocess")
+    @patch("aind_watchdog_service.run_job.PLATFORM", "windows")
+    def test_move_manifest_win(self, mock_subproc: MagicMock):
+        """Test the move manifest function"""
+        mock_subproc.return_value = subprocess.CompletedProcess(
+            args=[], returncode=0, stdout=b"Mock stdout", stderr=b"Mock stderr"
+        )
+        src = "/path/to/src"
+        dest = "/path/to/dest"
+        run_job.move_manifest_to_archive(src, dest)
+        mock_subproc.assert_called_once()
+
+    @patch("aind_watchdog_service.run_job.run_subprocess")
+    @patch("aind_watchdog_service.run_job.PLATFORM", "linux")
+    def test_move_manifest_lin(self, mock_subproc: MagicMock):
+        """Test the move manifest function"""
+        mock_subproc.return_value = subprocess.CompletedProcess(
+            args=[], returncode=0, stdout=b"Mock stdout", stderr=b"Mock stderr"
+        )
+        src = "/path/to/src"
+        dest = "/path/to/dest"
+        run_job.move_manifest_to_archive(src, dest)
+        mock_subproc.assert_called_once()
+
 
 if __name__ == "__main__":
     unittest.main()

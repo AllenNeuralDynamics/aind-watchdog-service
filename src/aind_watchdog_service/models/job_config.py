@@ -10,10 +10,10 @@ from pathlib import Path
 class WatchConfig(BaseModel):
     """Configuration for rig"""
 
-    flag_dir: str = Field(
+    flag_dir: Union[str, Path] = Field(
         description="Directory for watchdog to poll", title="Poll directory"
     )
-    manifest_complete: str = Field(
+    manifest_complete: Union[str, Path] = Field(
         description="Manifest directory for triggered data",
         title="Manifest complete directory",
     )
@@ -30,40 +30,6 @@ class WatchConfig(BaseModel):
     run_script: bool = Field(
         description="Run custom script for upload", title="Run script"
     )
-
-    @field_validator("flag_dir")
-    @classmethod
-    def verify_directories_exist(
-        cls, data: Union[Dict[str, str], str]
-    ) -> Union[Dict[str, str], str]:
-        """Verify that directories exist"""
-        if isinstance(data, dict):
-            for k, v in data.items():
-                if Path(v).is_dir() is False:
-                    raise ValueError(f"Provide valid path for {data}")
-        else:
-            if Path(data).is_dir() is False:
-                raise ValueError(f"Provide valid path for {data}")
-        return data
-
-    @field_validator("run_script")
-    @classmethod
-    def verify_run_script(cls, data: bool) -> bool:
-        """Verify that run_script is a boolean"""
-        if not isinstance(data, bool):
-            raise ValueError("run_script must be a boolean")
-        return data
-
-    @field_validator("manifest_complete")
-    @classmethod
-    def verify_manifest_complete(cls, data: str) -> str:
-        """Verify that manifest complete directory exists"""
-        if not Path(data).is_dir():
-            try:
-                Path(data).mkdir(parents=True)
-            except Exception:
-                raise ValueError("Could not create manifest complete directory")
-        return data
 
 
 class ManifestConfig(BaseModel):
@@ -128,38 +94,6 @@ class VastTransferConfig(ManifestConfig):
         description="Where schema files to be uploaded are saved",
         title="Schema directory",
     )
-
-    @field_validator("destination")
-    @classmethod
-    def verify_destination(cls, data: str) -> str:
-        """Verify that destination directory exists"""
-        if not Path(data).is_dir():
-            try:
-                Path(data).mkdir(parents=True)
-            except Exception:
-                raise ValueError("Could not create destination directory")
-        return data
-
-    @field_validator("modalities")
-    @classmethod
-    def verify_modalities(cls, data: Dict[str, list]) -> Dict[str, list]:
-        """Verify that modalities are in correct format"""
-        for modality, files in data.items():
-            if not isinstance(files, list):
-                raise ValueError(f"Files for {modality} must be a list")
-            for file in files:
-                if not Path(file).is_file():
-                    raise ValueError(f"{file} does not exist")
-        return data
-
-    @field_validator("schemas")
-    @classmethod
-    def verify_schemas(cls, data: list) -> list:
-        """Verify that schema files are in correct format"""
-        for schema in data:
-            if not Path(schema).is_file():
-                raise ValueError(f"{schema} does not exist")
-        return data
 
 
 class RunScriptConfig(ManifestConfig):
