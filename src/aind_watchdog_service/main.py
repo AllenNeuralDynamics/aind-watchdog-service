@@ -205,6 +205,10 @@ def initiate_observer(config: WatchConfig, scheduler: BackgroundScheduler) -> No
     """
     observer = Observer()
     watch_directory = config.flag_dir
+    if not Path(watch_directory).exists():
+        raise FileNotFoundError(f"Directory {watch_directory} does not exist")
+    if not Path(config.manifest_complete).exists():
+        Path(config.manifest_complete).mkdir(parents=True, exist_ok=True)
     event_handler = EventHandler(scheduler, config)
     observer.schedule(event_handler, watch_directory)
     observer.start()
