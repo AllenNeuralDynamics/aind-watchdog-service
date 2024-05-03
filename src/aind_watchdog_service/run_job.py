@@ -8,6 +8,7 @@ import json
 import requests
 from pathlib import Path, PurePosixPath
 from typing import Union
+import logging
 
 from aind_data_transfer_service.configs.job_configs import (
     BasicUploadJobConfigs,
@@ -86,7 +87,7 @@ def run_subprocess(cmd: list) -> subprocess.CompletedProcess:
     subprocess.CompletedProcess
         subprocess completed process
     """
-    print(f"Executing command: {cmd}")
+    logging.info(f"Executing command: {cmd}")
     subproc = subprocess.run(
         cmd, check=False, stderr=subprocess.PIPE, stdout=subprocess.PIPE
     )

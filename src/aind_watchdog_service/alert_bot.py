@@ -1,6 +1,7 @@
 """Module with Alert Bot for notifications on MS Teams: Alessio B"""
 
 from typing import Optional
+import logging
 
 import requests
 
@@ -90,4 +91,5 @@ class AlertBot:
         """
         contents = self._create_body_text(message, extra_text)
         response = requests.post(self.url, json=contents)
+        logging.info("Sent message to Teams")
         return response

@@ -22,7 +22,8 @@ dependencies = [
     'pydantic',
     'aind-data-schema',
     'aind-data-transfer-service',
-    'APScheduler'
+    'APScheduler',
+    'requests'
 ]
 
 [project.optional-dependencies]

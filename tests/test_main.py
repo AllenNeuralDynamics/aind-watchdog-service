@@ -13,16 +13,16 @@ from datetime import datetime as dt
 from datetime import timedelta
 import requests
 
-from aind_watchdog_service.models import job_config
 from aind_watchdog_service.models.job_config import (
     WatchConfig,
 )
 from aind_watchdog_service.main import (
     initiate_observer,
     initiate_scheduler,
-    EventHandler,
     main,
 )
+from aind_watchdog_service.event_handler import EventHandler
+from aind_watchdog_service.logging_config import setup_logging
 
 
 TEST_DIRECTORY = Path(__file__).resolve().parent
@@ -60,6 +60,7 @@ class TestInitiate(unittest.TestCase):
         """Set up the test environment by defining the test data."""
         cls.path_to_config = TEST_DIRECTORY / "resources" / "rig_config_no_run_script.yml"
 
+    @patch("aind_watchdog_service.logging_config.setup_logging")
     @patch("aind_watchdog_service.main.EventHandler")
     @patch(
         "time.sleep", side_effect=KeyboardInterrupt
@@ -70,6 +71,7 @@ class TestInitiate(unittest.TestCase):
         mock_scheduler: MagicMock,
         mock_sleep: MagicMock,
         mock_event_handler: MagicMock,
+        mock_logging: MagicMock
     ):
         """initiate observer test"""
         with open(self.path_to_config) as yam:
@@ -276,3 +278,8 @@ class TestEventHandlerEvents(unittest.TestCase):
                 event_handler.on_modified(mock_event)
                 # mock_scheduler.add_job.assert_called_once()
                 # event_handler.on_deleted(mock_event)
+
+
+if __name__ == "__main__":
+    unittest.main()
+        

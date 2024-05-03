@@ -35,10 +35,12 @@ class WatchConfig(BaseModel):
 class ManifestConfig(BaseModel):
     """Configuration for session: based on engineerings lims_scheduler_d manifest files"""
 
-    name: str = Field(
-        description="Unique name for session data assets",
-        title="Unique name",
-    ),
+    name: str = (
+        Field(
+            description="Unique name for session data assets",
+            title="Unique name",
+        ),
+    )
     processor_full_name: str = Field(
         description="User who processed the data", title="Processor name"
     )
@@ -55,10 +57,8 @@ class ManifestConfig(BaseModel):
     capsule_id: Optional[str] = Field(
         description="Capsule ID of pipeline to run", title="Capsule"
     )
-    s3_bucket: str = Field(None, description="s3 endpoint", title="S3 endpoint"),
-    project_name: str = Field(
-        description="Project name", title="Project name"
-    )
+    s3_bucket: str = (Field(None, description="s3 endpoint", title="S3 endpoint"),)
+    project_name: str = Field(description="Project name", title="Project name")
 
     @field_validator("transfer_time")
     @classmethod
