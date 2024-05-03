@@ -9,7 +9,7 @@ import requests
 import json
 from watchdog.events import FileModifiedEvent
 
-from aind_watchdog_service.models import job_config
+from aind_watchdog_service.models import watch_config
 from aind_watchdog_service import run_job
 
 
@@ -118,7 +118,7 @@ class TestCopyToVast(unittest.TestCase):
         with open(self.path_to_manifest) as yam:
             manifest_data = yaml.safe_load(yam)
 
-        vast_config = job_config.VastTransferConfig(**manifest_data)
+        vast_config = watch_config.VastTransferConfig(**manifest_data)
         response = run_job.copy_to_vast(vast_config, mock_alert)
         self.assertEqual(response, True)
 
@@ -150,7 +150,7 @@ class TestTriggerTransferService(unittest.TestCase):
         mock_post.return_value = mock_response
         with open(self.path_to_manifest) as yam:
             manifest_data = yaml.safe_load(yam)
-        vast_config = job_config.VastTransferConfig(**manifest_data)
+        vast_config = watch_config.VastTransferConfig(**manifest_data)
         response = run_job.trigger_transfer_service(vast_config)
         self.assertEqual(response, True)
 
@@ -198,8 +198,8 @@ class TestRunJob(unittest.TestCase):
             mock_dir.return_value = True
             with patch.object(Path, "is_file") as mock_file:
                 mock_file.return_value = True
-                watch_config = job_config.WatchConfig(**config_data)
-                vast_config = job_config.VastTransferConfig(**manifest_data)
+                watch_config = watch_config.WatchConfig(**config_data)
+                vast_config = watch_config.VastTransferConfig(**manifest_data)
                 mock_event = MockFileModifiedEvent("/path/to/file.txt")
                 mock_trigger_transfer.return_value = True
                 mock_copy_to_vast.return_value = True
@@ -259,8 +259,8 @@ class TestRunJob(unittest.TestCase):
             mock_dir.return_value = True
             with patch.object(Path, "is_file") as mock_file:
                 mock_file.return_value = True
-                watch_config = job_config.WatchConfig(**config_data)
-                run_config = job_config.RunScriptConfig(**manifest_data)
+                watch_config = watch_config.WatchConfig(**config_data)
+                run_config = watch_config.RunScriptConfig(**manifest_data)
                 mock_event = MockFileModifiedEvent("/path/to/file.txt")
                 run_job.run_script(mock_event, run_config, watch_config)
                 mock_subproc.assert_called()
@@ -272,8 +272,8 @@ class TestRunJob(unittest.TestCase):
             mock_dir.return_value = True
             with patch.object(Path, "is_file") as mock_file:
                 mock_file.return_value = True
-                watch_config = job_config.WatchConfig(**config_data)
-                run_config = job_config.RunScriptConfig(**manifest_data)
+                watch_config = watch_config.WatchConfig(**config_data)
+                run_config = watch_config.RunScriptConfig(**manifest_data)
                 mock_event = MockFileModifiedEvent("/path/to/file.txt")
                 run_job.run_script(mock_event, run_config, watch_config)
                 mock_alert.assert_called_with(
@@ -286,8 +286,8 @@ class TestRunJob(unittest.TestCase):
             mock_dir.return_value = True
             with patch.object(Path, "is_file") as mock_file:
                 mock_file.return_value = True
-                watch_config = job_config.WatchConfig(**config_data)
-                run_config = job_config.RunScriptConfig(**manifest_data)
+                watch_config = watch_config.WatchConfig(**config_data)
+                run_config = watch_config.RunScriptConfig(**manifest_data)
                 mock_event = MockFileModifiedEvent("/path/to/file.txt")
                 mock_subproc.assert_called()
                 run_job.run_script(mock_event, run_config, watch_config)

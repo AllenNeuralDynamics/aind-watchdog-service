@@ -30,7 +30,9 @@ else:
 
 
 class RunJob:
-    """Run job class to stage files on VAST or run a custom script and trigger aind-data-transfer-service"""
+    """Run job class to stage files on VAST or run a custom script 
+    and trigger aind-data-transfer-service
+    """
 
     def __init__(
         self,

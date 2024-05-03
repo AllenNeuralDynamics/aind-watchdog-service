@@ -5,7 +5,7 @@ from unittest.mock import patch, mock_open, MagicMock
 import yaml
 from pathlib import Path
 
-from aind_watchdog_service.models import job_config
+from aind_watchdog_service.models import watch_config
 
 
 TEST_DIRECTORY = Path(__file__).resolve().parent
@@ -30,13 +30,13 @@ class TestConfig(unittest.TestCase):
             data = yaml.safe_load(yam)
 
         # Check the the case where directories exist
-        watchdog_config = job_config.WatchConfig(**data)
+        watchdog_config = watch_config.WatchConfig(**data)
         self.assertEqual(watchdog_config.model_dump(), data)
 
         # Check run_script set to non-bool
         data["run_script"] = 10
         with self.assertRaises(ValueError):
-            job_config.WatchConfig(**data)
+            watch_config.WatchConfig(**data)
 
     def test_manifest_config(self):
         """Example of how to test the truth of a statement."""
@@ -44,28 +44,28 @@ class TestConfig(unittest.TestCase):
         with open(self.path_to_manifest) as yam:
             data = yaml.safe_load(yam)
         # Check the the case where directories exist
-        manifest_config = job_config.VastTransferConfig(**data)
+        manifest_config = watch_config.VastTransferConfig(**data)
         self.assertEqual(manifest_config.model_dump(), data)
 
         # Check transfer_time variants
         data["transfer_time"] = "12:00:00"
         with self.assertRaises(ValueError):
-            job_config.VastTransferConfig(**data)
+            watch_config.VastTransferConfig(**data)
 
         data["transfer_time"] = "11:00"
-        manifest_config = job_config.VastTransferConfig(**data)
+        manifest_config = watch_config.VastTransferConfig(**data)
         self.assertEqual(manifest_config.model_dump(), data)
 
         data["platform"] = "cafe"
         with self.assertRaises(ValueError):
-            job_config.VastTransferConfig(**data)
+            watch_config.VastTransferConfig(**data)
 
     def test_run_script_config(self):
         """test the runscript congig"""
         with open(self.path_to_run_script_manifest) as yam:
             data = yaml.safe_load(yam)
 
-        manifest_config = job_config.RunScriptConfig(**data)
+        manifest_config = watch_config.RunScriptConfig(**data)
         self.assertEqual(manifest_config.model_dump(), data)
 
 

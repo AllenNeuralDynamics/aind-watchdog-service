@@ -13,7 +13,7 @@ from datetime import datetime as dt
 from datetime import timedelta
 import requests
 
-from aind_watchdog_service.models.job_config import (
+from aind_watchdog_service.models.watch_config import (
     WatchConfig,
 )
 from aind_watchdog_service.main import (
