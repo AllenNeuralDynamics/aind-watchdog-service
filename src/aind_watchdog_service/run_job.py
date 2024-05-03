@@ -15,11 +15,11 @@ from aind_data_transfer_service.configs.job_configs import (
     ModalityConfigs,
 )
 
-from aind_watchdog_service.models.job_config import (
-    WatchConfig,
+from aind_watchdog_service.models.job_configs import (
     RunScriptConfig,
     VastTransferConfig,
 )
+from aind_watchdog_service.models.watch_config import WatchConfig
 from aind_watchdog_service.alert_bot import AlertBot
 
 

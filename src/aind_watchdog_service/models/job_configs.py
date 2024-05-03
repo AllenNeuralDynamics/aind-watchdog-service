@@ -23,6 +23,7 @@ class ManifestConfig(BaseModel):
         title="Acquisition datetime",
     )
     transfer_time: Optional[str] = Field(
+        default="now",
         description="Transfer time to schedule copy and upload, defaults to immediately",
         title="APScheduler transfer time",
     )
@@ -30,7 +31,7 @@ class ManifestConfig(BaseModel):
     capsule_id: Optional[str] = Field(
         description="Capsule ID of pipeline to run", title="Capsule"
     )
-    s3_bucket: str = (Field(None, description="s3 endpoint", title="S3 endpoint"),)
+    s3_bucket: str = (Field(default=None, description="s3 endpoint", title="S3 endpoint"),)
     project_name: str = Field(description="Project name", title="Project name")
 
     @field_validator("transfer_time")

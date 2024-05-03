@@ -2,19 +2,14 @@
 
 import time
 from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler, FileModifiedEvent
-from datetime import datetime as dt
-from datetime import timedelta
 import os
 import yaml
-from typing import Union
 from pathlib import Path
 from apscheduler.schedulers.background import BackgroundScheduler
 import logging
+import sys
 
-from aind_watchdog_service.models.job_config import (
-    WatchConfig,
-)
+from aind_watchdog_service.models.watch_config import WatchConfig
 from aind_watchdog_service.event_handler import EventHandler
 from aind_watchdog_service.logging_config import setup_logging
 
@@ -81,7 +76,11 @@ class WatchdogService:
 
 def main(config: dict) -> None:
     """Load configuration, initiate WatchdogService and start service"""
-    watch_config = WatchConfig(**config)
+    try:
+        watch_config = WatchConfig(**config)
+    except Exception as e:
+        logging.error("Error loading config %s", e)
+        sys.exit(1)
     watchdog_service = WatchdogService(watch_config)
     watchdog_service.start_service()
 

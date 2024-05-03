@@ -1,11 +1,8 @@
-"""Module with Alert Bot for notifications on MS Teams: Alessio B"""
+"""Module with Alert Bot for notifications on MS Teams"""
 
 from typing import Optional
-import logging
 
 import requests
-
-# From Alessio Buccino - pulled from aind-codeocean-utils
 
 
 class AlertBot:
@@ -35,6 +32,7 @@ class AlertBot:
           The main message content
         extra_text : Optional[str]
           Additional text to send in card body
+
         Returns
         -------
         dict
@@ -46,7 +44,6 @@ class AlertBot:
                 "size": "Medium",
                 "weight": "Bolder",
                 "text": message,
-                "style": {"borderTopWidth": 1, "borderTopColor": "#D2042D"},
             }
         ]
         if extra_text is not None:
@@ -60,7 +57,8 @@ class AlertBot:
                         "type": "AdaptiveCard",
                         "body": body,
                         "$schema": (
-                            "http://adaptivecards.io/schemas/" "adaptive-card.json"
+                            "http://adaptivecards.io/schemas/"
+                            "adaptive-card.json"
                         ),
                         "version": "1.0",
                     },
@@ -91,5 +89,4 @@ class AlertBot:
         """
         contents = self._create_body_text(message, extra_text)
         response = requests.post(self.url, json=contents)
-        logging.info("Sent message to Teams")
         return response
