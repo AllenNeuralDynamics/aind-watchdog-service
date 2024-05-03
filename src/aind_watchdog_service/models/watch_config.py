@@ -28,5 +28,3 @@ class WatchConfig(BaseModel):
     run_script: bool = Field(
         description="Run custom script for upload", title="Run script"
     )
-
-

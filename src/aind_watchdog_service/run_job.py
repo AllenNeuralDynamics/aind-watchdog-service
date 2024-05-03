@@ -30,7 +30,7 @@ else:
 
 
 class RunJob:
-    """Run job class to stage files on VAST or run a custom script 
+    """Run job class to stage files on VAST or run a custom script
     and trigger aind-data-transfer-service
     """
 

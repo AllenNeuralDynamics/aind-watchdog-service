@@ -57,8 +57,7 @@ class AlertBot:
                         "type": "AdaptiveCard",
                         "body": body,
                         "$schema": (
-                            "http://adaptivecards.io/schemas/"
-                            "adaptive-card.json"
+                            "http://adaptivecards.io/schemas/" "adaptive-card.json"
                         ),
                         "version": "1.0",
                     },

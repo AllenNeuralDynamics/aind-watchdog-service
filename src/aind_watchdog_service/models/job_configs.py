@@ -1,4 +1,5 @@
 """Job configs for VAST staging or executing a custom script"""
+
 from pydantic import BaseModel, Field, field_validator
 from typing import Optional, Dict
 from aind_data_schema.models.platforms import Platform
@@ -31,7 +32,9 @@ class ManifestConfig(BaseModel):
     capsule_id: Optional[str] = Field(
         description="Capsule ID of pipeline to run", title="Capsule"
     )
-    s3_bucket: str = (Field(default=None, description="s3 endpoint", title="S3 endpoint"),)
+    s3_bucket: str = (
+        Field(default=None, description="s3 endpoint", title="S3 endpoint"),
+    )
     project_name: str = Field(description="Project name", title="Project name")
 
     @field_validator("transfer_time")
