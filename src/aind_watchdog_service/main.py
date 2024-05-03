@@ -80,7 +80,7 @@ class WatchdogService:
 
 
 def main(config: dict) -> None:
-    """Main function to start the scheduler and observer procs"""
+    """Load configuration, initiate WatchdogService and start service"""
     watch_config = WatchConfig(**config)
     watchdog_service = WatchdogService(watch_config)
     watchdog_service.start_service()
