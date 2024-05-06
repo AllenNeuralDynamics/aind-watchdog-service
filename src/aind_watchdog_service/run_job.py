@@ -220,29 +220,23 @@ class RunJob:
         else:
             return False
 
-    def move_manifest_to_archive(self, src_path: str) -> None:
-        """Move manifest file to archive
-
-        Parameters
-        ----------
-        src_path : str
-            source path
-        """
+    def move_manifest_to_archive(self) -> None:
+        """Move manifest file to archive"""
         archive = self.config.manifest_complete
         if PLATFORM == "windows":
             self.run_subprocess(
                 [
                     "robocopy",
                     "/mov",
-                    os.path.dirname(src_path),
+                    os.path.dirname(self.event.src_path),
                     archive,
-                    os.path.basename(src_path),
+                    os.path.basename(self.event.src_path),
                 ]
             )
         else:
-            self.run_subprocess(["mv", src_path, archive])
+            self.run_subprocess(["mv", self.event.src_path, archive])
 
-    def run_job(self, event: FileModifiedEvent) -> None:
+    def run_job(self) -> None:
         """Triggers the vast transfer service
 
         Parameters
@@ -250,7 +244,7 @@ class RunJob:
         event : FileModifiedEvent
             modified event file
         """
-        self.alert_bot.send_message("Running job", event.src_path)
+        self.alert_bot.send_message("Running job", self.event.src_path)
         if isinstance(self.config, VastTransferConfig):
             transfer = self.copy_to_vast()
         else:
@@ -259,6 +253,7 @@ class RunJob:
                     self.config.script[command],
                 )
                 if run.returncode != 0:
+                    logging.error("Error running script %s", command)
                     self.alert_bot.send_message(
                         "Error running script",
                         f"Could not execute {command} for {self.config.name}",
@@ -271,13 +266,13 @@ class RunJob:
 
         if not transfer:
             self.alert_bot.send_message(
-                "Could not copy data to destination", event.src_path
+                "Could not copy data to destination", self.event.src_path
             )
             return
         if not self.trigger_transfer_service():
             self.alert_bot.send_message(
-                "Could not trigger aind-data-transfer-service", event.src_path
+                "Could not trigger aind-data-transfer-service", self.event.src_path
             )
             return
-        self.alert_bot.send_message("Job complete", event.src_path)
-        self.move_manifest_to_archive(event.src_path)
+        self.alert_bot.send_message("Job complete", self.event.src_path)
+        self.move_manifest_to_archive()

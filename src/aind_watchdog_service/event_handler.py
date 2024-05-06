@@ -81,13 +81,13 @@ class EventHandler(FileSystemEventHandler):
         Parameters
         ----------
         event : FileModifiedEvent
-           event being cancelled
+           event to remove
         """
         if self.jobs.get(event.src_path, ""):
-            job_id = self.jobs[event.src_path]
+            logging.info("Removing job_id %s", self.jobs[event.src_path].id)
             del self.jobs[event.src_path]
-            logging.info("Removing job %s", event.src_path)
-            self.scheduler.remove_job(job_id)
+
+            self.scheduler.remove_job(self.jobs[event.src_path].id)
 
     def _get_trigger_time(self, transfer_time: str) -> dt:
         """Get trigger time from the job
@@ -109,7 +109,9 @@ class EventHandler(FileSystemEventHandler):
         return trigger_time
 
     def schedule_job(
-        self, event: FileModifiedEvent, config: Union[VastTransferConfig, RunScriptConfig]
+        self,
+        event: FileModifiedEvent,
+        job_config: Union[VastTransferConfig, RunScriptConfig],
     ) -> None:
         """Schedule job to run
 
@@ -120,16 +122,16 @@ class EventHandler(FileSystemEventHandler):
         config : dict
             configuration for the job
         """
-        if config.transfer_time == "now":
+        if job_config.transfer_time == "now":
             logging.info("Schduling job to run now %s", event.src_path)
-            job_id = self.scheduler.add_job(RunJob, args=[event, config, self.config])
+            run = RunJob(event, job_config, self.config)
+            job_id = self.scheduler.add_job(run.run_job)
 
         else:
-            trigger = self._get_trigger_time(config.transfer_time)
+            trigger = self._get_trigger_time(job_config.transfer_time)
             logging.info("Schduling job to run at %s %s", trigger, event.src_path)
-            job_id = self.scheduler.add_job(
-                RunJob, "date", run_date=trigger, args=[event, config, self.config]
-            )
+            run = RunJob(event, job_config, self.config)
+            job_id = self.scheduler.add_job(run.run_job, "date", run_date=trigger)
         self.jobs[event.src_path] = job_id
 
     def on_deleted(self, event: FileModifiedEvent) -> None:
@@ -171,9 +173,9 @@ class EventHandler(FileSystemEventHandler):
         # If scheduled manifest is being modified, remove original job
         if (
             self.jobs.get(event.src_path, "")
-            and self.jobs.get(event.src_path, "") in self.scheduler.get_jobs()
+            and self.jobs[event.src_path].id in self.scheduler.get_jobs()
         ):
-            self._remove_job(self.jobs[event.src_path].id)
+            self._remove_job(self.jobs[event.src_path])
         if self.config.run_script:
             logging.info("Found job, executing custom script for %s", event.src_path)
             run_script_config = self._load_run_script_manifest(event)
