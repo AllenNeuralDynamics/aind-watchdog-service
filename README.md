@@ -9,7 +9,11 @@
 
 ## Summary
 
-Aind-watchdog-service can watch a specific folder for a manifest file to copy data to a location on VAST, then trigger the aind-data-transfer-service via the REST API. It can also be configured to run a custom script and bypass the VAST copy portion of the service (Still need to test this out). See below for configurations
+aind-watchdog-service watches a configured folder for a manifest to copy data to a location on VAST, then trigger the aind-data-transfer-service via the REST API. It can also be configured to run a custom script and bypass the VAST copy portion of the service. See below for configurations.
+
+## Configuration
+
+* 
 
 ## Usage
  - Create a yaml file and specify it's location with an environment variable called WATCH_CONFIG

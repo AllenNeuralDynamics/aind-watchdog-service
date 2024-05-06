@@ -222,7 +222,7 @@ class RunJob:
 
     def move_manifest_to_archive(self) -> None:
         """Move manifest file to archive"""
-        archive = self.config.manifest_complete
+        archive = self.watch_config.manifest_complete
         if PLATFORM == "windows":
             self.run_subprocess(
                 [
