@@ -36,4 +36,4 @@ platform: multiplane-ophys
 s3_bucket: s3://aind-watchdog-service
 subject_id: 704576
 transfer_time: now
-project_name: LearningmFISH
+project_name: LearningomFISH-V1omFISH
