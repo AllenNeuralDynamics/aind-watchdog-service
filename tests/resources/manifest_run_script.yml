@@ -14,4 +14,4 @@ platform: multiplane-ophys
 subject_id: 704576
 transfer_time: now
 s3_bucket: None
-project_name: LearningmFISH
+project_name: LearningmFISH-V1omFISH

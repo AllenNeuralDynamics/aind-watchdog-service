@@ -73,7 +73,8 @@ class VastTransferConfig(ManifestConfig):
         description="list of ModalityFile objects containing modality names and associated files",  # noqa
         title="modality files",
     )
-    schemas: list = Field(
+    schemas: Optional[list] = Field(
+        default=[],
         description="Where schema files to be uploaded are saved",
         title="Schema directory",
     )
