@@ -123,7 +123,7 @@ class RunJob:
             True if copy was successful, False otherwise
         """
         # Robocopy used over xcopy for better performance
-        # /j: unbuffered I/O (to speed up copy), /z: restartable mode,
+        # /j: unbuffered I/O (to speed up copy)
         # /e: copy subdirectories (includes empty subdirs), /r:5: retry 5 times
         if not Path(src).exists():
             return False
@@ -138,8 +138,7 @@ class RunJob:
                     str(Path(src).parent),
                     dest,
                     Path(src).name,
-                    "/j"
-                    "/z",
+                    "/J"
                     "/r:5",
                 ]
             )
