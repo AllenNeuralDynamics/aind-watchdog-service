@@ -138,7 +138,7 @@ class RunJob:
                     str(Path(src).parent),
                     dest,
                     Path(src).name,
-                    "/J"
+                    "/J",
                     "/r:5",
                 ]
             )
