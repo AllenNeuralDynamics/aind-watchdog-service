@@ -129,7 +129,7 @@ class RunJob:
             return False
         if Path(src).is_dir():
             run = self.run_subprocess(
-                ["robocopy", src, dest, "/z", "/e", "/r:5"],
+                ["robocopy", src, dest, "/z", "/e", "/j", "/r:5"],
             )
         else:
             run = self.run_subprocess(
@@ -138,7 +138,7 @@ class RunJob:
                     str(Path(src).parent),
                     dest,
                     Path(src).name,
-                    "/J",
+                    "/j",
                     "/r:5",
                 ]
             )
