@@ -196,7 +196,6 @@ class RunJob:
             metadata_dir=PurePosixPath(self.config.destination) / self.config.name,
             process_capsule_id=self.config.capsule_id,
             project_name=self.config.project_name,
-            processor_full_name=self.config.processor_full_name,
         )
 
         # From aind-data-transfer-service README
