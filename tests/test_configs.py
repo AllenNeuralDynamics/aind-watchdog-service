@@ -21,7 +21,9 @@ class TestWatchConfig(unittest.TestCase):
     def setUp(cls) -> None:
         """Set up the test environment by defining the test data."""
         cls.path_to_config = TEST_DIRECTORY / "resources" / "rig_config_no_run_script.yml"
-        cls.path_to_run_script_config = TEST_DIRECTORY / "resources" / "rig_config_run_script.yml"
+        cls.path_to_run_script_config = (
+            TEST_DIRECTORY / "resources" / "rig_config_run_script.yml"
+        )
 
     def test_watch_config_vast_transfer(self):
         """Test the WatchConfig class."""
@@ -37,21 +39,21 @@ class TestWatchConfig(unittest.TestCase):
         data["run_script"] = 10
         with self.assertRaises(ValueError):
             WatchConfig(**data)
-    
+
     def test_watch_config_run_script(self):
         """Test the WatchConfig class."""
         # Open config for to pass and compare
         with open(self.path_to_run_script_config) as yam:
             data = yaml.safe_load(yam)
-        
+
         # Check the the case where directories exist
         watchdog_config = WatchConfig(**data)
         self.assertEqual(watchdog_config.model_dump(), data)
 
 
-    
 class TestManifestConfigs(unittest.TestCase):
     """Test the manifest configs"""
+
     @classmethod
     def setUp(cls) -> None:
         """Set up the test environment by defining the test data."""

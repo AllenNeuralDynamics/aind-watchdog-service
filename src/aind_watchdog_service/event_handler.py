@@ -6,6 +6,7 @@ from datetime import timedelta
 from typing import Union
 from pathlib import Path
 import logging
+import json
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from watchdog.events import FileSystemEventHandler, FileModifiedEvent
@@ -45,7 +46,10 @@ class EventHandler(FileSystemEventHandler):
         """
         with open(event.src_path, "r") as f:
             try:
-                data = yaml.safe_load(f)
+                if event.src_path.split(".")[-1] in ["yml", "yaml"]:
+                    data = yaml.safe_load(f)
+                if event.src_path.split(".")[-1] == "json":
+                    data = json.load(f)
                 config = VastTransferConfig(**data)
                 return config
             except Exception as e:
@@ -176,7 +180,7 @@ class EventHandler(FileSystemEventHandler):
             and self.jobs[event.src_path].id in self.scheduler.get_jobs()
         ):
             self._remove_job(self.jobs[event.src_path])
-        
+
         if self.config.run_script:
             logging.info("Found job, executing custom script for %s", event.src_path)
             run_script_config = self._load_run_script_manifest(event)

@@ -20,6 +20,7 @@ from aind_watchdog_service.models.job_configs import (
 )
 from aind_watchdog_service.event_handler import EventHandler
 
+
 class MockFileModifiedEvent(FileModifiedEvent):
     """Mock FileModifiedEvent for testing EventHandler"""
 
@@ -35,7 +36,7 @@ class MockEventHandler(EventHandler):
         """init"""
         super().__init__(scheduler, config)
         self.jobs = {}
-    
+
     def _remove_job(self, job_id):
         """remove job"""
         pass
@@ -47,28 +48,41 @@ class MockScheduler(BackgroundScheduler):
     def __init__(self):
         """init"""
         super().__init__({})
-    
+
     def get_jobs(self):
         """mock job ids"""
         return ["1234"]
 
+
 TEST_DIRECTORY = Path(__file__).resolve().parent
-       
+
+
 class TestEventHandler(unittest.TestCase):
     """testing scheduler"""
 
     @classmethod
     def setUp(cls) -> None:
         """Set up the test environment by defining the test data."""
-        cls.watch_config_fp = TEST_DIRECTORY / "resources" / "rig_config_no_run_script.yml"
-        cls.watch_config_script = TEST_DIRECTORY / "resources" / "rig_config_run_script.yml"
+        cls.watch_config_fp = (
+            TEST_DIRECTORY / "resources" / "rig_config_no_run_script.yml"
+        )
+        cls.watch_config_script = (
+            TEST_DIRECTORY / "resources" / "rig_config_run_script.yml"
+        )
         cls.vast_manifest = TEST_DIRECTORY / "resources" / "manifest.yml"
         cls.script_manifest = TEST_DIRECTORY / "resources" / "manifest_run_script.yml"
-    
+
     @patch("logging.info")
-    @patch("aind_watchdog_service.event_handler.EventHandler._load_vast_transfer_manifest")
+    @patch(
+        "aind_watchdog_service.event_handler.EventHandler._load_vast_transfer_manifest"
+    )
     @patch("aind_watchdog_service.event_handler.EventHandler.schedule_job")
-    def test_event_handler_on_modified(self,mock_schedule_job: MagicMock,mock_vast_transfer: MagicMock,  mock_log_info: MagicMock):
+    def test_event_handler_on_modified(
+        self,
+        mock_schedule_job: MagicMock,
+        mock_vast_transfer: MagicMock,
+        mock_log_info: MagicMock,
+    ):
         """Test on_modified method"""
         with open(self.watch_config_fp) as yam:
             config = yaml.safe_load(yam)
@@ -83,16 +97,23 @@ class TestEventHandler(unittest.TestCase):
         event_handler.on_modified(mock_event)
         with patch.object(Path, "is_dir") as mock_dir:
             mock_dir.return_value = False
-            mock_log_info.assert_called_with("Found job, executing vast transfer for %s", mock_event.src_path)
+            mock_log_info.assert_called_with(
+                "Found job, executing vast transfer for %s", mock_event.src_path
+            )
             mock_vast_transfer.assert_called_once()
             mock_schedule_job.assert_called_once()
         with patch.object(Path, "is_dir") as mock_dir:
             mock_dir.return_value = True
-    
+
     @patch("logging.info")
     @patch("aind_watchdog_service.event_handler.EventHandler._load_run_script_manifest")
     @patch("aind_watchdog_service.event_handler.EventHandler.schedule_job")
-    def test_event_handler_on_modified_script(self,mock_schedule_job: MagicMock,mock_script_transfer: MagicMock,mock_log_info: MagicMock):
+    def test_event_handler_on_modified_script(
+        self,
+        mock_schedule_job: MagicMock,
+        mock_script_transfer: MagicMock,
+        mock_log_info: MagicMock,
+    ):
         """Test on_modified method for script execution"""
         with open(self.watch_config_script) as yam:
             watch_script_config = yaml.safe_load(yam)
@@ -106,10 +127,11 @@ class TestEventHandler(unittest.TestCase):
         mock_script_transfer.return_value = RunScriptConfig(**script_config)
         with patch.object(Path, "is_dir") as mock_dir:
             mock_dir.return_value = False
-            mock_log_info.assert_called_with("Found job, executing custom script for %s", mock_event.src_path)
+            mock_log_info.assert_called_with(
+                "Found job, executing custom script for %s", mock_event.src_path
+            )
             mock_schedule_job.assert_called_once()
-        
-        
+
     @patch("apscheduler.schedulers.background.BackgroundScheduler")
     def test_datetime(self, mock_scheduler: MagicMock):
         """testing scheduler trigger time"""
@@ -143,6 +165,7 @@ class TestEventHandler(unittest.TestCase):
                     hour=dt.now().hour + 2, minute=0, second=0, microsecond=0
                 )
                 self.assertEqual(trigger_time, test_time)
+
 
 # class TestMain(unittest.TestCase):
 #     """Test main function"""
@@ -211,4 +234,3 @@ class TestEventHandler(unittest.TestCase):
 #                 # event_handler.on_deleted(mock_event)
 if __name__ == "__main__":
     unittest.main()
-        

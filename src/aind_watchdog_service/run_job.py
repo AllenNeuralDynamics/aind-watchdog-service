@@ -58,10 +58,11 @@ class RunJob:
         destination = self.config.destination
         modalities = self.config.modalities
         for modality in modalities.keys():
-            destination_directory = os.path.join(destination, parent_directory, modality)
-            os.makedirs(destination_directory, exist_ok=True)
+            destination_directory = Path(destination) / parent_directory / modality
+            if not destination_directory.is_dir():
+                destination_directory.mkdir(parents=True)
             for file in modalities[modality]:
-                if os.path.isfile(file):
+                if Path(file).exists():
                     if PLATFORM == "windows":
                         transfer = self.execute_windows_command(
                             file, destination_directory
@@ -195,7 +196,6 @@ class RunJob:
             metadata_dir=PurePosixPath(self.config.destination) / self.config.name,
             process_capsule_id=self.config.capsule_id,
             project_name=self.config.project_name,
-            processor_full_name=self.config.processor_full_name,
         )
 
         # From aind-data-transfer-service README
@@ -249,6 +249,11 @@ class RunJob:
         self.alert_bot.send_message("Running job", self.event.src_path)
         if isinstance(self.config, VastTransferConfig):
             transfer = self.copy_to_vast()
+            if not transfer:
+                self.alert_bot.send_message(
+                    "Could not copy data to destination", self.event.src_path
+                )
+                return
         else:
             for command in self.config.script:
                 run = subprocess.run(
@@ -266,11 +271,6 @@ class RunJob:
                     "Script executed", f"Ran {command} for {self.config.name}"
                 )
 
-        if not transfer:
-            self.alert_bot.send_message(
-                "Could not copy data to destination", self.event.src_path
-            )
-            return
         if not self.trigger_transfer_service():
             self.alert_bot.send_message(
                 "Could not trigger aind-data-transfer-service", self.event.src_path
