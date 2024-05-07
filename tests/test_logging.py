@@ -14,16 +14,21 @@ TEST_DIRECTORY = Path(__file__).resolve().parent
 
 
 class TestMyModule(unittest.TestCase):
-    
+
     @classmethod
     def setUp(cls) -> None:
         """set up files"""
         cls.path_to_manifest = TEST_DIRECTORY / "resources" / "manifest_file.yml"
-    
-    @patch('logging.getLogger')
-    @patch('logging.StreamHandler')
-    @patch('logging.FileHandler')
-    def test_log_streamhandler(self, mock_file_handler: MagicMock, mock_stream_handler: MagicMock, mock_logger: MagicMock):
+
+    @patch("logging.getLogger")
+    @patch("logging.StreamHandler")
+    @patch("logging.FileHandler")
+    def test_log_streamhandler(
+        self,
+        mock_file_handler: MagicMock,
+        mock_stream_handler: MagicMock,
+        mock_logger: MagicMock,
+    ):
         """Test logging setup configuration"""
         # Set up mock objects for logger, stream handler and file handler
         mock_logger.return_value = logging.getLogger
@@ -34,6 +39,7 @@ class TestMyModule(unittest.TestCase):
 
         # Assert that the getLogger function was called
         mock_logger.assert_called_once()
+
 
 if __name__ == "__main__":
     unittest.main()

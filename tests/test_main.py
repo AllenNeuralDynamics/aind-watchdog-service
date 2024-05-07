@@ -49,6 +49,7 @@ class MockScheduler(BackgroundScheduler):
         """init"""
         super().__init__({})
 
+
 class MockWatchdogService:
     """Mock WatchdogService for testing WatchdogService"""
 
@@ -60,12 +61,14 @@ class MockWatchdogService:
         """start service"""
         pass
 
+
 class MockObserver(Observer):
     """Mock Observer for testing WatchdogService"""
+
     def __init__(self):
         """init"""
         super().__init__()
-    
+
     def start(self):
         """start"""
         pass
@@ -73,6 +76,8 @@ class MockObserver(Observer):
     def schedule(event_handler: EventHandler, watch_directory: str):
         """schedule"""
         pass
+
+
 class TestWatchdogService(unittest.TestCase):
     """Test WatchdogService class"""
 
@@ -97,7 +102,7 @@ class TestWatchdogService(unittest.TestCase):
         mock_event_handler: MagicMock,
         mock_log_info: MagicMock,
         mock_log_err: MagicMock,
-        mock_setup_logging: MagicMock
+        mock_setup_logging: MagicMock,
     ):
         """initiate observer test"""
         with open(self.path_to_config) as yam:
@@ -131,7 +136,6 @@ class TestWatchdogService(unittest.TestCase):
                 watchdog_service.initiate_observer()
                 mock_log_err.assert_called_once()
 
-    
     @patch("aind_watchdog_service.main.WatchdogService")
     def test_main(self, mock_watchdog: MagicMock):
         """Test main, WatchdogService constructor"""
@@ -140,8 +144,7 @@ class TestWatchdogService(unittest.TestCase):
         mock_watchdog.return_value = MockWatchdogService(WatchConfig(**config))
         start_watchdog(config)
         mock_watchdog.assert_called_once()
- 
+
 
 if __name__ == "__main__":
     unittest.main()
-        
