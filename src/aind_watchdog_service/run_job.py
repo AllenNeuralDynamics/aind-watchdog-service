@@ -270,7 +270,6 @@ class RunJob:
                     "Script executed", f"Ran {command} for {self.config.name}"
                 )
 
-        
         if not self.trigger_transfer_service():
             self.alert_bot.send_message(
                 "Could not trigger aind-data-transfer-service", self.event.src_path
