@@ -224,13 +224,15 @@ class RunJob:
         """Move manifest file to archive"""
         archive = self.watch_config.manifest_complete
         if PLATFORM == "windows":
+            copy_file = self.execute_windows_command(self.event.src_path, archive)
+            if not copy_file:
+                logging.error("Error copying manifest file %s", self.event.src_path)
+                self.alert_bot.send_message("Error copying manifest file", self.event.src_path)
+                return
             self.run_subprocess(
                 [
-                    "robocopy",
-                    "/mov",
-                    os.path.dirname(self.event.src_path),
-                    archive,
-                    os.path.basename(self.event.src_path),
+                    "del",
+                    self.event.src_path
                 ]
             )
         else:
