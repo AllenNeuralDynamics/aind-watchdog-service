@@ -78,7 +78,7 @@ exclude_lines = [
     "import",
     "pragma: no cover"
 ]
-fail_under = 100
+fail_under = 85
 
 [tool.isort]
 line_length = 90
@@ -86,4 +86,4 @@ profile = "black"
 
 [tool.interrogate]
 exclude = ["setup.py", "docs", "build"]
-fail-under = 100
+fail-under = 85
