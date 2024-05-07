@@ -7,12 +7,12 @@
 ![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen?logo=codecov)
 ![Python](https://img.shields.io/badge/python->=3.7-blue?logo=python)
 
-## Summary
+# Summary
 
-aind-watchdog-service watches a configured folder for a manifest to copy data to a location on VAST, then trigger the aind-data-transfer-service via the REST API. It can also be configured to run a custom script and bypass the VAST copy portion of the service. See below for configurations.
+aind-watchdog-service watches a configured folder for a manifest to copy data to a location on VAST, then trigger the aind-data-transfer-service via the REST API. It can also be configured to run a custom script and bypass the VAST copy portion of the service. See below for usage and template files.
 
-## Usage
-* Create a watch_config.yml file and store it's location in an environment variable called WATCH_CONFIG
+# Usage
+* Create a watch_config file as json or yaml and store it's location in an environment variable called WATCH_CONFIG
     * Review src/aind-watchdog-service/models/watch_config.py for configuration parameters
     * watch_config.yml must include:
         * flag_dir (where watchdog observer should be looking for beacon files)
@@ -20,8 +20,14 @@ aind-watchdog-service watches a configured folder for a manifest to copy data to
         * run_script (bool - should be set to False if planning on staging data on VAST)
 
 * Beacon or manifest file must contain the word "manifest" in the file name and the parameters according to the configurations set in aind-watchdog-service/models/job_config.py using either VastTransferConfig or RunScriptConfig for VAST transfer or custom script instructions, respectively. 
-    * VastTransferConfig
-## Installation
+    * Can be json or yaml
+    * To run a job that stages data on VAST, view the a template manifest under \tests\resources\manifest.yml
+        * for configuration parameters reference VastTransferConfig under src\aind_watchdog_service\models\job_configs.py
+    * Run a custom script
+        * To run a custom script that requires a differnt procedure than staging data directly on VAST, view the template manifest under \tests\resources\manifest_run_script.yml
+        * see src\aind_watchdog_service\models\job_configs.py
+
+# Installation
 To use the software, in the root directory, run
 ```bash
 pip install -e .
