@@ -3,7 +3,6 @@
 import unittest
 import yaml
 from pathlib import Path
-from aind_data_transfer_service.configs.job_configs import BasicUploadJobConfigs
 from aind_watchdog_service.models.watch_config import WatchConfig
 from aind_watchdog_service.models.job_configs import (
     VastTransferConfig,

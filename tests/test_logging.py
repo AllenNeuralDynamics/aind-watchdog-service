@@ -1,14 +1,11 @@
 """Example test template."""
 
 import unittest
-from unittest.mock import patch
 from unittest.mock import patch, MagicMock
 from pathlib import Path
-import subprocess
 import logging
 
 from aind_watchdog_service.logging_config import setup_logging
-from aind_watchdog_service.run_job import RunJob
 
 TEST_DIRECTORY = Path(__file__).resolve().parent
 

@@ -144,7 +144,7 @@ class RunJob:
                 ]
             )
         # Robocopy return code documenttion:
-        # https://learn.microsoft.com/en-us/troubleshoot/windows-server/backup-and-storage/return-codes-used-robocopy-utility #noqa
+        # https://learn.microsoft.com/en-us/troubleshoot/windows-server/backup-and-storage/return-codes-used-robocopy-utility # noqa
         if run.returncode > 7:
             return False
         return True
@@ -227,14 +227,11 @@ class RunJob:
             copy_file = self.execute_windows_command(self.event.src_path, archive)
             if not copy_file:
                 logging.error("Error copying manifest file %s", self.event.src_path)
-                self.alert_bot.send_message("Error copying manifest file", self.event.src_path)
+                self.alert_bot.send_message(
+                    "Error copying manifest file", self.event.src_path
+                )
                 return
-            self.run_subprocess(
-                [
-                    "del",
-                    self.event.src_path
-                ]
-            )
+            self.run_subprocess(["del", self.event.src_path])
         else:
             self.run_subprocess(["mv", self.event.src_path, archive])
 

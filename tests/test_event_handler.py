@@ -1,7 +1,6 @@
 """Test EventHandler constructor."""
 
 import unittest
-from unittest.mock import patch
 from unittest.mock import patch, MagicMock
 import yaml
 from pathlib import Path
@@ -147,7 +146,7 @@ class TestEventHandler(unittest.TestCase):
                 )  # Provide necessary config parameters
                 event_handler = EventHandler(mock_scheduler, watch_config)
 
-                # Test time trigger conditions for addition of one day when hour has already passed
+                # Test time trigger conditions for addition of one day when hour has already passed # noqa
                 time_now = dt.now().hour - 2
                 trigger_time = str(time_now).zfill(2) + ":00"
                 trigger_time = event_handler._get_trigger_time(trigger_time)
@@ -167,70 +166,5 @@ class TestEventHandler(unittest.TestCase):
                 self.assertEqual(trigger_time, test_time)
 
 
-# class TestMain(unittest.TestCase):
-#     """Test main function"""
-
-#     @classmethod
-#     def setUp(cls) -> None:
-#         """set up the test environment by defining the test data."""
-#         cls.path_to_config = TEST_DIRECTORY / "resources" / "rig_config_no_run_script.yml"
-#         cls.path_to_run_script_config = (
-#             TEST_DIRECTORY / "resources" / "rig_config_with_run_script.yml"
-#         )
-
-#     @patch("aind_watchdog_service.main.initiate_scheduler")
-#     @patch("aind_watchdog_service.main.initiate_observer")
-#     def test_main_vast_config(self, mock_observer: MagicMock, mock_scheduler: MagicMock):
-#         """test main function with vast config"""
-#         with open(self.path_to_config) as yam:
-#             config = yaml.safe_load(yam)
-#         mock_observer.return_value = True
-#         mock_scheduler.return_value = True
-#         main(config)
-#         mock_observer.assert_called_once()
-#         mock_scheduler.assert_called_once()
-
-#     @patch("aind_watchdog_service.main.initiate_scheduler")
-#     @patch("aind_watchdog_service.main.initiate_observer")
-#     def test_main_script_config(
-#         self, mock_observer: MagicMock, mock_scheduler: MagicMock
-#     ):
-#         """test main function with run script config"""
-#         with open(self.path_to_run_script_config) as yam:
-#             run_script_config = yaml.safe_load(yam)
-#         mock_observer.return_value = True
-#         mock_scheduler.return_value = True
-#         main(run_script_config)
-#         mock_observer.assert_called_once()
-#         mock_scheduler.assert_called_once()
-
-
-# class TestEventHandlerEvents(unittest.TestCase):
-#     """Test event handler events"""
-
-#     @classmethod
-#     def setUp(cls) -> None:
-#         """Set up the test environment by defining the test data."""
-#         cls.path_to_config = TEST_DIRECTORY / "resources" / "rig_config_no_run_script.yml"
-#         cls.path_to_manifest = TEST_DIRECTORY / "resources" / "manifest_file.yml"
-
-#     @patch("apscheduler.schedulers.background.BackgroundScheduler")
-#     def test_event_handler(self, mock_scheduler: MagicMock):
-#         """test event handler events"""
-#         mock_scheduler.return_value = MockScheduler
-#         with open(self.path_to_config) as yam:
-#             config = yaml.safe_load(yam)
-#         with patch.object(Path, "is_dir") as mock_dir:
-#             mock_dir.return_value = True
-#             with patch.object(Path, "is_file") as mock_file:
-#                 mock_file.return_value = True
-#                 watch_config = WatchConfig(
-#                     **config
-#                 )  # Provide necessary config parameters
-#                 event_handler = EventHandler(mock_scheduler, watch_config)
-#                 mock_event = MockFileModifiedEvent("/path/to/file.txt")
-#                 event_handler.on_modified(mock_event)
-#                 # mock_scheduler.add_job.assert_called_once()
-#                 # event_handler.on_deleted(mock_event)
 if __name__ == "__main__":
     unittest.main()

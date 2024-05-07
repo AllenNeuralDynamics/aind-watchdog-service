@@ -1,14 +1,12 @@
 """Test main entry point."""
 
 import unittest
-from unittest.mock import patch
 from unittest.mock import patch, MagicMock
 import yaml
 from pathlib import Path
 from watchdog.events import FileModifiedEvent
 from watchdog.observers import Observer
 from apscheduler.schedulers.background import BackgroundScheduler
-import signal
 
 from aind_watchdog_service.models.watch_config import (
     WatchConfig,
@@ -48,6 +46,7 @@ class MockScheduler(BackgroundScheduler):
     def shutdown(self):
         """mock scheduler shutdown"""
         pass
+
 
 class MockWatchdogService:
     """Mock WatchdogService for testing WatchdogService"""
@@ -133,7 +132,7 @@ class TestWatchdogService(unittest.TestCase):
         #     mock_exists.return_value = False
         #     with self.assertRaises(FileNotFoundError):
         #         watchdog_service.initiate_observer()
-                # mock_log_err.assert_called_once()
+        # mock_log_err.assert_called_once()
 
     @patch("aind_watchdog_service.main.WatchdogService")
     def test_main(self, mock_watchdog: MagicMock):
