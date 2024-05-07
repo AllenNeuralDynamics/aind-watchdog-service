@@ -21,7 +21,7 @@ dependencies = [
     'pyyaml',
     'pydantic',
     'aind-data-schema',
-    'aind-data-transfer-service @ git+ssh://github.com/AllenNeuralDynamics/aind-data-transfer-service',
+    'aind-data-transfer-service @ git+https://github.com/AllenNeuralDynamics/aind-data-transfer-service',
     'APScheduler',
     'requests'
 ]
