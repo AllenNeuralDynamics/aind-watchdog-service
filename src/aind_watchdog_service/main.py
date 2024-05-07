@@ -53,6 +53,7 @@ class WatchdogService:
         observer = Observer()
         watch_directory = self.watch_config.flag_dir
         if not Path(watch_directory).exists():
+            logging.error("Directory %s does not exist", watch_directory)
             raise FileNotFoundError(f"Directory {watch_directory} does not exist")
         if not Path(self.watch_config.manifest_complete).exists():
             Path(self.watch_config.manifest_complete).mkdir(parents=True, exist_ok=True)
@@ -74,7 +75,7 @@ class WatchdogService:
         self.initiate_observer()
 
 
-def main(config: dict) -> None:
+def start_watchdog(config: dict) -> None:
     """Load configuration, initiate WatchdogService and start service"""
     try:
         watch_config = WatchConfig(**config)
@@ -88,9 +89,10 @@ def main(config: dict) -> None:
 if __name__ == "__main__":
     configuration = os.getenv("WATCH_CONFIG")
     if not configuration:
+        logging.error("Environment variable WATCH_CONFIG not set. Please set and restart")
         raise AttributeError(
             "Environment variable WATCH_CONFIG not set. Please set and restart"
         )
     with open(configuration) as y:
         data = yaml.safe_load(y)
-    main(data)
+    start_watchdog(data)

@@ -176,6 +176,7 @@ class EventHandler(FileSystemEventHandler):
             and self.jobs[event.src_path].id in self.scheduler.get_jobs()
         ):
             self._remove_job(self.jobs[event.src_path])
+        
         if self.config.run_script:
             logging.info("Found job, executing custom script for %s", event.src_path)
             run_script_config = self._load_run_script_manifest(event)

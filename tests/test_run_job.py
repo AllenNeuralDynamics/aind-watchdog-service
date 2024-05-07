@@ -9,20 +9,22 @@ import requests
 import json
 from watchdog.events import FileModifiedEvent
 
-from aind_watchdog_service.models import watch_config
-from aind_watchdog_service import run_job
+from aind_watchdog_service.models.watch_config import WatchConfig
+from aind_watchdog_service.models.job_configs import (
+    VastTransferConfig,
+    RunScriptConfig,
+)
+from aind_watchdog_service.run_job import RunJob
 
 
 TEST_DIRECTORY = Path(__file__).resolve().parent
 
-
 class MockFileModifiedEvent(FileModifiedEvent):
-    """Mock FileModifiedEvent class"""
+    """Mock FileModifiedEvent for testing EventHandler"""
 
     def __init__(self, src_path):
-        """Initialize MockFileModifiedEvent class"""
+        """init"""
         super().__init__(src_path)
-
 
 class TestRunSubprocess(unittest.TestCase):
     """test subrpcocess"""
@@ -30,13 +32,15 @@ class TestRunSubprocess(unittest.TestCase):
     @patch("subprocess.run")
     def test_run_subprocess(self, mock_subproc: MagicMock):
         """Test run_subprocess function"""
+        
         cmd = ["ls", "-l"]
 
         # Mock mock_subproc to return a CompletedProcess object
         mock_subproc.return_value = subprocess.CompletedProcess(
             args=cmd, returncode=8, stdout=b"Mock stdout", stderr=b"Mock stderr"
         )
-        result = run_job.run_subprocess(cmd)
+        mock_event = MockFileModifiedEvent("/path/to/file.txt")
+        result = RunJob.run_subprocess(cmd)
         # # Assert that mock_subproc was called with the correct arguments
         mock_subproc.assert_called_once_with(
             cmd, check=False, stderr=subprocess.PIPE, stdout=subprocess.PIPE
@@ -57,32 +61,32 @@ class TestRunSubprocess(unittest.TestCase):
 
         with patch.object(Path, "exists") as mock_file:
             mock_file.return_value = True
-            winx_dir = run_job.execute_windows_command(src_dir, dest)
-            winx_file = run_job.execute_windows_command(src_file, dest)
+            winx_dir = RunJob.execute_windows_command(src_dir, dest)
+            winx_file = RunJob.execute_windows_command(src_file, dest)
             self.assertEqual(winx_dir, True)
             self.assertEqual(winx_file, True)
             mock_subproc.assert_called()
 
         with patch.object(Path, "exists") as mock_file:
             mock_file.return_value = False
-            winx_dir = run_job.execute_windows_command(src_dir, dest)
-            winx_file = run_job.execute_windows_command(src_file, dest)
+            winx_dir = RunJob.execute_windows_command(src_dir, dest)
+            winx_file = RunJob.execute_windows_command(src_file, dest)
             self.assertEqual(winx_dir, False)
             self.assertEqual(winx_file, False)
             mock_subproc.assert_called()
 
         with patch.object(Path, "exists") as mock_file:
             mock_file.return_value = True
-            winx_dir = run_job.execute_linux_command(src_dir, dest)
-            winx_file = run_job.execute_linux_command(src_file, dest)
+            winx_dir = RunJob.execute_linux_command(src_dir, dest)
+            winx_file = RunJob.execute_linux_command(src_file, dest)
             self.assertEqual(winx_dir, True)
             self.assertEqual(winx_file, True)
             mock_subproc.assert_called()
 
         with patch.object(Path, "exists") as mock_file:
             mock_file.return_value = False
-            winx_dir = run_job.execute_linux_command(src_dir, dest)
-            winx_file = run_job.execute_linux_command(src_file, dest)
+            winx_dir = RunJob.execute_linux_command(src_dir, dest)
+            winx_file = RunJob.execute_linux_command(src_file, dest)
             self.assertEqual(winx_dir, False)
             self.assertEqual(winx_file, False)
             mock_subproc.assert_called()
@@ -118,12 +122,12 @@ class TestCopyToVast(unittest.TestCase):
         with open(self.path_to_manifest) as yam:
             manifest_data = yaml.safe_load(yam)
 
-        vast_config = watch_config.VastTransferConfig(**manifest_data)
-        response = run_job.copy_to_vast(vast_config, mock_alert)
+        vast_config = VastTransferConfig(**manifest_data)
+        response = RunJob.copy_to_vast(vast_config, mock_alert)
         self.assertEqual(response, True)
 
         mock_execute_windows.return_value = False
-        response = run_job.copy_to_vast(vast_config, mock_alert)
+        response = RunJob.copy_to_vast(vast_config, mock_alert)
         self.assertEqual(response, False)
 
 
@@ -150,13 +154,13 @@ class TestTriggerTransferService(unittest.TestCase):
         mock_post.return_value = mock_response
         with open(self.path_to_manifest) as yam:
             manifest_data = yaml.safe_load(yam)
-        vast_config = watch_config.VastTransferConfig(**manifest_data)
-        response = run_job.trigger_transfer_service(vast_config)
+        vast_config = VastTransferConfig(**manifest_data)
+        response = RunJob.trigger_transfer_service(vast_config)
         self.assertEqual(response, True)
 
         mock_response.status_code = 404
         mock_post.return_value = mock_response
-        response = run_job.trigger_transfer_service(vast_config)
+        response = RunJob.trigger_transfer_service(vast_config)
         self.assertEqual(response, False)
 
 
@@ -198,33 +202,33 @@ class TestRunJob(unittest.TestCase):
             mock_dir.return_value = True
             with patch.object(Path, "is_file") as mock_file:
                 mock_file.return_value = True
-                watch_config = watch_config.WatchConfig(**config_data)
-                vast_config = watch_config.VastTransferConfig(**manifest_data)
+                watch_config = WatchConfig(**config_data)
+                vast_config = VastTransferConfig(**manifest_data)
                 mock_event = MockFileModifiedEvent("/path/to/file.txt")
                 mock_trigger_transfer.return_value = True
                 mock_copy_to_vast.return_value = True
                 mock_alert.return_value = requests.Response
-                run_job.run_job(mock_event, vast_config, watch_config)
+                RunJob.run_job(mock_event, vast_config, watch_config)
                 mock_alert.assert_called_with("Job complete", mock_event.src_path)
                 mock_move_mani.assert_called_once()
 
                 mock_trigger_transfer.return_value = False
                 mock_copy_to_vast.return_value = True
-                run_job.run_job(mock_event, vast_config, watch_config)
+                RunJob.run_job(mock_event, vast_config, watch_config)
                 mock_alert.assert_called_with(
                     "Could not trigger aind-data-transfer-service", mock_event.src_path
                 )
 
                 mock_trigger_transfer.return_value = True
                 mock_copy_to_vast.return_value = False
-                run_job.run_job(mock_event, vast_config, watch_config)
+                RunJob.run_job(mock_event, vast_config, watch_config)
                 mock_alert.assert_called_with(
                     "Could not copy data to destination", mock_event.src_path
                 )
 
                 mock_trigger_transfer.return_value = False
                 mock_copy_to_vast.return_value = False
-                run_job.run_job(mock_event, vast_config, watch_config)
+                RunJob.run_job(mock_event, vast_config, watch_config)
 
                 mock_alert.assert_called_with(
                     "Could not copy data to destination", mock_event.src_path
@@ -259,10 +263,10 @@ class TestRunJob(unittest.TestCase):
             mock_dir.return_value = True
             with patch.object(Path, "is_file") as mock_file:
                 mock_file.return_value = True
-                watch_config = watch_config.WatchConfig(**config_data)
-                run_config = watch_config.RunScriptConfig(**manifest_data)
+                watch_config = WatchConfig(**config_data)
+                run_config = RunScriptConfig(**manifest_data)
                 mock_event = MockFileModifiedEvent("/path/to/file.txt")
-                run_job.run_script(mock_event, run_config, watch_config)
+                RunJob.run_job(mock_event, run_config, watch_config)
                 mock_subproc.assert_called()
                 mock_alert.assert_called_with("Job complete", mock_event.src_path)
                 mock_move_mani.assert_called_once()
@@ -275,7 +279,7 @@ class TestRunJob(unittest.TestCase):
                 watch_config = watch_config.WatchConfig(**config_data)
                 run_config = watch_config.RunScriptConfig(**manifest_data)
                 mock_event = MockFileModifiedEvent("/path/to/file.txt")
-                run_job.run_script(mock_event, run_config, watch_config)
+                RunJob.run_job(mock_event, run_config, watch_config)
                 mock_alert.assert_called_with(
                     "Could not trigger aind-data-transfer-service", mock_event.src_path
                 )
@@ -290,7 +294,7 @@ class TestRunJob(unittest.TestCase):
                 run_config = watch_config.RunScriptConfig(**manifest_data)
                 mock_event = MockFileModifiedEvent("/path/to/file.txt")
                 mock_subproc.assert_called()
-                run_job.run_script(mock_event, run_config, watch_config)
+                RunJob.run_job(mock_event, run_config, watch_config)
                 mock_alert.assert_called_with(
                     "Error running script",
                     f"Could not execute cmd1 for {run_config.name}",
@@ -305,7 +309,7 @@ class TestRunJob(unittest.TestCase):
         )
         src = "/path/to/src"
         dest = "/path/to/dest"
-        run_job.move_manifest_to_archive(src, dest)
+        RunJob.move_manifest_to_archive(src, dest)
         mock_subproc.assert_called_once()
 
     @patch("aind_watchdog_service.run_job.run_subprocess")
@@ -317,7 +321,7 @@ class TestRunJob(unittest.TestCase):
         )
         src = "/path/to/src"
         dest = "/path/to/dest"
-        run_job.move_manifest_to_archive(src, dest)
+        RunJob.move_manifest_to_archive(src, dest)
         mock_subproc.assert_called_once()
 
 

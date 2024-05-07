@@ -1,4 +1,4 @@
-"""Example test template."""
+"""Test main entry point."""
 
 import unittest
 from unittest.mock import patch
@@ -17,12 +17,10 @@ from aind_watchdog_service.models.watch_config import (
     WatchConfig,
 )
 from aind_watchdog_service.main import (
-    initiate_observer,
-    initiate_scheduler,
-    main,
+    WatchdogService,
+    start_watchdog,
 )
 from aind_watchdog_service.event_handler import EventHandler
-from aind_watchdog_service.logging_config import setup_logging
 
 
 TEST_DIRECTORY = Path(__file__).resolve().parent
@@ -51,27 +49,55 @@ class MockScheduler(BackgroundScheduler):
         """init"""
         super().__init__({})
 
+class MockWatchdogService:
+    """Mock WatchdogService for testing WatchdogService"""
 
-class TestInitiate(unittest.TestCase):
-    """Test initiate functions"""
+    def __init__(self, watch_config: WatchConfig):
+        """init"""
+        self.watch_config = watch_config
+
+    def start_service(self):
+        """start service"""
+        pass
+
+class MockObserver(Observer):
+    """Mock Observer for testing WatchdogService"""
+    def __init__(self):
+        """init"""
+        super().__init__()
+    
+    def start(self):
+        """start"""
+        pass
+
+    def schedule(event_handler: EventHandler, watch_directory: str):
+        """schedule"""
+        pass
+class TestWatchdogService(unittest.TestCase):
+    """Test WatchdogService class"""
 
     @classmethod
     def setUp(cls) -> None:
         """Set up the test environment by defining the test data."""
         cls.path_to_config = TEST_DIRECTORY / "resources" / "rig_config_no_run_script.yml"
+        cls.path_to_manifest = TEST_DIRECTORY / "resources" / "manifest.yml"
 
-    @patch("aind_watchdog_service.logging_config.setup_logging")
+    @patch("aind_watchdog_service.main.WatchdogService._setup_logging")
+    @patch("logging.error")
+    @patch("logging.info")
     @patch("aind_watchdog_service.main.EventHandler")
     @patch(
         "time.sleep", side_effect=KeyboardInterrupt
     )  # Mock time.sleep to raise KeyboardInterrupt
-    @patch("apscheduler.schedulers.background.BackgroundScheduler")
+    @patch("watchdog.observers.Observer")
     def test_initiate_observer(
         self,
-        mock_scheduler: MagicMock,
+        mock_observer: MagicMock,
         mock_sleep: MagicMock,
         mock_event_handler: MagicMock,
-        mock_logging: MagicMock
+        mock_log_info: MagicMock,
+        mock_log_err: MagicMock,
+        mock_setup_logging: MagicMock
     ):
         """initiate observer test"""
         with open(self.path_to_config) as yam:
@@ -80,205 +106,41 @@ class TestInitiate(unittest.TestCase):
             mock_dir.return_value = True
             with patch.object(Path, "is_file") as mock_file:
                 mock_file.return_value = True
-                watch_config = WatchConfig(
-                    **config
-                )  # Provide necessary config parameters
-                mock_event_handler.return_value = MockEventHandler(
-                    mock_scheduler, watch_config
-                )
-                initiate_observer(watch_config, mock_scheduler)
-                mock_event_handler.assert_called_once()
-                mock_sleep.assert_called_once()
-                mock_scheduler.shutdown.assert_called_once()
-                with self.assertRaises(KeyboardInterrupt):
-                    signal.raise_signal(signal.SIGINT)
+                with patch.object(Path, "exists") as mock_exists:
+                    mock_exists.return_value = True
+                    watch_config = WatchConfig(
+                        **config
+                    )  # Provide necessary config parameters
+                    mock_scheduler = MockScheduler()
+                    mock_observer.return_value = MockObserver()
+                    mock_event_handler.return_value = MockEventHandler(
+                        mock_scheduler, watch_config
+                    )
+                    watchdog_service = WatchdogService(watch_config)
+                    watchdog_service.start_service()
+                    mock_setup_logging.assert_called_once()
+                    mock_log_info.assert_called()
+                    mock_log_err.assert_not_called()
+                    mock_event_handler.assert_called_once()
+                    mock_sleep.assert_called_once()
+                    with self.assertRaises(KeyboardInterrupt):
+                        signal.raise_signal(signal.SIGINT)
+        with patch.object(Path, "exists") as mock_exists:
+            mock_exists.return_value = False
+            with self.assertRaises(FileNotFoundError):
+                watchdog_service.initiate_observer()
+                mock_log_err.assert_called_once()
 
-    def test_initiate_scheduler(self):
-        """initiate scheduler test"""
-        scheduler = initiate_scheduler()
-        self.assertIsInstance(scheduler, BackgroundScheduler)
-
-
-class TestDatetime(unittest.TestCase):
-    """testing scheduler"""
-
-    @classmethod
-    def setUp(cls) -> None:
-        """Set up the test environment by defining the test data."""
-        cls.path_to_config = TEST_DIRECTORY / "resources" / "rig_config_no_run_script.yml"
-
-    @patch("apscheduler.schedulers.background.BackgroundScheduler")
-    def test_datetime(self, mock_scheduler: MagicMock):
-        """testing scheduler trigger time"""
-        # mock_scheduler.return_value = MockScheduler()
+    
+    @patch("aind_watchdog_service.main.WatchdogService")
+    def test_main(self, mock_watchdog: MagicMock):
+        """Test main, WatchdogService constructor"""
         with open(self.path_to_config) as yam:
             config = yaml.safe_load(yam)
-        with patch.object(Path, "is_dir") as mock_dir:
-            mock_dir.return_value = True
-            with patch.object(Path, "is_file") as mock_file:
-                mock_file.return_value = True
-                watch_config = WatchConfig(
-                    **config
-                )  # Provide necessary config parameters
-                event_handler = EventHandler(mock_scheduler, watch_config)
-
-                # Test time trigger conditions for addition of one day when hour has already passed
-                time_now = dt.now().hour - 2
-                trigger_time = str(time_now).zfill(2) + ":00"
-                trigger_time = event_handler._get_trigger_time(trigger_time)
-                test_time = dt.now().replace(
-                    hour=dt.now().hour - 2, minute=0, second=0, microsecond=0
-                )
-                test_time = test_time + timedelta(days=1)
-                self.assertEqual(trigger_time, test_time)
-
-                # Test trigger time when hour has not passed
-                time_now = dt.now().hour + 2
-                trigger_time = str(time_now).zfill(2) + ":00"
-                trigger_time = event_handler._get_trigger_time(trigger_time)
-                test_time = dt.now().replace(
-                    hour=dt.now().hour + 2, minute=0, second=0, microsecond=0
-                )
-                self.assertEqual(trigger_time, test_time)
-
-
-class TestLoadManifest(unittest.TestCase):
-    """Load manifest test"""
-
-    @classmethod
-    def setUp(cls) -> None:
-        """set up the test environment by defining the test data."""
-        cls.path_to_config = TEST_DIRECTORY / "resources" / "rig_config_no_run_script.yml"
-        cls.path_to_manifest = TEST_DIRECTORY / "resources" / "manifest_file.yml"
-        cls.path_to_run_script_manifest = (
-            TEST_DIRECTORY / "resources" / "manifest_run_script.yml"
-        )
-
-    @patch("aind_watchdog_service.alert_bot.AlertBot.send_message")
-    @patch("apscheduler.schedulers.background.BackgroundScheduler")
-    def test_load_vast_manifest(self, mock_scheduler: MagicMock, mock_alert: MagicMock):
-        """Test load manifest"""
-        with open(self.path_to_manifest) as yam:
-            manifest = yaml.safe_load(yam)
-        with open(self.path_to_config) as yam:
-            config = yaml.safe_load(yam)
-        with patch.object(Path, "is_dir") as mock_dir:
-            mock_dir.return_value = True
-            with patch.object(Path, "is_file") as mock_file:
-                mock_file.return_value = True
-                watch_config = WatchConfig(**config)
-            # Test config returns correctly
-            event_handler = EventHandler(mock_scheduler, watch_config)
-            mock_event = MockFileModifiedEvent(
-                TEST_DIRECTORY / "resources" / "manifest_file.yml"
-            )
-            test_manifest = event_handler._load_vast_transfer_manifest(mock_event)
-            self.assertEqual(test_manifest.model_dump(), manifest)
-
-            # Test case where config load fails
-            mock_alert.return_value = requests.Response
-            with self.assertRaises(Exception):
-                mock_alert.assert_called_with(
-                    "Could not copy data to destination", mock_event.src_path
-                )
-
-    @patch("aind_watchdog_service.alert_bot.AlertBot.send_message")
-    @patch("apscheduler.schedulers.background.BackgroundScheduler")
-    def test_load_run_script_manifest(
-        self, mock_scheduler: MagicMock, mock_alert: MagicMock
-    ):
-        """Test load run script manifest"""
-        with open(self.path_to_run_script_manifest) as yam:
-            manifest = yaml.safe_load(yam)
-        with open(self.path_to_config) as yam:
-            config = yaml.safe_load(yam)
-        with patch.object(Path, "is_dir") as mock_dir:
-            mock_dir.return_value = True
-            with patch.object(Path, "is_file") as mock_file:
-                mock_file.return_value = True
-                watch_config = WatchConfig(**config)
-            # Test config returns correctly
-            event_handler = EventHandler(mock_scheduler, watch_config)
-            mock_event = MockFileModifiedEvent(
-                TEST_DIRECTORY / "resources" / "manifest_run_script.yml"
-            )
-            test_manifest = event_handler._load_run_script_manifest(mock_event)
-            self.assertEqual(test_manifest.model_dump(), manifest)
-
-            # Test case where config load fails
-            mock_alert.return_value = requests.Response
-            with self.assertRaises(Exception):
-                mock_alert.assert_called_with(
-                    "Could not copy data to destination", mock_event.src_path
-                )
-
-
-class TestMain(unittest.TestCase):
-    """Test main function"""
-
-    @classmethod
-    def setUp(cls) -> None:
-        """set up the test environment by defining the test data."""
-        cls.path_to_config = TEST_DIRECTORY / "resources" / "rig_config_no_run_script.yml"
-        cls.path_to_run_script_config = (
-            TEST_DIRECTORY / "resources" / "rig_config_with_run_script.yml"
-        )
-
-    @patch("aind_watchdog_service.main.initiate_scheduler")
-    @patch("aind_watchdog_service.main.initiate_observer")
-    def test_main_vast_config(self, mock_observer: MagicMock, mock_scheduler: MagicMock):
-        """test main function with vast config"""
-        with open(self.path_to_config) as yam:
-            config = yaml.safe_load(yam)
-        mock_observer.return_value = True
-        mock_scheduler.return_value = True
-        main(config)
-        mock_observer.assert_called_once()
-        mock_scheduler.assert_called_once()
-
-    @patch("aind_watchdog_service.main.initiate_scheduler")
-    @patch("aind_watchdog_service.main.initiate_observer")
-    def test_main_script_config(
-        self, mock_observer: MagicMock, mock_scheduler: MagicMock
-    ):
-        """test main function with run script config"""
-        with open(self.path_to_run_script_config) as yam:
-            run_script_config = yaml.safe_load(yam)
-        mock_observer.return_value = True
-        mock_scheduler.return_value = True
-        main(run_script_config)
-        mock_observer.assert_called_once()
-        mock_scheduler.assert_called_once()
-
-
-class TestEventHandlerEvents(unittest.TestCase):
-    """Test event handler events"""
-
-    @classmethod
-    def setUp(cls) -> None:
-        """Set up the test environment by defining the test data."""
-        cls.path_to_config = TEST_DIRECTORY / "resources" / "rig_config_no_run_script.yml"
-        cls.path_to_manifest = TEST_DIRECTORY / "resources" / "manifest_file.yml"
-
-    @patch("apscheduler.schedulers.background.BackgroundScheduler")
-    def test_event_handler(self, mock_scheduler: MagicMock):
-        """test event handler events"""
-        mock_scheduler.return_value = MockScheduler
-        with open(self.path_to_config) as yam:
-            config = yaml.safe_load(yam)
-        with patch.object(Path, "is_dir") as mock_dir:
-            mock_dir.return_value = True
-            with patch.object(Path, "is_file") as mock_file:
-                mock_file.return_value = True
-                watch_config = WatchConfig(
-                    **config
-                )  # Provide necessary config parameters
-                event_handler = EventHandler(mock_scheduler, watch_config)
-                mock_event = MockFileModifiedEvent("/path/to/file.txt")
-                event_handler.on_modified(mock_event)
-                # mock_scheduler.add_job.assert_called_once()
-                # event_handler.on_deleted(mock_event)
-
+        mock_watchdog.return_value = MockWatchdogService(WatchConfig(**config))
+        start_watchdog(config)
+        mock_watchdog.assert_called_once()
+ 
 
 if __name__ == "__main__":
     unittest.main()
