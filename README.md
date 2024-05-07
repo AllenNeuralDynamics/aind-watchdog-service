@@ -11,22 +11,16 @@
 
 aind-watchdog-service watches a configured folder for a manifest to copy data to a location on VAST, then trigger the aind-data-transfer-service via the REST API. It can also be configured to run a custom script and bypass the VAST copy portion of the service. See below for configurations.
 
-## Configuration
-
-* 
-
 ## Usage
- - Create a yaml file and specify it's location with an environment variable called WATCH_CONFIG
- - WATCH_CONFIG must contain the following paramters: 
- 
-    **flag_dir** - (string) path where watchdog event handler should watch
-    
-    **webhook_url** - (Optional(str) for Teams notifications on events  
-    
-    **run_script** (bool) if custom script will be run
-- Flag (or manifest file) should contain the word "manifest" in the file name and the parameters according to the configurations set in aind-watchdog-service/models/job_config.py using either VastTransferConfig or RunScriptConfig for VAST transfer or custom script instructions, respectively. 
-- Can be configured to run in the background through Windows Task Scheduler or Linux's systemd; these services will make sure that the watchdog service is always running while the machine is on
+* Create a watch_config.yml file and store it's location in an environment variable called WATCH_CONFIG
+    * Review src/aind-watchdog-service/models/watch_config.py for configuration parameters
+    * watch_config.yml must include:
+        * flag_dir (where watchdog observer should be looking for beacon files)
+        * webhook_url (to receive Teams notifications)
+        * run_script (bool - should be set to False if planning on staging data on VAST)
 
+* Beacon or manifest file must contain the word "manifest" in the file name and the parameters according to the configurations set in aind-watchdog-service/models/job_config.py using either VastTransferConfig or RunScriptConfig for VAST transfer or custom script instructions, respectively. 
+    * VastTransferConfig
 ## Installation
 To use the software, in the root directory, run
 ```bash
