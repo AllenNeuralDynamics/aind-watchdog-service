@@ -231,7 +231,7 @@ class RunJob:
                     "Error copying manifest file", self.event.src_path
                 )
                 return
-            self.run_subprocess(["del", self.event.src_path])
+            os.remove(self.event.src_path)
         else:
             self.run_subprocess(["mv", self.event.src_path, archive])
 
