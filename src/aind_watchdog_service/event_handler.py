@@ -46,10 +46,7 @@ class EventHandler(FileSystemEventHandler):
         """
         with open(event.src_path, "r") as f:
             try:
-                if event.src_path.split(".")[-1] in ["yml", "yaml"]:
-                    data = yaml.safe_load(f)
-                if event.src_path.split(".")[-1] == "json":
-                    data = json.load(f)
+                data = yaml.safe_load(f)
                 config = VastTransferConfig(**data)
                 return config
             except Exception as e:
