@@ -334,18 +334,15 @@ class TestRunSubprocess(unittest.TestCase):
                     f"Could not execute cmd1 for {self.script_config.name}",
                 )
 
-    @patch("aind_watchdog_service.run_job.RunJob.run_subprocess")
+    @patch("os.remove")
     @patch("aind_watchdog_service.run_job.PLATFORM", "windows")
     @patch("aind_watchdog_service.run_job.RunJob.execute_windows_command")
-    def test_move_manifest_win(self, mock_execute: MagicMock, mock_subproc: MagicMock):
+    def test_move_manifest_win(self, mock_execute: MagicMock, mock_remove: MagicMock):
         """Test the move manifest function"""
-        mock_subproc.return_value = subprocess.CompletedProcess(
-            args=[], returncode=0, stdout=b"Mock stdout", stderr=b"Mock stderr"
-        )
         mock_execute.return_value = True
         execute = RunJob(self.mock_event, self.script_config, self.watch_config)
         execute.move_manifest_to_archive()
-        mock_subproc.assert_called_once()
+        mock_remove.assert_called_once()
 
     @patch("aind_watchdog_service.run_job.RunJob.run_subprocess")
     @patch("aind_watchdog_service.run_job.PLATFORM", "linux")
