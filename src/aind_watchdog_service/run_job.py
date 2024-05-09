@@ -71,7 +71,7 @@ class RunJob:
                         transfer = self.execute_linux_command(file, destination_directory)
                     if not transfer:
                         logging.error("Error copying files %s", file)
-                        self.alert_bot.send_message("Error copying files", file)
+                        self.alert_bot.send_message("Error copying files", str(file))
                         return False
                 else:
                     logging.error("File not found %s", file)
