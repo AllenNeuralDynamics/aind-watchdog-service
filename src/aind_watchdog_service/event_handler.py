@@ -6,7 +6,6 @@ from datetime import timedelta
 from typing import Union
 from pathlib import Path
 import logging
-import json
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from watchdog.events import FileSystemEventHandler, FileModifiedEvent

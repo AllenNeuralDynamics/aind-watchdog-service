@@ -8,7 +8,6 @@ from pathlib import Path
 from apscheduler.schedulers.background import BackgroundScheduler
 import logging
 import sys
-import json
 
 from aind_watchdog_service.models.watch_config import WatchConfig
 from aind_watchdog_service.event_handler import EventHandler
@@ -95,5 +94,5 @@ if __name__ == "__main__":
             "Environment variable WATCH_CONFIG not set. Please set and restart"
         )
     with open(configuration) as y:
-            data = yaml.safe_load(y)
+        data = yaml.safe_load(y)
     start_watchdog(data)
