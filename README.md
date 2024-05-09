@@ -9,7 +9,7 @@
 
 # Summary
 
-aind-watchdog-service watches a configured folder for a manifest to copy data to a location on VAST, then trigger the aind-data-transfer-service via the REST API. It can also be configured to run a custom script and bypass the VAST copy portion of the service. See below for usage and template files.
+With aind-watchdog-service, you can configure a directory for the app to watch, where manifest files (or beacon files) are dropped containing src files from an acquisition labeled by modality. The program is meant to be configured with a web-hook URL to send messages to a Teams channel when data staging is complete and data transfer has been triggered through [aind-data-transfer-service](https://github.com/AllenNeuralDynamics/aind-data-transfer). Pipeline capsule ids can be added if triggering pipelines is necessary post-acquisition.
 
 # Usage
 * Create a watch_config file as json or yaml and store it's location in an environment variable called WATCH_CONFIG
@@ -20,7 +20,7 @@ aind-watchdog-service watches a configured folder for a manifest to copy data to
         * run_script (bool - should be set to False if planning on staging data on VAST)
 
 * Beacon or manifest file must contain the word "manifest" in the file name and the parameters according to the configurations set in aind-watchdog-service/models/job_config.py using either VastTransferConfig or RunScriptConfig for VAST transfer or custom script instructions, respectively. 
-    * Can be json or yaml
+    * yaml only (for now)
     * To run a job that stages data on VAST, view the a template manifest under \tests\resources\manifest.yml
         * for configuration parameters reference VastTransferConfig under src\aind_watchdog_service\models\job_configs.py
     * Run a custom script
