@@ -160,11 +160,11 @@ class TestRunSubprocess(unittest.TestCase):
     def test_copy_to_vast(
         self,
         mock_log_err: MagicMock,
-        mock_join: MagicMock,
-        mock_mkdir: MagicMock,
-        mock_execute_windows: MagicMock,
-        mock_execute_linux: MagicMock,
         mock_alert: MagicMock,
+        mock_execute_linux: MagicMock,
+        mock_execute_windows: MagicMock,
+        mock_mkdir: MagicMock,
+        mock_join: MagicMock,
     ):
         """test copy to vast"""
         mock_join.return_value = "/path/to/join"
