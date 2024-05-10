@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Dict, Optional
 
 from aind_data_schema_models.platforms import Platform
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 
 
 class ManifestConfig(BaseModel):
@@ -23,12 +23,12 @@ class ManifestConfig(BaseModel):
         description="acquisition datetime in YYYY-MM-DD HH:mm:ss format",
         title="Acquisition datetime",
     )
-    transfer_time: datetime = Field(
-        default=datetime.now(),
-        description="Transfer time to schedule copy and upload, defaults to immediately",
+    schedule_time: Optional[datetime.time] = Field(
+        default=None,
+        description="Transfer time to schedule copy and upload. If None defaults to trigger the transfer immediately", # noqa
         title="APScheduler transfer time",
     )
-    platform: str = Field(description="Platform type", title="Platform type")
+    platform: Platform = Field(description="Platform type", title="Platform type")
     capsule_id: Optional[str] = Field(
         ..., description="Capsule ID of pipeline to run", title="Capsule"
     )
@@ -36,16 +36,6 @@ class ManifestConfig(BaseModel):
         default=None, description="s3 endpoint", title="S3 endpoint"
     )
     project_name: str = Field(..., description="Project name", title="Project name")
-
-    @field_validator("platform")
-    @classmethod
-    def verify_platform(cls, data: str) -> str:
-        """Verify that platform is in accepted platforms list"""
-        if "_" in data:
-            data = data.replace("_", "-")
-        if data.lower() not in Platform._abbreviation_map:
-            raise ValueError(f"{data} not in accepted platforms")
-        return data
 
 
 class VastTransferConfig(ManifestConfig):
