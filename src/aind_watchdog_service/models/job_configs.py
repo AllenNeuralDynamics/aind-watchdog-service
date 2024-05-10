@@ -1,9 +1,10 @@
 """Job configs for VAST staging or executing a custom script"""
 
 from datetime import datetime
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 
 from aind_data_schema_models.platforms import Platform
+from aind_data_schema_models.modalities import Modality
 from pydantic import BaseModel, Field
 
 
@@ -37,30 +38,22 @@ class ManifestConfig(BaseModel):
     )
     project_name: str = Field(..., description="Project name", title="Project name")
 
-
-class VastTransferConfig(ManifestConfig):
-    """Template to verify all files that need to be uploaded"""
-
     destination: str = Field(
         ...,
         description="where to send data to on VAST",
         title="VAST destination and maybe S3?",
     )
-    modalities: Dict[str, list] = Field(
+    modalities: Dict[Modality, List[str]] = Field(
         default={},
-        description="list of ModalityFile objects containing modality names and associated files",  # noqa
+        description="list of ModalityFile objects containing modality names and associated files or directories",  # noqa
         title="modality files",
     )
-    schemas: Optional[list] = Field(
+    schemas: Optional[List[str]] = Field(
         default=[],
         description="Where schema files to be uploaded are saved",
         title="Schema directory",
     )
-
-
-class RunScriptConfig(ManifestConfig):
-    """Upload data directly to cloud"""
-
     script: Dict[str, list] = Field(
-        default={}, description="Set of commands to run in subprocess", title="Commands"
+        default={}, description="Set of commands to run in subprocess.", title="Commands"
     )
+
