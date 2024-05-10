@@ -1,21 +1,18 @@
 """Event handler module"""
 
-import yaml
+import logging
 from datetime import datetime as dt
 from datetime import timedelta
-from typing import Union
 from pathlib import Path
-import logging
+from typing import Union, Dict, Optional
 
+import yaml
 from apscheduler.schedulers.background import BackgroundScheduler
-from watchdog.events import FileSystemEventHandler, FileModifiedEvent
+from watchdog.events import FileModifiedEvent, FileSystemEventHandler
 
-from aind_watchdog_service.models.job_configs import (
-    VastTransferConfig,
-    RunScriptConfig,
-)
-from aind_watchdog_service.models.watch_config import WatchConfig
 from aind_watchdog_service.alert_bot import AlertBot
+from aind_watchdog_service.models.job_configs import RunScriptConfig, VastTransferConfig
+from aind_watchdog_service.models.watch_config import WatchConfig
 from aind_watchdog_service.run_job import RunJob
 
 
@@ -27,10 +24,15 @@ class EventHandler(FileSystemEventHandler):
         super().__init__()
         self.scheduler = scheduler
         self.config = config
-        self.jobs = {}
-        self.alert = AlertBot(config.webhook_url)
-
-    def _load_vast_transfer_manifest(self, event: FileModifiedEvent) -> dict:
+        self.jobs: Dict[str, str] = {}
+        if config.webhook_url:
+            self.alert = AlertBot(config.webhook_url)
+        else:
+            raise ValueError("Webhook URL not provided")
+    
+    def _load_vast_transfer_manifest(
+        self, event: FileModifiedEvent
+    ) -> Optional[VastTransferConfig]:
         """Instructions to transfer to VAST
 
         Parameters
@@ -123,13 +125,13 @@ class EventHandler(FileSystemEventHandler):
             configuration for the job
         """
         if job_config.transfer_time == "now":
-            logging.info("Schduling job to run now %s", event.src_path)
+            logging.info("Scheduling job to run now %s", event.src_path)
             run = RunJob(event, job_config, self.config)
             job_id = self.scheduler.add_job(run.run_job)
 
         else:
             trigger = self._get_trigger_time(job_config.transfer_time)
-            logging.info("Schduling job to run at %s %s", trigger, event.src_path)
+            logging.info("Scheduling job to run at %s %s", trigger, event.src_path)
             run = RunJob(event, job_config, self.config)
             job_id = self.scheduler.add_job(run.run_job, "date", run_date=trigger)
         self.jobs[event.src_path] = job_id
