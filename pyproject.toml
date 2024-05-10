@@ -19,8 +19,7 @@ dynamic = ["version"]
 dependencies = [
     'watchdog',
     'pyyaml',
-    'pydantic',
-    'aind-data-schema-models @ git+https://github.com/AllenNeuralDynamics/aind-data-schema-models',
+    'aind-data-transfer-models@git+https://github.com/AllenNeuralDynamics/aind-data-transfer-models',
     'APScheduler',
     'requests'
 ]
