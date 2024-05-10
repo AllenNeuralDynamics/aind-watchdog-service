@@ -20,8 +20,7 @@ dependencies = [
     'watchdog',
     'pyyaml',
     'pydantic',
-    'aind-data-schema',
-    'aind-data-transfer-service @ git+https://github.com/AllenNeuralDynamics/aind-data-transfer-service',
+    'aind-data-schema-models @ git+https://github.com/AllenNeuralDynamics/aind-data-schema-models',
     'APScheduler',
     'requests'
 ]
