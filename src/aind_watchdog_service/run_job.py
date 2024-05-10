@@ -1,27 +1,20 @@
 """ Module to run jobs on file modification"""
 
-import subprocess
-from watchdog.events import FileModifiedEvent
-import platform
-import os
 import json
-import requests
+import logging
+import os
+import platform
+import subprocess
 from pathlib import Path, PurePosixPath
 from typing import Union
-import logging
 
-from aind_data_transfer_service.configs.job_configs import (
-    BasicUploadJobConfigs,
-    ModalityConfigs,
-)
+import requests
+from aind_data_transfer_models.core import BasicUploadJobConfigs, ModalityConfigs
+from watchdog.events import FileModifiedEvent
 
-from aind_watchdog_service.models.job_configs import (
-    RunScriptConfig,
-    VastTransferConfig,
-)
-from aind_watchdog_service.models.watch_config import WatchConfig
 from aind_watchdog_service.alert_bot import AlertBot
-
+from aind_watchdog_service.models.job_configs import RunScriptConfig, VastTransferConfig
+from aind_watchdog_service.models.watch_config import WatchConfig
 
 if platform.system() == "Windows":
     PLATFORM = "windows"
