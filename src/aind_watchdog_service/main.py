@@ -1,17 +1,18 @@
 """ Main module to start the watchdog observer and scheduler """
 
-import time
-from watchdog.observers import Observer
-import os
-import yaml
-from pathlib import Path
-from apscheduler.schedulers.background import BackgroundScheduler
 import logging
+import os
 import sys
+import time
+from pathlib import Path
 
-from aind_watchdog_service.models.watch_config import WatchConfig
+import yaml
+from apscheduler.schedulers.background import BackgroundScheduler
+from watchdog.observers import Observer
+
 from aind_watchdog_service.event_handler import EventHandler
 from aind_watchdog_service.logging_config import setup_logging
+from aind_watchdog_service.models.watch_config import WatchConfig
 
 
 class WatchdogService:
@@ -48,7 +49,7 @@ class WatchdogService:
         self.scheduler.start()
 
     def initiate_observer(self) -> None:
-        """Starts Wathdog observer"""
+        """Starts Watchdog observer"""
         logging.info("Starting observer")
         observer = Observer()
         watch_directory = self.watch_config.flag_dir
