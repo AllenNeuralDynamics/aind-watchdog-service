@@ -6,14 +6,13 @@ import os
 import platform
 import subprocess
 from pathlib import Path, PurePosixPath
-from typing import Union
 
 import requests
 from aind_data_transfer_models.core import BasicUploadJobConfigs, ModalityConfigs
 from watchdog.events import FileModifiedEvent
 
 from aind_watchdog_service.alert_bot import AlertBot
-from aind_watchdog_service.models.job_configs import RunScriptConfig, VastTransferConfig
+from aind_watchdog_service.models.manifest_config import ManifestConfig
 from aind_watchdog_service.models.watch_config import WatchConfig
 
 if platform.system() == "Windows":
@@ -30,7 +29,7 @@ class RunJob:
     def __init__(
         self,
         event: FileModifiedEvent,
-        config: Union[VastTransferConfig, RunScriptConfig],
+        config: ManifestConfig,
         watch_config: WatchConfig,
     ):
         """initialize RunJob class"""
@@ -237,14 +236,7 @@ class RunJob:
             modified event file
         """
         self.alert_bot.send_message("Running job", self.event.src_path)
-        if isinstance(self.config, VastTransferConfig):
-            transfer = self.copy_to_vast()
-            if not transfer:
-                self.alert_bot.send_message(
-                    "Could not copy data to destination", self.event.src_path
-                )
-                return
-        else:
+        if self.config.script:
             for command in self.config.script:
                 run = subprocess.run(
                     self.config.script[command],
@@ -256,11 +248,18 @@ class RunJob:
                         f"Could not execute {command} for {self.config.name}",
                     )
                     return
-            else:
-                self.alert_bot.send_message(
+                else:
+                    self.alert_bot.send_message(
                     "Script executed", f"Ran {command} for {self.config.name}"
                 )
 
+        else:
+            transfer = self.copy_to_vast()
+            if not transfer:
+                self.alert_bot.send_message(
+                    "Could not copy data to destination", self.event.src_path
+                )
+                return
         if not self.trigger_transfer_service():
             self.alert_bot.send_message(
                 "Could not trigger aind-data-transfer-service", self.event.src_path

@@ -6,7 +6,7 @@ import pydantic_core
 from pathlib import Path
 from datetime import datetime as dt
 from aind_watchdog_service.models.watch_config import WatchConfig
-from aind_watchdog_service.models.job_configs import ManifestConfig
+from aind_watchdog_service.models.manifest_config import ManifestConfig
 
 
 TEST_DIRECTORY = Path(__file__).resolve().parent

@@ -13,10 +13,7 @@ from datetime import timedelta
 from aind_watchdog_service.models.watch_config import (
     WatchConfig,
 )
-from aind_watchdog_service.models.job_configs import (
-    VastTransferConfig,
-    RunScriptConfig,
-)
+from aind_watchdog_service.models.manifest_config import ManifestConfig
 from aind_watchdog_service.event_handler import EventHandler
 
 

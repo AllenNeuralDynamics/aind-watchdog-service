@@ -10,7 +10,7 @@ import json
 from watchdog.events import FileModifiedEvent
 
 from aind_watchdog_service.models.watch_config import WatchConfig
-from aind_watchdog_service.models.job_configs import (
+from aind_watchdog_service.models.manifest_config import (
     VastTransferConfig,
     RunScriptConfig,
 )
