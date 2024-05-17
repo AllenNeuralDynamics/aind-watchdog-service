@@ -25,7 +25,6 @@ class TestWatchConfig(unittest.TestCase):
         # Open config for to pass and compare
         with open(self.watch_config_fp) as yam:
             data = yaml.safe_load(yam)
-
         # Check the the case where directories exist
         watchdog_config = WatchConfig(**data)
         self.assertEqual(watchdog_config.model_dump(), data)
@@ -50,7 +49,7 @@ class TestManifestConfigs(unittest.TestCase):
         # Check the the case where directories exist
         manifest_config = ManifestConfig(**data)
         self.assertEqual(manifest_config.model_dump(), data)
-        
+
         # Check transfer_time variants
         data["transfer_time"] = "12:00"
         with self.assertRaises(pydantic_core._pydantic_core.ValidationError):
@@ -64,7 +63,11 @@ class TestManifestConfigs(unittest.TestCase):
         with self.assertRaises(AttributeError):
             ManifestConfig(**data)
 
-        data["modalities"]["nikon"] = []
+        data["platform"] = "multiplane-ophys"
+        data["modalities"]["nikon"] = ["some file"]
+        with self.assertRaises(AttributeError):
+            ManifestConfig(**data)
+
 
 if __name__ == "__main__":
     unittest.main()

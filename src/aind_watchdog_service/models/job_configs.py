@@ -75,7 +75,6 @@ class ManifestConfig(BaseModel):
     ) -> Dict[str, List[str]]:
         """Checks if str can be converted to platform model"""
         for key in input_modality.keys():
-            if key in Modality._abbreviation_map:
-                return input_modality
-        else:
-            raise AttributeError(f"Unknown modality: {input_modality}")
+            if key not in Modality._abbreviation_map:
+                raise AttributeError(f"Unknown modality: {input_modality}")
+        return input_modality
