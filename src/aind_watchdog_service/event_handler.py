@@ -29,10 +29,8 @@ class EventHandler(FileSystemEventHandler):
             self.alert = AlertBot(config.webhook_url)
         else:
             raise ValueError("Webhook URL not provided")
-    
-    def _load_manifest(
-        self, event: FileModifiedEvent
-    ) -> ManifestConfig:
+
+    def _load_manifest(self, event: FileModifiedEvent) -> ManifestConfig:
         """Instructions to transfer to VAST
 
         Parameters
@@ -69,7 +67,7 @@ class EventHandler(FileSystemEventHandler):
 
             self.scheduler.remove_job(self.jobs[event.src_path].id)
 
-    def _get_trigger_time(self, transfer_time: str) -> dt:
+    def _get_trigger_time(self, transfer_time: dt) -> dt:
         """Get trigger time from the job
 
         Parameters
@@ -82,17 +80,13 @@ class EventHandler(FileSystemEventHandler):
         dt
             datetime object
         """
-        hour = dt.strptime(transfer_time, "%H:%M").hour
+        hour = transfer_time.time().hour
         trigger_time = dt.now().replace(hour=hour, minute=0, second=0, microsecond=0)
         if (trigger_time - dt.now()).total_seconds() < 0:
             trigger_time = trigger_time + timedelta(days=1)
         return trigger_time
 
-    def schedule_job(
-        self,
-        event: FileModifiedEvent,
-        job_config: ManifestConfig
-    ) -> None:
+    def schedule_job(self, event: FileModifiedEvent, job_config: ManifestConfig) -> None:
         """Schedule job to run
 
         Parameters
@@ -102,13 +96,13 @@ class EventHandler(FileSystemEventHandler):
         config : dict
             configuration for the job
         """
-        if not job_config.transfer_time:
+        if not job_config.schedule_time:
             logging.info("Scheduling job to run now %s", event.src_path)
             run = RunJob(event, job_config, self.config)
             job_id = self.scheduler.add_job(run.run_job)
 
         else:
-            trigger = self._get_trigger_time(job_config.transfer_time.time)
+            trigger = self._get_trigger_time(job_config.schedule_time)
             logging.info("Scheduling job to run at %s %s", trigger, event.src_path)
             run = RunJob(event, job_config, self.config)
             job_id = self.scheduler.add_job(run.run_job, "date", run_date=trigger)
@@ -156,8 +150,7 @@ class EventHandler(FileSystemEventHandler):
             and self.jobs[event.src_path].id in self.scheduler.get_jobs()
         ):
             self._remove_job(self.jobs[event.src_path])
-
-        logging.info("Found job, executing vast transfer for %s", event.src_path)
+        logging.info("Found event file %s", event.src_path)
         transfer_config = self._load_manifest(event)
         if transfer_config:
             self.schedule_job(event, transfer_config)

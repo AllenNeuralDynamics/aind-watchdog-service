@@ -238,6 +238,9 @@ class RunJob:
         self.alert_bot.send_message("Running job", self.event.src_path)
         if self.config.script:
             for command in self.config.script:
+                logging.info(
+                    "Found job, executing custom script for %s", self.event.src_path
+                )
                 run = subprocess.run(
                     self.config.script[command],
                 )
@@ -250,8 +253,8 @@ class RunJob:
                     return
                 else:
                     self.alert_bot.send_message(
-                    "Script executed", f"Ran {command} for {self.config.name}"
-                )
+                        "Script executed", f"Ran {command} for {self.config.name}"
+                    )
 
         else:
             transfer = self.copy_to_vast()
