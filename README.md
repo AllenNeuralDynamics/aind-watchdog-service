@@ -27,6 +27,9 @@ With aind-watchdog-service, you can configure a directory for the app to watch, 
         * To run a custom script that requires a differnt procedure than staging data directly on VAST, view the template manifest under \tests\resources\manifest_run_script.yml
         * see src\aind_watchdog_service\models\job_configs.py
 
+# Configure Task Scheduler to boot aind-watchdog-service
+
+
 # Installation
 To use the software, in the root directory, run
 ```bash

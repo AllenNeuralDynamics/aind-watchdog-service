@@ -82,44 +82,38 @@ class TestWatchdogService(unittest.TestCase):
     @classmethod
     def setUp(cls) -> None:
         """Set up the test environment by defining the test data."""
-        cls.path_to_config = TEST_DIRECTORY / "resources" / "rig_config_no_run_script.yml"
-        cls.path_to_manifest = TEST_DIRECTORY / "resources" / "manifest.yml"
+        watch_config_fp = TEST_DIRECTORY / "resources" / "watch_config.yml"
+        with open(watch_config_fp) as yam:
+            cls.watch_config_dict = yaml.safe_load(yam)
+        cls.watch_config = WatchConfig(**cls.watch_config_dict)
+        cls.mock_event = MockFileModifiedEvent("/path/to/file.txt")
 
     @patch("aind_watchdog_service.main.WatchdogService._setup_logging")
     @patch("logging.error")
     @patch("logging.info")
     @patch("aind_watchdog_service.main.EventHandler")
-    @patch(
-        "time.sleep", side_effect=KeyboardInterrupt
-    )  # Mock time.sleep to raise KeyboardInterrupt
     @patch("aind_watchdog_service.main.WatchdogService.initiate_observer")
     def test_start(
         self,
         mock_observer: MagicMock,
-        mock_sleep: MagicMock,
         mock_event_handler: MagicMock,
         mock_log_info: MagicMock,
         mock_log_err: MagicMock,
         mock_setup_logging: MagicMock,
     ):
         """initiate observer test"""
-        with open(self.path_to_config) as yam:
-            config = yaml.safe_load(yam)
         with patch.object(Path, "is_dir") as mock_dir:
             mock_dir.return_value = True
             with patch.object(Path, "is_file") as mock_file:
                 mock_file.return_value = True
                 with patch.object(Path, "exists") as mock_exists:
                     mock_exists.return_value = True
-                    watch_config = WatchConfig(
-                        **config
-                    )  # Provide necessary config parameters
                     mock_scheduler = MockScheduler()
                     mock_observer.return_value = MockObserver()
                     mock_event_handler.return_value = MockEventHandler(
-                        mock_scheduler, watch_config
+                        mock_scheduler, self.watch_config
                     )
-                    watchdog_service = WatchdogService(watch_config)
+                    watchdog_service = WatchdogService(self.watch_config)
                     watchdog_service.start_service()
                     mock_setup_logging.assert_called_once()
                     mock_log_info.assert_called()
@@ -137,10 +131,8 @@ class TestWatchdogService(unittest.TestCase):
     @patch("aind_watchdog_service.main.WatchdogService")
     def test_main(self, mock_watchdog: MagicMock):
         """Test main, WatchdogService constructor"""
-        with open(self.path_to_config) as yam:
-            config = yaml.safe_load(yam)
-        mock_watchdog.return_value = MockWatchdogService(WatchConfig(**config))
-        start_watchdog(config)
+        mock_watchdog.return_value = MockWatchdogService(self.watch_config)
+        start_watchdog(self.watch_config_dict)
         mock_watchdog.assert_called_once()
 
 
