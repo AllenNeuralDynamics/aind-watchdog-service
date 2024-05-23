@@ -54,6 +54,6 @@ class ManifestConfig(BaseModel):
         description="Where schema files to be uploaded are saved",
         title="Schema directory",
     )
-    script: Dict[str, list[str]] = Field(
+    script: Dict[str, List[str]] = Field(
         default={}, description="Set of commands to run in subprocess.", title="Commands"
     )
