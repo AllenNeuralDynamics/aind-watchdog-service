@@ -63,6 +63,7 @@ class TestEventHandler(unittest.TestCase):
             cls.config = yaml.safe_load(yam)
         with open(vast_manifest) as yam:
             cls.manifest_config = yaml.safe_load(yam)
+    # TODO: add test for on_deleted and remove_job methods
 
     @patch("logging.info")
     @patch("aind_watchdog_service.event_handler.EventHandler._load_manifest")

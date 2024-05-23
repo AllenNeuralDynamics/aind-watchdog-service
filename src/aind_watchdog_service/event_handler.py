@@ -61,6 +61,7 @@ class EventHandler(FileSystemEventHandler):
         event : FileModifiedEvent
            event to remove
         """
+        # TODO: check with on_deleted method
         if self.jobs.get(event.src_path, ""):
             logging.info("Removing job_id %s", self.jobs[event.src_path].id)
             del self.jobs[event.src_path]
@@ -93,7 +94,7 @@ class EventHandler(FileSystemEventHandler):
         ----------
         event : FileModifiedEvent
             event to trigger job
-        config : dict
+        job_config : ManifestConfig
             configuration for the job
         """
         if not job_config.schedule_time:
@@ -120,12 +121,21 @@ class EventHandler(FileSystemEventHandler):
         -------
         None
         """
+        # TODO: review this method.
         if event.src_path in self.jobs:
             logging.info("Deleting job %s", event.src_path)
             del self.jobs[event.src_path]
         if self.jobs.get(event.src_path, ""):
             self._remove_job(self.jobs[event.src_path].id)
         logging.info("Jobs in queue %s", self.scheduler.get_jobs())
+        # Comments:
+        # When is self._remove_job(self.jobs[event.src_path].id) called?
+        # Consider using pop instead of del?
+        # job_id = self.jobs.pop(event.src_path, None)
+        # if job_id is not None:
+        #     logging.info("Deleting job %s", event.src_path)
+        #     self._remove_job(job_id)
+        # logging.info("Jobs in queue %s", self.scheduler.get_jobs())
 
     def on_modified(self, event: FileModifiedEvent) -> None:
         """Event handler for file modified event

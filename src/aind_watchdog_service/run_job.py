@@ -71,6 +71,7 @@ class RunJob:
                     return False
         for schema in self.config.schemas:
             destination_directory = os.path.join(destination, parent_directory)
+            # TODO: consider a wrapper method to handle both windows and linux
             if PLATFORM == "windows":
                 transfer = self.execute_windows_command(schema, destination_directory)
             else:

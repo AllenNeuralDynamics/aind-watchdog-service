@@ -31,6 +31,7 @@ class ManifestConfig(BaseModel):
         title="APScheduler transfer time",
     )
     platform: str = Field(description="Platform type", title="Platform type")
+    # TODO: does capsule_id need default=None?
     capsule_id: Optional[str] = Field(
         ..., description="Capsule ID of pipeline to run", title="Capsule"
     )
@@ -54,7 +55,8 @@ class ManifestConfig(BaseModel):
         description="Where schema files to be uploaded are saved",
         title="Schema directory",
     )
-    script: Dict[str, list[str]] = Field(
+    # TODO: verify this is supposed to be List
+    script: Dict[str, List[str]] = Field(
         default={}, description="Set of commands to run in subprocess.", title="Commands"
     )
 
