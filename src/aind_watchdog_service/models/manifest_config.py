@@ -44,7 +44,7 @@ class ManifestConfig(BaseModel):
         description="where to send data to on VAST",
         title="VAST destination and maybe S3?",
     )
-    modalities: Dict[str, List[str]] = Field(
+    modalities: Dict[Modality, List[str]] = Field(
         default={},
         description="list of ModalityFile objects containing modality names and associated files or directories",  # noqa
         title="modality files",
@@ -57,14 +57,3 @@ class ManifestConfig(BaseModel):
     script: Dict[str, list[str]] = Field(
         default={}, description="Set of commands to run in subprocess.", title="Commands"
     )
-
-    @field_validator("modalities")
-    @classmethod
-    def check_modality_string(
-        cls, input_modality: Dict[str, List[str]]
-    ) -> Dict[str, List[str]]:
-        """Checks if str can be converted to platform model"""
-        for key in input_modality.keys():
-            if key not in Modality._abbreviation_map:
-                raise AttributeError(f"Unknown modality: {input_modality}")
-        return input_modality
