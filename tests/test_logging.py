@@ -1,4 +1,4 @@
-"""Example test template."""
+"""Test the logging_config module."""
 
 import unittest
 from unittest.mock import patch, MagicMock
@@ -11,6 +11,7 @@ TEST_DIRECTORY = Path(__file__).resolve().parent
 
 
 class TestMyModule(unittest.TestCase):
+    """Test class for the logging configuration."""
 
     @classmethod
     def setUp(cls) -> None:

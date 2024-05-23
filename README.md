@@ -24,7 +24,7 @@ With aind-watchdog-service, you can configure a directory for the app to watch, 
     * To run a job that stages data on VAST, view the a template manifest under \tests\resources\manifest.yml
         * for configuration parameters reference VastTransferConfig under src\aind_watchdog_service\models\job_configs.py
     * Run a custom script
-        * To run a custom script that requires a differnt procedure than staging data directly on VAST, view the template manifest under \tests\resources\manifest_run_script.yml
+        * To run a custom script that requires a different procedure than staging data directly on VAST, view the template manifest under \tests\resources\manifest_run_script.yml
         * see src\aind_watchdog_service\models\job_configs.py
 
 # Configure Task Scheduler to boot aind-watchdog-service

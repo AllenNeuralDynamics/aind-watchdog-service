@@ -26,7 +26,7 @@ class MockFileModifiedEvent(FileModifiedEvent):
 
 
 class TestRunSubprocess(unittest.TestCase):
-    """test subrpcocess"""
+    """Test subprocess"""
 
     @classmethod
     def setUp(cls) -> None:
@@ -206,6 +206,7 @@ class TestRunSubprocess(unittest.TestCase):
 
     @patch("requests.post")
     def test_trigger_transfer_service_bad(self, mock_post: MagicMock):
+        """Test trigger transfer service"""
         mock_response = requests.Response()
         mock_response.status_code = 404
         body = json.dumps(

@@ -1,4 +1,4 @@
-"""Example test template."""
+"""Test the manifest_config module"""
 
 import unittest
 import yaml
