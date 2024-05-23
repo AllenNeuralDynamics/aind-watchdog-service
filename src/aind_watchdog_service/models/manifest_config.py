@@ -1,7 +1,7 @@
 """Job configs for VAST staging or executing a custom script"""
 
 from datetime import datetime
-from typing import Dict, Optional, List
+from typing import Dict, Optional, List, Literal
 
 from aind_data_schema_models.platforms import Platform
 from aind_data_schema_models.modalities import Modality
@@ -34,7 +34,7 @@ class ManifestConfig(BaseModel):
     capsule_id: Optional[str] = Field(
         ..., description="Capsule ID of pipeline to run", title="Capsule"
     )
-    s3_bucket: Optional[str] = Field(
+    s3_bucket: Optional[Literal['s3', 'public', 'private', 'scratch']] = Field(
         default=None, description="s3 endpoint", title="S3 endpoint"
     )
     project_name: str = Field(..., description="Project name", title="Project name")
