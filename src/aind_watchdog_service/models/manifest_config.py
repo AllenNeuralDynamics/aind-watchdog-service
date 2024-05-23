@@ -30,7 +30,7 @@ class ManifestConfig(BaseModel):
         description="Transfer time to schedule copy and upload. If None defaults to trigger the transfer immediately",  # noqa
         title="APScheduler transfer time",
     )
-    platform: str = Field(description="Platform type", title="Platform type")
+    platform: Platform = Field(description="Platform type", title="Platform type")
     capsule_id: Optional[str] = Field(
         ..., description="Capsule ID of pipeline to run", title="Capsule"
     )
@@ -57,15 +57,6 @@ class ManifestConfig(BaseModel):
     script: Dict[str, list[str]] = Field(
         default={}, description="Set of commands to run in subprocess.", title="Commands"
     )
-
-    @field_validator("platform")
-    @classmethod
-    def check_platform_string(cls, input_platform: str) -> str:
-        """Checks if str can be converted to platform model"""
-        if input_platform in Platform._abbreviation_map:
-            return input_platform
-        else:
-            raise AttributeError(f"Unknown platform: {input_platform}")
 
     @field_validator("modalities")
     @classmethod
