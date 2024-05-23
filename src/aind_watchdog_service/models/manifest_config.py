@@ -1,11 +1,11 @@
 """Job configs for VAST staging or executing a custom script"""
 
 from datetime import datetime
-from typing import Dict, Optional, List
+from typing import Dict, List, Optional
 
-from aind_data_schema_models.platforms import Platform
 from aind_data_schema_models.modalities import Modality
-from pydantic import BaseModel, Field, field_validator, ConfigDict
+from aind_data_schema_models.platforms import Platform
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class ManifestConfig(BaseModel):

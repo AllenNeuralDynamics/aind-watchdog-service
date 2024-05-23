@@ -1,9 +1,9 @@
 """Test the logging_config module."""
 
-import unittest
-from unittest.mock import patch, MagicMock
-from pathlib import Path
 import logging
+import unittest
+from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 from aind_watchdog_service.logging_config import setup_logging
 

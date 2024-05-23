@@ -1,18 +1,18 @@
 """Test the run_job module"""
 
-import unittest
-from unittest.mock import patch, MagicMock
-import yaml
-from pathlib import Path
-import subprocess
-import requests
 import json
+import subprocess
+import unittest
+from pathlib import Path
+from unittest.mock import MagicMock, patch
+
+import requests
+import yaml
 from watchdog.events import FileModifiedEvent
 
-from aind_watchdog_service.models.watch_config import WatchConfig
 from aind_watchdog_service.models.manifest_config import ManifestConfig
+from aind_watchdog_service.models.watch_config import WatchConfig
 from aind_watchdog_service.run_job import RunJob
-
 
 TEST_DIRECTORY = Path(__file__).resolve().parent
 
