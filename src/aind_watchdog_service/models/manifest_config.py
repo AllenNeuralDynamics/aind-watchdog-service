@@ -5,7 +5,7 @@ from typing import Dict, Optional, List
 
 from aind_data_schema_models.platforms import Platform
 from aind_data_schema_models.modalities import Modality
-from pydantic import BaseModel, Field, field_validator, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class ManifestConfig(BaseModel):
