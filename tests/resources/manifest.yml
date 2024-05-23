@@ -1,6 +1,7 @@
 acquisition_datetime: 2024-02-12 09:14:43+00:00
 capsule_id: capsule_id
 destination: D:/ophys
+processor_full_name: Some User
 modalities:
   behavior:
   - D:\behavior\data\1330132892_Behavior_20240212T091443.mp4
@@ -34,4 +35,6 @@ name: multiplane-ophys_704576_2024-04-12_15-22-44
 platform: multiplane-ophys
 s3_bucket: s3://aind-watchdog-service
 subject_id: 704576
-transfer_time: now
+schedule_time: null
+project_name: LearningomFISH-V1omFISH
+script: {}

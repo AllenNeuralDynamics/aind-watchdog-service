@@ -1,10 +1,8 @@
-"""Module with Alert Bot for notifications on MS Teams: Alessio B"""
+"""Module with Alert Bot for notifications on MS Teams"""
 
 from typing import Optional
 
 import requests
-
-# From Alessio Buccino - pulled from aind-codeocean-utils
 
 
 class AlertBot:
@@ -34,6 +32,7 @@ class AlertBot:
           The main message content
         extra_text : Optional[str]
           Additional text to send in card body
+
         Returns
         -------
         dict

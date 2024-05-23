@@ -1,5 +1,6 @@
 acquisition_datetime: 2024-02-12 09:14:43+00:00
 capsule_id: capsule_id
+processor_full_name: Some User
 script:
   cmd1: 
     - "source"
@@ -10,6 +11,7 @@ script:
     - "script.py"
 name: multiplane-ophys_704576_2024-04-12_15-22-44
 platform: multiplane-ophys
+s3_bucket: s3://aind-watchdog-service
 subject_id: 704576
-transfer_time: now
-s3_bucket: None
+schedule_time: null
+project_name: LearningomFISH-V1omFISH

@@ -1,235 +1,99 @@
-import time
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler, FileModifiedEvent
-from datetime import datetime as dt
-from datetime import timedelta
+""" Main module to start the watchdog observer and scheduler """
+
+import logging
 import os
-import yaml
-from typing import Union
+import sys
+import time
 from pathlib import Path
+
+import yaml
 from apscheduler.schedulers.background import BackgroundScheduler
+from watchdog.observers import Observer
 
-from aind_watchdog_service.run_job import run_job, run_script
-from aind_watchdog_service.models.job_config import (
-    WatchConfig,
-    RunScriptConfig,
-    VastTransferConfig,
-)
-from aind_watchdog_service.alert_bot import AlertBot
+from aind_watchdog_service.event_handler import EventHandler
+from aind_watchdog_service.logging_config import setup_logging
+from aind_watchdog_service.models.watch_config import WatchConfig
 
 
-class EventHandler(FileSystemEventHandler):
-    """Event handler for watchdog observer"""
+class WatchdogService:
+    """Maintain and starts scheduler and observer"""
 
-    def __init__(self, scheduler: BackgroundScheduler, config: WatchConfig):
-        super().__init__()
-        self.scheduler = scheduler
-        self.config = config
-        self.jobs = {}
-        self.alert = AlertBot(config.webhook_url)
-
-    def _load_vast_transfer_manifest(self, event: FileModifiedEvent) -> dict:
-        """Instructions to transfer to VAST
+    def __init__(
+        self,
+        watch_config: WatchConfig,
+        log_dir: Path = "C:/ProgramData/aind/aind-watchdog-service",
+    ):
+        """Construct WatchDogService, setup logging
 
         Parameters
         ----------
-        event : FileModifiedEvent
-           file modified event
-
-        Returns
-        -------
-        dict
-           manifest configuration
+        watch_config : WatchConfig
+            Configuration for scheduler and observer
+        log_dir : Optional[Path]
+            Directory to store logs
         """
-        with open(event.src_path, "r") as f:
-            try:
-                data = yaml.safe_load(f)
-                config = VastTransferConfig(**data)
-                return config
-            except Exception as e:
-                self.alert.send_message("Error loading config", e)
+        self.watch_config = watch_config
+        self.scheduler = None
+        self._setup_logging(log_dir)
 
-    def _load_run_script_manifest(self, event: FileModifiedEvent) -> dict:
-        """Instructions to run a script
+    def _setup_logging(self, log_dir):
+        log_fp = Path(log_dir)
+        if not log_fp.exists():
+            log_fp.mkdir(parents=True)
+        setup_logging(log_file=log_fp / "aind-watchdog-service.log")
 
-        Parameters
-        ----------
-        event : FileModifiedEvent
-            file modified event
+    def initiate_scheduler(self) -> None:
+        """Starts APScheduler"""
+        logging.info("Starting scheduler")
+        self.scheduler = BackgroundScheduler()
+        self.scheduler.start()
 
-        Returns
-        -------
-        dict
-            manifest configuration
-        """
-        with open(event.src_path, "r") as f:
-            try:
-                config = RunScriptConfig(**yaml.safe_load(f))
-            except Exception as e:
-                self.alert.send_message("Error loading config", e)
-        return config
+    def initiate_observer(self) -> None:
+        """Starts Watchdog observer"""
+        logging.info("Starting observer")
+        observer = Observer()
+        watch_directory = self.watch_config.flag_dir
+        if not Path(watch_directory).exists():
+            logging.error("Directory %s does not exist", watch_directory)
+            raise FileNotFoundError(f"Directory {watch_directory} does not exist")
+        if not Path(self.watch_config.manifest_complete).exists():
+            Path(self.watch_config.manifest_complete).mkdir(parents=True, exist_ok=True)
+        event_handler = EventHandler(self.scheduler, self.watch_config)
+        observer.schedule(event_handler, watch_directory)
+        observer.start()
+        try:
+            while True:
+                time.sleep(3)
+        except (KeyboardInterrupt, SyntaxError, SystemExit):
+            logging.info("Exiting program")
+            observer.stop()
+            self.scheduler.shutdown()
+        observer.join()
 
-    def _remove_job(self, event: FileModifiedEvent) -> None:
-        """Removes job from scheduler queue
-
-        Parameters
-        ----------
-        event : FileModifiedEvent
-           event being cancelled
-        """
-        if self.jobs.get(event.src_path, ""):
-            job_id = self.jobs[event.src_path]
-            del self.jobs[event.src_path]
-            self.scheduler.remove_job(job_id)
-
-    def _get_trigger_time(self, transfer_time: str) -> dt:
-        """Get trigger time from the job
-
-        Parameters
-        ----------
-        transfer_time : str
-            In HH:MM format
-
-        Returns
-        -------
-        dt
-            datetime object
-        """
-        hour = dt.strptime(transfer_time, "%H:%M").hour
-        trigger_time = dt.now().replace(hour=hour, minute=0, second=0, microsecond=0)
-        if (trigger_time - dt.now()).total_seconds() < 0:
-            trigger_time = trigger_time + timedelta(days=1)
-        return trigger_time
-
-    def schedule_job(
-        self, event: FileModifiedEvent, config: Union[VastTransferConfig, RunScriptConfig]
-    ) -> None:
-        """Schedule job to run
-
-        Parameters
-        ----------
-        event : FileModifiedEvent
-            event to trigger job
-        config : dict
-            configuration for the job
-        """
-        if config.transfer_time == "now":
-            job_id = self.scheduler.add_job(run_job, args=[event, config, self.config])
-
-        else:
-            trigger = self._get_trigger_time(config.transfer_time)
-            job_id = self.scheduler.add_job(
-                run_job, "date", run_date=trigger, args=[event, config, self.config]
-            )
-        self.jobs[event.src_path] = job_id
-
-    def on_deleted(self, event: FileModifiedEvent) -> None:
-        """Event handler for file deleted event
-
-        Parameters
-        ----------
-        event : FileModifiedEvent
-            file deleted event
-
-        Returns
-        -------
-        None
-        """
-        print("IN ON DELETED")
-        print(f"{self.jobs}")
-        if event.src_path in self.jobs:
-            del self.jobs[event.src_path]
-        if self.jobs.get(event.src_path, ""):
-            self._remove_job(self.jobs[event.src_path].id)
-        print("DONE DELETING")
-        print(f"{self.jobs}")
-
-    def on_modified(self, event: FileModifiedEvent) -> None:
-        """Event handler for file modified event
-
-        Parameters
-        ----------
-        event : FileModifiedEvent
-            file modified event
-
-        Returns
-        -------
-        None
-        """
-        # Check if manifest file is being modified / created
-        if Path(event.src_path).is_dir():
-            return
-        if not "manifest" in event.src_path:
-            return
-        # If scheduled manifest is being modified, remove original job
-        print("IN ON MODIFIED")
-        if (
-            self.jobs.get(event.src_path, "")
-            and self.jobs.get(event.src_path, "") in self.scheduler.get_jobs()
-        ):
-            self._remove_job(self.jobs[event.src_path].id)
-        if self.config.run_script:
-            run_script_config = self._load_run_script_manifest(event)
-            self.schedule_job(event, run_script_config)
-        else:
-            vast_transfer_config = self._load_vast_transfer_manifest(event)
-            self.schedule_job(event, vast_transfer_config)
-        print(f"JOBS {self.jobs}")
+    def start_service(self) -> None:
+        """Initiate scheduler and observer"""
+        self.initiate_scheduler()
+        self.initiate_observer()
 
 
-def initiate_scheduler() -> BackgroundScheduler:
-    """Starts APScheduler
-
-    Returns
-    -------
-    BackgroundScheduler
-        Background schedule to upload jobs
-    """
-    scheduler = BackgroundScheduler()
-    scheduler.start()
-    return scheduler
-
-
-def initiate_observer(config: WatchConfig, scheduler: BackgroundScheduler) -> None:
-    """Starts Wathdog observer
-
-    Parameters
-    ----------
-    config : WatchConfig
-        Configuration for the observer
-    scheduler : BackgroundScheduler
-        scheduler to run jobs
-    """
-    observer = Observer()
-    watch_directory = config.flag_dir
-    event_handler = EventHandler(scheduler, config)
-    observer.schedule(event_handler, watch_directory)
-    observer.start()
+def start_watchdog(config: dict) -> None:
+    """Load configuration, initiate WatchdogService and start service"""
     try:
-        while True:
-            time.sleep(3)
-    except (KeyboardInterrupt, SyntaxError, SystemExit):
-        observer.stop()
-        scheduler.shutdown()
-    observer.join()
-
-
-def main(config: dict) -> None:
-    """Main function to start the scheduler and observer procs"""
-    # Load configuration
-    watch_config = WatchConfig(**config)
-    # Start APScheduler
-    scheduler = initiate_scheduler()
-    # Start watchdog observer
-    initiate_observer(watch_config, scheduler)
+        watch_config = WatchConfig(**config)
+    except Exception as e:
+        logging.error("Error loading config %s", e)
+        sys.exit(1)
+    watchdog_service = WatchdogService(watch_config)
+    watchdog_service.start_service()
 
 
 if __name__ == "__main__":
     configuration = os.getenv("WATCH_CONFIG")
     if not configuration:
+        logging.error("Environment variable WATCH_CONFIG not set. Please set and restart")
         raise AttributeError(
             "Environment variable WATCH_CONFIG not set. Please set and restart"
         )
     with open(configuration) as y:
         data = yaml.safe_load(y)
-    main(data)
+    start_watchdog(data)

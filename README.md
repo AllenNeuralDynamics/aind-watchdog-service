@@ -7,23 +7,30 @@
 ![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen?logo=codecov)
 ![Python](https://img.shields.io/badge/python->=3.7-blue?logo=python)
 
-## Summary
+# Summary
 
-Aind-watchdog-service can watch a specific folder for a manifest file to copy data to a location on VAST, then trigger the aind-data-transfer-service via the REST API. It can also be configured to run a custom script and bypass the VAST copy portion of the service. See below for configurations
+With aind-watchdog-service, you can configure a directory for the app to watch, where manifest files (or beacon files) are dropped containing src files from an acquisition labeled by modality. The program is meant to be configured with a web-hook URL to send messages to a Teams channel when data staging is complete and data transfer has been triggered through [aind-data-transfer-service](https://github.com/AllenNeuralDynamics/aind-data-transfer-service). Pipeline capsule ids can be added if triggering pipelines is necessary post-acquisition.
 
-## Usage
- - Create a yaml file and specify it's location with an environment variable called WATCH_CONFIG
- - WATCH_CONFIG must contain the following paramters: 
- 
-    **flag_dir** - (string) path where watchdog event handler should watch
-    
-    **webhook_url** - (Optional(str) for Teams notifications on events  
-    
-    **run_script** (bool) if custom script will be run
-- Flag (or manifest file) should contain the word "manifest" in the file name and the parameters according to the configurations set in aind-watchdog-service/models/job_config.py using either VastTransferConfig or RunScriptConfig for VAST transfer or custom script instructions, respectively. 
-- Can be configured to run in the background through Windows Task Scheduler or Linux's systemd; these services will make sure that the watchdog service is always running while the machine is on
+# Usage
+* Create a watch_config file as json or yaml and store it's location in an environment variable called WATCH_CONFIG
+    * Review src/aind-watchdog-service/models/watch_config.py for configuration parameters
+    * watch_config.yml must include:
+        * flag_dir (where watchdog observer should be looking for beacon files)
+        * webhook_url (to receive Teams notifications)
+        * run_script (bool - should be set to False if planning on staging data on VAST)
 
-## Installation
+* Beacon or manifest file must contain the word "manifest" in the file name and the parameters according to the configurations set in aind-watchdog-service/models/job_config.py using either VastTransferConfig or RunScriptConfig for VAST transfer or custom script instructions, respectively. 
+    * yaml only (for now)
+    * To run a job that stages data on VAST, view the a template manifest under \tests\resources\manifest.yml
+        * for configuration parameters reference VastTransferConfig under src\aind_watchdog_service\models\job_configs.py
+    * Run a custom script
+        * To run a custom script that requires a differnt procedure than staging data directly on VAST, view the template manifest under \tests\resources\manifest_run_script.yml
+        * see src\aind_watchdog_service\models\job_configs.py
+
+# Configure Task Scheduler to boot aind-watchdog-service
+
+
+# Installation
 To use the software, in the root directory, run
 ```bash
 pip install -e .
