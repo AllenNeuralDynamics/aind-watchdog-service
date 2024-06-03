@@ -48,8 +48,9 @@ class EventHandler(FileSystemEventHandler):
                 return config
             except Exception as e:
                 logging.error("Error loading config %s", repr(e))
-                self.alert.send_message("Error loading config", repr(e))
-                return None
+                if hasattr(self, self.alert):
+                    self.alert.send_message("Error loading config", repr(e))
+                    return None
 
     def _remove_job(self, event: FileModifiedEvent) -> None:
         """Removes job from scheduler queue
