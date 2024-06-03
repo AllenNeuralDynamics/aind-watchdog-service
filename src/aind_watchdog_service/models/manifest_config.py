@@ -30,7 +30,7 @@ class ManifestConfig(BaseModel):
         description="Transfer time to schedule copy and upload. If None defaults to trigger the transfer immediately",  # noqa
         title="APScheduler transfer time",
     )
-    platform: Platform = Field(description="Platform type", title="Platform type")
+    platform: Platform.ONE_OF = Field(description="Platform type", title="Platform type")
     capsule_id: Optional[str] = Field(
         ..., description="Capsule ID of pipeline to run", title="Capsule"
     )
@@ -44,7 +44,7 @@ class ManifestConfig(BaseModel):
         description="where to send data to on VAST",
         title="VAST destination and maybe S3?",
     )
-    modalities: Dict[Modality, List[str]] = Field(
+    modalities: Dict[Modality.ONE_OF, List[str]] = Field(
         default={},
         description="list of ModalityFile objects containing modality names and associated files or directories",  # noqa
         title="modality files",
