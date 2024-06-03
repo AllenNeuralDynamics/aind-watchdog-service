@@ -27,8 +27,6 @@ class EventHandler(FileSystemEventHandler):
         self.jobs: Dict[str, str] = {}
         if config.webhook_url:
             self.alert = AlertBot(config.webhook_url)
-        else:
-            raise ValueError("Webhook URL not provided")
 
     def _load_manifest(self, event: FileModifiedEvent) -> ManifestConfig:
         """Instructions to transfer to VAST
