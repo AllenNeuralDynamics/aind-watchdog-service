@@ -32,7 +32,7 @@ class ManifestConfig(BaseModel):
     )
     platform: str = Field(description="Platform type", title="Platform type")
     capsule_id: Optional[str] = Field(
-        ..., description="Capsule ID of pipeline to run", title="Capsule"
+        default=None, description="Capsule ID of pipeline to run", title="Capsule"
     )
     s3_bucket: Optional[Literal["s3", "public", "private", "scratch"]] = Field(
         default=None, description="s3 endpoint", title="S3 endpoint"
@@ -75,5 +75,6 @@ class ManifestConfig(BaseModel):
         """Checks if str can be converted to platform model"""
         for key in input_modality.keys():
             if key not in Modality._abbreviation_map:
+                import pdb;pdb.set_trace()
                 raise AttributeError(f"Unknown modality: {input_modality}")
         return input_modality
