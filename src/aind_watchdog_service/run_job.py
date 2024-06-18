@@ -8,7 +8,11 @@ import subprocess
 from pathlib import Path, PurePosixPath
 
 import requests
-from aind_data_transfer_models.core import BasicUploadJobConfigs, ModalityConfigs, SubmitJobRequest
+from aind_data_transfer_models.core import (
+    BasicUploadJobConfigs,
+    ModalityConfigs,
+    SubmitJobRequest,
+)
 from watchdog.events import FileModifiedEvent
 
 from aind_watchdog_service.alert_bot import AlertBot
