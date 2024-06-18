@@ -1,11 +1,15 @@
 """Job configs for VAST staging or executing a custom script"""
 
 from datetime import datetime
+<<<<<<< HEAD
 from typing import Dict, Optional, List, Literal
+=======
+from typing import Dict, List, Literal, Optional
+>>>>>>> 149057ecd9fa1206cbe1394dfe1b032596354f0d
 
-from aind_data_schema_models.platforms import Platform
 from aind_data_schema_models.modalities import Modality
-from pydantic import BaseModel, Field, field_validator, ConfigDict
+from aind_data_schema_models.platforms import Platform
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class ManifestConfig(BaseModel):
@@ -34,6 +38,9 @@ class ManifestConfig(BaseModel):
     capsule_id: Optional[str] = Field(
         default=None, description="Capsule ID of pipeline to run", title="Capsule"
     )
+    mount: Optional[str] = Field(
+        ..., description="Mount point for pipeline run", title="Mount point"
+    )
     s3_bucket: Optional[Literal["s3", "public", "private", "scratch"]] = Field(
         default=None, description="s3 endpoint", title="S3 endpoint"
     )
@@ -54,7 +61,7 @@ class ManifestConfig(BaseModel):
         description="Where schema files to be uploaded are saved",
         title="Schema directory",
     )
-    script: Dict[str, list[str]] = Field(
+    script: Dict[str, List[str]] = Field(
         default={}, description="Set of commands to run in subprocess.", title="Commands"
     )
 
