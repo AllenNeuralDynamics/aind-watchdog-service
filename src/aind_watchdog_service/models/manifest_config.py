@@ -30,9 +30,14 @@ class ManifestConfig(BaseModel):
         description="Transfer time to schedule copy and upload. If None defaults to trigger the transfer immediately",  # noqa
         title="APScheduler transfer time",
     )
-    platform: Platform = Field(description="Platform type", title="Platform type")
+    platform: Literal[tuple(Platform._abbreviation_map.keys())] = Field(
+        description="Platform type", title="Platform type"
+    )
     capsule_id: Optional[str] = Field(
         ..., description="Capsule ID of pipeline to run", title="Capsule"
+    )
+    mount: Optional[str] = Field(
+        ..., description="Mount point for pipeline run", title="Mount point"
     )
     s3_bucket: Optional[Literal["s3", "public", "private", "scratch"]] = Field(
         default=None, description="s3 endpoint", title="S3 endpoint"
@@ -44,10 +49,12 @@ class ManifestConfig(BaseModel):
         description="where to send data to on VAST",
         title="VAST destination and maybe S3?",
     )
-    modalities: Dict[Modality, List[str]] = Field(
-        default={},
-        description="list of ModalityFile objects containing modality names and associated files or directories",  # noqa
-        title="modality files",
+    modalities: Dict[Literal[tuple(Modality._abbreviation_map.keys())], List[str]] = (
+        Field(
+            default={},
+            description="list of ModalityFile objects containing modality names and associated files or directories",  # noqa
+            title="modality files",
+        )
     )
     schemas: Optional[List[str]] = Field(
         default=[],

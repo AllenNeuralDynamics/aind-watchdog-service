@@ -8,7 +8,11 @@ import subprocess
 from pathlib import Path, PurePosixPath
 
 import requests
-from aind_data_transfer_models.core import BasicUploadJobConfigs, ModalityConfigs
+from aind_data_transfer_models.core import (
+    BasicUploadJobConfigs,
+    ModalityConfigs,
+    SubmitJobRequest,
+)
 from watchdog.events import FileModifiedEvent
 
 from aind_watchdog_service.alert_bot import AlertBot
@@ -188,25 +192,16 @@ class RunJob:
             metadata_dir=PurePosixPath(self.config.destination) / self.config.name,
             process_capsule_id=self.config.capsule_id,
             project_name=self.config.project_name,
+            input_data_mount=self.config.mount,
         )
 
-        # From aind-data-transfer-service README
-        hpc_settings = json.dumps({})
-        upload_job_settings = upload_job_configs.model_dump_json()
-        script = ""
-
-        hpc_job = {
-            "upload_job_settings": upload_job_settings,
-            "hpc_settings": hpc_settings,
-            "script": script,
-        }
-
-        hpc_jobs = [hpc_job]
-        post_request_content = {"jobs": hpc_jobs}
+        submit_request = SubmitJobRequest(upload_jobs=[upload_job_configs])
+        post_request_content = json.loads(submit_request.model_dump_json(round_trip=True))
         submit_job_response = requests.post(
-            url="http://aind-data-transfer-service/api/submit_hpc_jobs",
+            url="http://aind-data-transfer-service-dev/api/v1/submit_jobs",
             json=post_request_content,
         )
+
         if submit_job_response.status_code == 200:
             return True
         else:
