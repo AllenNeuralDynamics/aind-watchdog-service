@@ -33,6 +33,9 @@ class TestRunSubprocess(unittest.TestCase):
         """Set up the test environment by defining the test data."""
         watch_config_fp = TEST_DIRECTORY / "resources" / "watch_config.yml"
         manifest_config = TEST_DIRECTORY / "resources" / "manifest.yml"
+        manifest_config_upload_only_fp = (
+            TEST_DIRECTORY / "resources" / "manifest_upload_only.yaml"
+        )
         manifest_with_run_script = (
             TEST_DIRECTORY / "resources" / "manifest_run_script.yml"
         )
@@ -42,9 +45,12 @@ class TestRunSubprocess(unittest.TestCase):
             manifest_config = yaml.safe_load(yam)
         with open(manifest_with_run_script) as yam:
             manifest_with_run_script = yaml.safe_load(yam)
+        with open(manifest_config_upload_only_fp) as yam:
+            manifest_upload_only = yaml.safe_load(yam)
         cls.watch_config = WatchConfig(**watch_config)
         cls.manifest_config = ManifestConfig(**manifest_config)
         cls.manifest_with_run_script = ManifestConfig(**manifest_with_run_script)
+        cls.manifest_config_upload_only = ManifestConfig(**manifest_upload_only)
         cls.mock_event = MockFileModifiedEvent("/path/to/file.txt")
 
     @patch("subprocess.run")
@@ -345,6 +351,38 @@ class TestRunSubprocess(unittest.TestCase):
         execute = RunJob(self.mock_event, self.manifest_config, self.watch_config)
         execute.move_manifest_to_archive()
         mock_subproc.assert_called_once()
+
+    @patch("aind_watchdog_service.alert_bot.AlertBot.send_message")
+    @patch("aind_watchdog_service.run_job.RunJob.copy_to_vast")
+    @patch("aind_watchdog_service.run_job.RunJob.trigger_transfer_service")
+    @patch("subprocess.run")
+    @patch("aind_watchdog_service.run_job.RunJob.move_manifest_to_archive")
+    def test_run_job_upload_only(
+        self,
+        mock_move_mani: MagicMock,
+        mock_subproc: MagicMock,
+        mock_trigger_transfer: MagicMock,
+        mock_copy_to_vast: MagicMock,
+        mock_alert: MagicMock,
+    ):
+        """test run job"""
+        mock_move_mani.return_value = None
+        with patch.object(Path, "is_dir") as mock_dir:
+            mock_dir.return_value = True
+            with patch.object(Path, "is_file") as mock_file:
+                mock_file.return_value = True
+                mock_trigger_transfer.return_value = True
+                mock_copy_to_vast.return_value = True
+                mock_alert.return_value = requests.Response
+                mock_subproc.return_value = subprocess.CompletedProcess(
+                    args=[], returncode=0
+                )
+                execute = RunJob(
+                    self.mock_event, self.manifest_config_upload_only, self.watch_config
+                )
+                execute.run_job()
+                mock_alert.assert_called_with("Job complete", self.mock_event.src_path)
+                mock_move_mani.assert_called_once()
 
 
 if __name__ == "__main__":
