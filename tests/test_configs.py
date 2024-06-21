@@ -5,6 +5,7 @@ from datetime import datetime as dt
 from pathlib import Path
 
 import pydantic_core
+from pydantic import ValidationError
 import yaml
 
 from aind_watchdog_service.models.manifest_config import ManifestConfig
@@ -61,12 +62,12 @@ class TestManifestConfigs(unittest.TestCase):
         self.assertEqual(manifest_config.model_dump(), data)
 
         data["platform"] = "cafe"
-        with self.assertRaises(AttributeError):
+        with self.assertRaises(ValidationError):
             ManifestConfig(**data)
 
         data["platform"] = "multiplane-ophys"
         data["modalities"]["nikon"] = ["some file"]
-        with self.assertRaises(AttributeError):
+        with self.assertRaises(ValidationError):
             ManifestConfig(**data)
 
 

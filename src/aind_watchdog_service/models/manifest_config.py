@@ -5,7 +5,7 @@ from typing import Dict, List, Literal, Optional
 
 from aind_data_schema_models.modalities import Modality
 from aind_data_schema_models.platforms import Platform
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ManifestConfig(BaseModel):
@@ -30,7 +30,9 @@ class ManifestConfig(BaseModel):
         description="Transfer time to schedule copy and upload. If None defaults to trigger the transfer immediately",  # noqa
         title="APScheduler transfer time",
     )
-    platform: str = Field(description="Platform type", title="Platform type")
+    platform: Literal[tuple(Platform._abbreviation_map.keys())] = Field(
+        description="Platform type", title="Platform type"
+    )
     capsule_id: Optional[str] = Field(
         ..., description="Capsule ID of pipeline to run", title="Capsule"
     )
@@ -47,10 +49,12 @@ class ManifestConfig(BaseModel):
         description="where to send data to on VAST",
         title="VAST destination and maybe S3?",
     )
-    modalities: Dict[str, List[str]] = Field(
-        default={},
-        description="list of ModalityFile objects containing modality names and associated files or directories",  # noqa
-        title="modality files",
+    modalities: Dict[Literal[tuple(Modality._abbreviation_map.keys())], List[str]] = (
+        Field(
+            default={},
+            description="list of ModalityFile objects containing modality names and associated files or directories",  # noqa
+            title="modality files",
+        )
     )
     schemas: Optional[List[str]] = Field(
         default=[],
@@ -60,23 +64,3 @@ class ManifestConfig(BaseModel):
     script: Dict[str, List[str]] = Field(
         default={}, description="Set of commands to run in subprocess.", title="Commands"
     )
-
-    @field_validator("platform")
-    @classmethod
-    def check_platform_string(cls, input_platform: str) -> str:
-        """Checks if str can be converted to platform model"""
-        if input_platform in Platform._abbreviation_map:
-            return input_platform
-        else:
-            raise AttributeError(f"Unknown platform: {input_platform}")
-
-    @field_validator("modalities")
-    @classmethod
-    def check_modality_string(
-        cls, input_modality: Dict[str, List[str]]
-    ) -> Dict[str, List[str]]:
-        """Checks if str can be converted to platform model"""
-        for key in input_modality.keys():
-            if key not in Modality._abbreviation_map:
-                raise AttributeError(f"Unknown modality: {input_modality}")
-        return input_modality
