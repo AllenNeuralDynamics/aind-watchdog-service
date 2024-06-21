@@ -348,12 +348,10 @@ class TestRunSubprocess(unittest.TestCase):
     @patch("aind_watchdog_service.run_job.RunJob.trigger_transfer_service")
     @patch("aind_watchdog_service.alert_bot.AlertBot.send_message")
     @patch("aind_watchdog_service.run_job.RunJob.move_manifest_to_archive")
-    @patch("logging.info")
     @patch("logging.error")
     def test_run_script(
         self,
         mock_log_error: MagicMock,
-        mock_log_info: MagicMock,
         mock_move_mani: MagicMock,
         mock_alert: MagicMock,
         mock_trigger_transfer: MagicMock,
@@ -392,6 +390,36 @@ class TestRunSubprocess(unittest.TestCase):
         )
         execute.run_job()
         mock_log_error.assert_called_with("Error running script %s", "cmd1")
+
+    @patch("os.mkdir")
+    @patch("subprocess.run")
+    @patch("aind_watchdog_service.run_job.RunJob.trigger_transfer_service")
+    @patch("aind_watchdog_service.alert_bot.AlertBot.send_message")
+    @patch("aind_watchdog_service.run_job.RunJob.move_manifest_to_archive")
+    def test_run_script_no_webhook(
+        self,
+        mock_move_mani: MagicMock,
+        mock_alert: MagicMock,
+        mock_trigger_transfer: MagicMock,
+        mock_subproc: MagicMock,
+        mock_dir: MagicMock,
+    ):
+        """test run script"""
+        mock_subproc.return_value = subprocess.CompletedProcess(
+            args=[], returncode=0, stdout=b"Mock stdout", stderr=b"Mock stderr"
+        )
+        mock_alert.return_value = requests.Response
+        mock_trigger_transfer.return_value = True
+        mock_dir.return_value = True
+        mock_move_mani.return_value = None
+        execute = RunJob(
+            self.mock_event,
+            self.manifest_with_run_script,
+            self.watch_config_no_webhook,
+            self.watch_config_no_webhook.webhook_url,
+        )
+        execute.run_job()
+        mock_alert.assert_not_called()
 
     @patch("os.remove")
     @patch("aind_watchdog_service.run_job.PLATFORM", "windows")
