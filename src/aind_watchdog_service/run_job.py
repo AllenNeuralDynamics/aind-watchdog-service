@@ -183,6 +183,7 @@ class RunJob:
                 modality=modality,
             )
             modality_configs.append(m)
+
         upload_job_configs = BasicUploadJobConfigs(
             s3_bucket=self.config.s3_bucket,
             platform=self.config.platform,
@@ -198,7 +199,7 @@ class RunJob:
         submit_request = SubmitJobRequest(upload_jobs=[upload_job_configs])
         post_request_content = json.loads(submit_request.model_dump_json(round_trip=True))
         submit_job_response = requests.post(
-            url="http://aind-data-transfer-service-dev/api/v1/submit_jobs",
+            url="http://aind-data-transfer-service/api/v1/submit_jobs",
             json=post_request_content,
         )
 
