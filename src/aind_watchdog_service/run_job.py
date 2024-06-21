@@ -24,7 +24,6 @@ if platform.system() == "Windows":
 else:
     PLATFORM = "linux"
 
-    
 
 class RunJob:
     """Run job class to stage files on VAST or run a custom script
@@ -36,7 +35,7 @@ class RunJob:
         event: FileModifiedEvent,
         config: ManifestConfig,
         watch_config: WatchConfig,
-        alert: bool,
+        alert: str | None,
     ):
         """initialize RunJob class"""
         self.event = event
@@ -45,8 +44,8 @@ class RunJob:
         if alert:
             self.alert = alert
 
-    def _send_alert(self, title: str, send: bool, message: str=None) -> None:
-        """wrapper for AlertBot configured 
+    def _send_alert(self, title: str, send: bool, message: str = None) -> None:
+        """wrapper for AlertBot configured
 
         Parameters
         ----------
@@ -54,7 +53,7 @@ class RunJob:
             message to send
         send : bool
             send to Teams
-        message: str 
+        message: str
             Message to go in Teams card
         """
         if send:
@@ -86,11 +85,13 @@ class RunJob:
                         transfer = self.execute_linux_command(file, destination_directory)
                     if not transfer:
                         logging.error("Error copying files %s", file)
-                        self._send_alert("Error copying files", hasattr(self, self.alert), str(file))
+                        self._send_alert(
+                            "Error copying files", hasattr(self, "alert"), str(file)
+                        )
                         return False
                 else:
                     logging.error("File not found %s", file)
-                    self._send_alert("File not found", hasattr(self, self.alert), file)
+                    self._send_alert("File not found", hasattr(self, "alert"), file)
                     return False
         for schema in self.config.schemas:
             destination_directory = os.path.join(destination, parent_directory)
@@ -100,7 +101,7 @@ class RunJob:
                 transfer = self.execute_linux_command(schema, destination_directory)
             if not transfer:
                 logging.error("Error copying schema %s", schema)
-                self._send_alert("Error copying schema", hasattr(self, self.alert), schema)
+                self._send_alert("Error copying schema", hasattr(self, "alert"), schema)
                 return False
         return True
 
@@ -234,7 +235,9 @@ class RunJob:
             if not copy_file:
                 logging.error("Error copying manifest file %s", self.event.src_path)
                 self._send_alert(
-                    "Error copying manifest file", hasattr(self, self.alert), self.event.src_path
+                    "Error copying manifest file",
+                    hasattr(self, "alert"),
+                    self.event.src_path,
                 )
                 return
             os.remove(self.event.src_path)
@@ -249,7 +252,7 @@ class RunJob:
         event : FileModifiedEvent
             modified event file
         """
-        self._send_alert("Running job", hasattr(self, self.alert), self.event.src_path)
+        self._send_alert("Running job", hasattr(self, "alert"), self.event.src_path)
         if self.config.script:
             for command in self.config.script:
                 logging.info(
@@ -262,26 +265,32 @@ class RunJob:
                     logging.error("Error running script %s", command)
                     self._send_alert(
                         "Error running script",
-                        hasattr(self, self.alert),
+                        hasattr(self, "alert"),
                         f"Could not execute {command} for {self.config.name}",
                     )
                     return
                 else:
                     self._send_alert(
-                        "Script executed", hasattr(self, self.alert), f"Ran {command} for {self.config.name}"
+                        "Script executed",
+                        hasattr(self, "alert"),
+                        f"Ran {command} for {self.config.name}",
                     )
 
         else:
             transfer = self.copy_to_vast()
             if not transfer:
                 self._send_alert(
-                    "Could not copy data to destination", hasattr(self, self.alert), self.event.src_path
+                    "Could not copy data to destination",
+                    hasattr(self, "alert"),
+                    self.event.src_path,
                 )
                 return
         if not self.trigger_transfer_service():
             self._send_alert(
-                "Could not trigger aind-data-transfer-service", hasattr(self, self.alert), self.event.src_path
+                "Could not trigger aind-data-transfer-service",
+                hasattr(self, "alert"),
+                self.event.src_path,
             )
             return
-        self._send_alert("Job complete", hasattr(self, self.alert), self.event.src_path)
+        self._send_alert("Job complete", hasattr(self, "alert"), self.event.src_path)
         self.move_manifest_to_archive()

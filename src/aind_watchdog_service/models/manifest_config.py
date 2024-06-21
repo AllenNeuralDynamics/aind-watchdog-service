@@ -1,11 +1,7 @@
 """Job configs for VAST staging or executing a custom script"""
 
 from datetime import datetime
-<<<<<<< HEAD
-from typing import Dict, Optional, List, Literal
-=======
 from typing import Dict, List, Literal, Optional
->>>>>>> 149057ecd9fa1206cbe1394dfe1b032596354f0d
 
 from aind_data_schema_models.modalities import Modality
 from aind_data_schema_models.platforms import Platform
@@ -82,6 +78,5 @@ class ManifestConfig(BaseModel):
         """Checks if str can be converted to platform model"""
         for key in input_modality.keys():
             if key not in Modality._abbreviation_map:
-                import pdb;pdb.set_trace()
                 raise AttributeError(f"Unknown modality: {input_modality}")
         return input_modality

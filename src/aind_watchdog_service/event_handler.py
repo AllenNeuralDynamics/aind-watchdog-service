@@ -25,6 +25,7 @@ class EventHandler(FileSystemEventHandler):
         self.scheduler = scheduler
         self.config = config
         self.jobs: Dict[str, str] = {}
+        self.alert = None
         if config.webhook_url:
             self.alert = AlertBot(config.webhook_url)
 
