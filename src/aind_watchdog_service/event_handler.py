@@ -25,10 +25,9 @@ class EventHandler(FileSystemEventHandler):
         self.scheduler = scheduler
         self.config = config
         self.jobs: Dict[str, str] = {}
+        self.alert = None
         if config.webhook_url:
             self.alert = AlertBot(config.webhook_url)
-        else:
-            raise ValueError("Webhook URL not provided")
 
     def _load_manifest(self, event: FileModifiedEvent) -> ManifestConfig:
         """Instructions to transfer to VAST
@@ -50,8 +49,9 @@ class EventHandler(FileSystemEventHandler):
                 return config
             except Exception as e:
                 logging.error("Error loading config %s", repr(e))
-                self.alert.send_message("Error loading config", repr(e))
-                return None
+                if getattr(self, "alert"):
+                    self.alert.send_message("Error loading config", repr(e))
+                    return None
 
     def _remove_job(self, event: FileModifiedEvent) -> None:
         """Removes job from scheduler queue

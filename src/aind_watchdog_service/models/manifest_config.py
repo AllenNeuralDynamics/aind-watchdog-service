@@ -34,7 +34,7 @@ class ManifestConfig(BaseModel):
         description="Platform type", title="Platform type"
     )
     capsule_id: Optional[str] = Field(
-        ..., description="Capsule ID of pipeline to run", title="Capsule"
+        default=None, description="Capsule ID of pipeline to run", title="Capsule"
     )
     mount: Optional[str] = Field(
         ..., description="Mount point for pipeline run", title="Mount point"

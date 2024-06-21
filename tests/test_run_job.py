@@ -32,6 +32,9 @@ class TestRunSubprocess(unittest.TestCase):
     def setUp(cls) -> None:
         """Set up the test environment by defining the test data."""
         watch_config_fp = TEST_DIRECTORY / "resources" / "watch_config.yml"
+        watch_config_no_webhook_fp = (
+            TEST_DIRECTORY / "resources" / "watch_config_no_webhook.yaml"
+        )
         manifest_config = TEST_DIRECTORY / "resources" / "manifest.yml"
         manifest_config_upload_only_fp = (
             TEST_DIRECTORY / "resources" / "manifest_upload_only.yaml"
@@ -41,6 +44,8 @@ class TestRunSubprocess(unittest.TestCase):
         )
         with open(watch_config_fp) as yam:
             watch_config = yaml.safe_load(yam)
+        with open(watch_config_no_webhook_fp) as yam:
+            watch_config_no_webhook = yaml.safe_load(yam)
         with open(manifest_config) as yam:
             manifest_config = yaml.safe_load(yam)
         with open(manifest_with_run_script) as yam:
@@ -48,10 +53,12 @@ class TestRunSubprocess(unittest.TestCase):
         with open(manifest_config_upload_only_fp) as yam:
             manifest_upload_only = yaml.safe_load(yam)
         cls.watch_config = WatchConfig(**watch_config)
+        cls.watch_config_no_webhook = WatchConfig(**watch_config_no_webhook)
         cls.manifest_config = ManifestConfig(**manifest_config)
         cls.manifest_with_run_script = ManifestConfig(**manifest_with_run_script)
         cls.manifest_config_upload_only = ManifestConfig(**manifest_upload_only)
         cls.mock_event = MockFileModifiedEvent("/path/to/file.txt")
+        cls.run_script_config = manifest_with_run_script
 
     @patch("subprocess.run")
     def test_run_subprocess_vast(self, mock_subproc: MagicMock):
@@ -64,7 +71,10 @@ class TestRunSubprocess(unittest.TestCase):
             args=cmd, returncode=8, stdout=b"Mock stdout", stderr=b"Mock stderr"
         )
         execute_manifest_config = RunJob(
-            self.mock_event, self.manifest_config, self.watch_config
+            self.mock_event,
+            self.manifest_config,
+            self.watch_config,
+            self.watch_config.webhook_url,
         )
         result = execute_manifest_config.run_subprocess(cmd)
         # # Assert that mock_subproc was called with the correct arguments
@@ -88,7 +98,10 @@ class TestRunSubprocess(unittest.TestCase):
             args=cmd, returncode=8, stdout=b"Mock stdout", stderr=b"Mock stderr"
         )
         execute_script_config = RunJob(
-            self.mock_event, self.manifest_config, self.watch_config
+            self.mock_event,
+            self.manifest_config,
+            self.watch_config,
+            self.watch_config.webhook_url,
         )
         result = execute_script_config.run_subprocess(cmd)
         # # Assert that mock_subproc was called with the correct arguments
@@ -112,7 +125,10 @@ class TestRunSubprocess(unittest.TestCase):
         with patch.object(Path, "exists") as mock_file:
             mock_file.return_value = True
             execute_manifest_config = RunJob(
-                self.mock_event, self.manifest_config, self.watch_config
+                self.mock_event,
+                self.manifest_config,
+                self.watch_config,
+                self.watch_config.webhook_url,
             )
             winx_dir = execute_manifest_config.execute_windows_command(src_dir, dest)
             winx_file = execute_manifest_config.execute_windows_command(src_file, dest)
@@ -123,7 +139,10 @@ class TestRunSubprocess(unittest.TestCase):
         with patch.object(Path, "exists") as mock_file:
             mock_file.return_value = False
             execute_manifest_config = RunJob(
-                self.mock_event, self.manifest_config, self.watch_config
+                self.mock_event,
+                self.manifest_config,
+                self.watch_config,
+                self.watch_config.webhook_url,
             )
             winx_dir = execute_manifest_config.execute_windows_command(src_dir, dest)
             winx_file = execute_manifest_config.execute_windows_command(src_file, dest)
@@ -134,7 +153,10 @@ class TestRunSubprocess(unittest.TestCase):
         with patch.object(Path, "exists") as mock_file:
             mock_file.return_value = True
             execute_manifest_config = RunJob(
-                self.mock_event, self.manifest_config, self.watch_config
+                self.mock_event,
+                self.manifest_config,
+                self.watch_config,
+                self.watch_config.webhook_url,
             )
             winx_dir = execute_manifest_config.execute_linux_command(src_dir, dest)
             winx_file = execute_manifest_config.execute_linux_command(src_file, dest)
@@ -145,7 +167,10 @@ class TestRunSubprocess(unittest.TestCase):
         with patch.object(Path, "exists") as mock_file:
             mock_file.return_value = False
             execute_manifest_config = RunJob(
-                self.mock_event, self.manifest_config, self.watch_config
+                self.mock_event,
+                self.manifest_config,
+                self.watch_config,
+                self.watch_config.webhook_url,
             )
             winx_dir = execute_manifest_config.execute_linux_command(src_dir, dest)
             winx_file = execute_manifest_config.execute_linux_command(src_file, dest)
@@ -178,7 +203,12 @@ class TestRunSubprocess(unittest.TestCase):
             mock_dir.return_value = True
             with patch.object(Path, "exists") as mock_file:
                 mock_file.return_value = True
-                result = RunJob(self.mock_event, self.manifest_config, self.watch_config)
+                result = RunJob(
+                    self.mock_event,
+                    self.manifest_config,
+                    self.watch_config,
+                    self.watch_config.webhook_url,
+                )
                 mock_log_err.assert_not_called()
                 response = result.copy_to_vast()
                 self.assertEqual(response, True)
@@ -188,7 +218,12 @@ class TestRunSubprocess(unittest.TestCase):
             with patch.object(Path, "exists") as mock_file:
                 mock_file.return_value = False
                 mock_execute_windows.return_value = False
-                result = RunJob(self.mock_event, self.manifest_config, self.watch_config)
+                result = RunJob(
+                    self.mock_event,
+                    self.manifest_config,
+                    self.watch_config,
+                    self.watch_config.webhook_url,
+                )
                 response = result.copy_to_vast()
                 mock_log_err.assert_called()
                 self.assertEqual(response, False)
@@ -206,7 +241,12 @@ class TestRunSubprocess(unittest.TestCase):
         )
         mock_response._content = json.dumps({"body": body}).encode("utf-8")
         mock_post.return_value = mock_response
-        execute = RunJob(self.mock_event, self.manifest_config, self.watch_config)
+        execute = RunJob(
+            self.mock_event,
+            self.manifest_config,
+            self.watch_config,
+            self.watch_config.webhook_url,
+        )
         response = execute.trigger_transfer_service()
         self.assertEqual(response, True)
 
@@ -222,7 +262,12 @@ class TestRunSubprocess(unittest.TestCase):
         )
         mock_response._content = json.dumps({"body": body}).encode("utf-8")
         mock_post.return_value = mock_response
-        execute = RunJob(self.mock_event, self.manifest_config, self.watch_config)
+        execute = RunJob(
+            self.mock_event,
+            self.manifest_config,
+            self.watch_config,
+            self.watch_config.webhook_url,
+        )
         response = execute.trigger_transfer_service()
         self.assertEqual(response, False)
 
@@ -251,14 +296,24 @@ class TestRunSubprocess(unittest.TestCase):
                 mock_subproc.return_value = subprocess.CompletedProcess(
                     args=[], returncode=0
                 )
-                execute = RunJob(self.mock_event, self.manifest_config, self.watch_config)
+                execute = RunJob(
+                    self.mock_event,
+                    self.manifest_config,
+                    self.watch_config,
+                    self.watch_config.webhook_url,
+                )
                 execute.run_job()
                 mock_alert.assert_called_with("Job complete", self.mock_event.src_path)
                 mock_move_mani.assert_called_once()
 
                 mock_trigger_transfer.return_value = False
                 mock_copy_to_vast.return_value = True
-                execute = RunJob(self.mock_event, self.manifest_config, self.watch_config)
+                execute = RunJob(
+                    self.mock_event,
+                    self.manifest_config,
+                    self.watch_config,
+                    self.watch_config.webhook_url,
+                )
                 execute.run_job()
                 mock_alert.assert_called_with(
                     "Could not trigger aind-data-transfer-service",
@@ -267,7 +322,12 @@ class TestRunSubprocess(unittest.TestCase):
 
                 mock_trigger_transfer.return_value = True
                 mock_copy_to_vast.return_value = False
-                execute = RunJob(self.mock_event, self.manifest_config, self.watch_config)
+                execute = RunJob(
+                    self.mock_event,
+                    self.manifest_config,
+                    self.watch_config,
+                    self.watch_config.webhook_url,
+                )
                 execute.run_job()
                 mock_alert.assert_called_with(
                     "Could not copy data to destination",
@@ -276,7 +336,12 @@ class TestRunSubprocess(unittest.TestCase):
 
                 mock_trigger_transfer.return_value = False
                 mock_copy_to_vast.return_value = False
-                execute = RunJob(self.mock_event, self.manifest_config, self.watch_config)
+                execute = RunJob(
+                    self.mock_event,
+                    self.manifest_config,
+                    self.watch_config,
+                    self.watch_config.webhook_url,
+                )
                 execute.run_job()
 
                 mock_alert.assert_called_with(
@@ -289,12 +354,10 @@ class TestRunSubprocess(unittest.TestCase):
     @patch("aind_watchdog_service.run_job.RunJob.trigger_transfer_service")
     @patch("aind_watchdog_service.alert_bot.AlertBot.send_message")
     @patch("aind_watchdog_service.run_job.RunJob.move_manifest_to_archive")
-    @patch("logging.info")
     @patch("logging.error")
     def test_run_script(
         self,
         mock_log_error: MagicMock,
-        mock_log_info: MagicMock,
         mock_move_mani: MagicMock,
         mock_alert: MagicMock,
         mock_trigger_transfer: MagicMock,
@@ -310,13 +373,13 @@ class TestRunSubprocess(unittest.TestCase):
         mock_dir.return_value = True
         mock_move_mani.return_value = None
         execute = RunJob(
-            self.mock_event, self.manifest_with_run_script, self.watch_config
+            self.mock_event,
+            self.manifest_with_run_script,
+            self.watch_config,
+            self.watch_config.webhook_url,
         )
         execute.run_job()
-        mock_log_info.assert_called_with(
-            "Found job, executing custom script for %s",
-            self.mock_event.src_path,
-        )
+        mock_alert.assert_called_with("Job complete", self.mock_event.src_path)
         mock_subproc.assert_called()
 
         mock_subproc.return_value = subprocess.CompletedProcess(
@@ -326,10 +389,43 @@ class TestRunSubprocess(unittest.TestCase):
             stderr=b"Mock stderr",
         )
         execute = RunJob(
-            self.mock_event, self.manifest_with_run_script, self.watch_config
+            self.mock_event,
+            self.manifest_with_run_script,
+            self.watch_config,
+            self.watch_config.webhook_url,
         )
         execute.run_job()
         mock_log_error.assert_called_with("Error running script %s", "cmd1")
+
+    @patch("os.mkdir")
+    @patch("subprocess.run")
+    @patch("aind_watchdog_service.run_job.RunJob.trigger_transfer_service")
+    @patch("aind_watchdog_service.alert_bot.AlertBot.send_message")
+    @patch("aind_watchdog_service.run_job.RunJob.move_manifest_to_archive")
+    def test_run_script_no_webhook(
+        self,
+        mock_move_mani: MagicMock,
+        mock_alert: MagicMock,
+        mock_trigger_transfer: MagicMock,
+        mock_subproc: MagicMock,
+        mock_dir: MagicMock,
+    ):
+        """test run script"""
+        mock_subproc.return_value = subprocess.CompletedProcess(
+            args=[], returncode=0, stdout=b"Mock stdout", stderr=b"Mock stderr"
+        )
+        mock_alert.return_value = requests.Response
+        mock_trigger_transfer.return_value = True
+        mock_dir.return_value = True
+        mock_move_mani.return_value = None
+        execute = RunJob(
+            self.mock_event,
+            self.manifest_with_run_script,
+            self.watch_config_no_webhook,
+            self.watch_config_no_webhook.webhook_url,
+        )
+        execute.run_job()
+        mock_alert.assert_not_called()
 
     @patch("os.remove")
     @patch("aind_watchdog_service.run_job.PLATFORM", "windows")
@@ -337,7 +433,12 @@ class TestRunSubprocess(unittest.TestCase):
     def test_move_manifest_win(self, mock_execute: MagicMock, mock_remove: MagicMock):
         """Test the move manifest function"""
         mock_execute.return_value = True
-        execute = RunJob(self.mock_event, self.manifest_config, self.watch_config)
+        execute = RunJob(
+            self.mock_event,
+            self.manifest_config,
+            self.watch_config,
+            self.watch_config.webhook_url,
+        )
         execute.move_manifest_to_archive()
         mock_remove.assert_called_once()
 
@@ -348,7 +449,12 @@ class TestRunSubprocess(unittest.TestCase):
         mock_subproc.return_value = subprocess.CompletedProcess(
             args=[], returncode=0, stdout=b"Mock stdout", stderr=b"Mock stderr"
         )
-        execute = RunJob(self.mock_event, self.manifest_config, self.watch_config)
+        execute = RunJob(
+            self.mock_event,
+            self.manifest_config,
+            self.watch_config,
+            self.watch_config.webhook_url,
+        )
         execute.move_manifest_to_archive()
         mock_subproc.assert_called_once()
 
