@@ -34,6 +34,9 @@ class ManifestConfig(BaseModel):
     capsule_id: Optional[str] = Field(
         ..., description="Capsule ID of pipeline to run", title="Capsule"
     )
+    mount: Optional["str"] = Field(
+        ..., description="Mount point associated with pipeline", title="Mount point"
+    )
     s3_bucket: Optional[str] = Field(
         default=None, description="s3 endpoint", title="S3 endpoint"
     )
