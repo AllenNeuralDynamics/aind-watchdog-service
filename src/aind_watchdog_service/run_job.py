@@ -41,6 +41,7 @@ class RunJob:
         self.event = event
         self.config = config
         self.watch_config = watch_config
+        self.alert = None
         if alert:
             self.alert = alert
 
@@ -86,12 +87,12 @@ class RunJob:
                     if not transfer:
                         logging.error("Error copying files %s", file)
                         self._send_alert(
-                            "Error copying files", hasattr(self, "alert"), str(file)
+                            "Error copying files", getattr(self, "alert"), str(file)
                         )
                         return False
                 else:
                     logging.error("File not found %s", file)
-                    self._send_alert("File not found", hasattr(self, "alert"), file)
+                    self._send_alert("File not found", getattr(self, "alert"), file)
                     return False
         for schema in self.config.schemas:
             destination_directory = os.path.join(destination, parent_directory)
@@ -101,7 +102,7 @@ class RunJob:
                 transfer = self.execute_linux_command(schema, destination_directory)
             if not transfer:
                 logging.error("Error copying schema %s", schema)
-                self._send_alert("Error copying schema", hasattr(self, "alert"), schema)
+                self._send_alert("Error copying schema", getattr(self, "alert"), schema)
                 return False
         return True
 
@@ -236,7 +237,7 @@ class RunJob:
                 logging.error("Error copying manifest file %s", self.event.src_path)
                 self._send_alert(
                     "Error copying manifest file",
-                    hasattr(self, "alert"),
+                    getattr(self, "alert"),
                     self.event.src_path,
                 )
                 return
@@ -252,7 +253,7 @@ class RunJob:
         event : FileModifiedEvent
             modified event file
         """
-        self._send_alert("Running job", hasattr(self, "alert"), self.event.src_path)
+        self._send_alert("Running job", getattr(self, "alert"), self.event.src_path)
         if self.config.script:
             for command in self.config.script:
                 logging.info(
@@ -265,14 +266,14 @@ class RunJob:
                     logging.error("Error running script %s", command)
                     self._send_alert(
                         "Error running script",
-                        hasattr(self, "alert"),
+                        getattr(self, "alert"),
                         f"Could not execute {command} for {self.config.name}",
                     )
                     return
                 else:
                     self._send_alert(
                         "Script executed",
-                        hasattr(self, "alert"),
+                        getattr(self, "alert"),
                         f"Ran {command} for {self.config.name}",
                     )
 
@@ -281,16 +282,16 @@ class RunJob:
             if not transfer:
                 self._send_alert(
                     "Could not copy data to destination",
-                    hasattr(self, "alert"),
+                    getattr(self, "alert"),
                     self.event.src_path,
                 )
                 return
         if not self.trigger_transfer_service():
             self._send_alert(
                 "Could not trigger aind-data-transfer-service",
-                hasattr(self, "alert"),
+                getattr(self, "alert"),
                 self.event.src_path,
             )
             return
-        self._send_alert("Job complete", hasattr(self, "alert"), self.event.src_path)
+        self._send_alert("Job complete", getattr(self, "alert"), self.event.src_path)
         self.move_manifest_to_archive()

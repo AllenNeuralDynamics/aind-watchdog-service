@@ -49,7 +49,7 @@ class EventHandler(FileSystemEventHandler):
                 return config
             except Exception as e:
                 logging.error("Error loading config %s", repr(e))
-                if hasattr(self, self.alert):
+                if getattr(self, "alert"):
                     self.alert.send_message("Error loading config", repr(e))
                     return None
 
