@@ -484,7 +484,10 @@ class TestRunSubprocess(unittest.TestCase):
                     args=[], returncode=0
                 )
                 execute = RunJob(
-                    self.mock_event, self.manifest_config_upload_only, self.watch_config
+                    self.mock_event,
+                    self.manifest_config_upload_only,
+                    self.watch_config,
+                    self.watch_config.webhook_url,
                 )
                 execute.run_job()
                 mock_alert.assert_called_with("Job complete", self.mock_event.src_path)

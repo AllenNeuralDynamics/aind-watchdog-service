@@ -37,7 +37,7 @@ class ManifestConfig(BaseModel):
         default=None, description="Capsule ID of pipeline to run", title="Capsule"
     )
     mount: Optional[str] = Field(
-        ..., description="Mount point for pipeline run", title="Mount point"
+        default=None, description="Mount point for pipeline run", title="Mount point"
     )
     s3_bucket: Optional[Literal["s3", "public", "private", "scratch"]] = Field(
         default=None, description="s3 endpoint", title="S3 endpoint"
