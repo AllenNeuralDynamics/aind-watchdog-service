@@ -5,6 +5,7 @@ from datetime import datetime as dt
 from datetime import timedelta
 from pathlib import Path
 from typing import Dict
+import sys
 
 import yaml
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -49,9 +50,6 @@ class EventHandler(FileSystemEventHandler):
                 return config
             except Exception as e:
                 logging.error("Error loading config %s", repr(e))
-                if getattr(self, "alert"):
-                    self.alert.send_message("Error loading config", repr(e))
-                    return None
 
     def _remove_job(self, event: FileModifiedEvent) -> None:
         """Removes job from scheduler queue
@@ -84,6 +82,7 @@ class EventHandler(FileSystemEventHandler):
         trigger_time = dt.now().replace(hour=hour, minute=0, second=0, microsecond=0)
         if (trigger_time - dt.now()).total_seconds() < 0:
             trigger_time = trigger_time + timedelta(days=1)
+        print(f"Trigger time {trigger_time}")
         return trigger_time
 
     def schedule_job(self, event: FileModifiedEvent, job_config: ManifestConfig) -> None:
@@ -98,15 +97,15 @@ class EventHandler(FileSystemEventHandler):
         """
         if not job_config.schedule_time:
             logging.info("Scheduling job to run now %s", event.src_path)
-            run = RunJob(event, job_config, self.config)
-            job_id = self.scheduler.add_job(run.run_job)
+            # run = RunJob(event, job_config, self.config, self.alert)
+            # job_id = self.scheduler.add_job(run.run_job)
 
         else:
             trigger = self._get_trigger_time(job_config.schedule_time)
             logging.info("Scheduling job to run at %s %s", trigger, event.src_path)
-            run = RunJob(event, job_config, self.config)
-            job_id = self.scheduler.add_job(run.run_job, "date", run_date=trigger)
-        self.jobs[event.src_path] = job_id
+            # run = RunJob(event, job_config, self.config, self.alert)
+            # job_id = self.scheduler.add_job(run.run_job, "date", run_date=trigger)
+        # self.jobs[event.src_path] = job_id
 
     def on_deleted(self, event: FileModifiedEvent) -> None:
         """Event handler for file deleted event
