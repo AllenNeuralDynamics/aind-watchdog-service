@@ -254,6 +254,7 @@ class RunJob:
         event : FileModifiedEvent
             modified event file
         """
+        logging.info("Running job for %s", self.event.src_path)
         self._send_alert("Running job", getattr(self, "alert"), self.event.src_path)
         if self.config.script:
             for command in self.config.script:
@@ -295,4 +296,5 @@ class RunJob:
             )
             return
         self._send_alert("Job complete", getattr(self, "alert"), self.event.src_path)
+        logging.info("Job complete for %s", self.event.src_path)
         self.move_manifest_to_archive()
