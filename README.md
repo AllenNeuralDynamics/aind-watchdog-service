@@ -9,26 +9,47 @@
 
 # Summary
 
-With aind-watchdog-service, you can configure a directory for the app to watch, where manifest files (or beacon files) are dropped containing src files from an acquisition labeled by modality. The program is meant to be configured with a web-hook URL to send messages to a Teams channel when data staging is complete and data transfer has been triggered through [aind-data-transfer-service](https://github.com/AllenNeuralDynamics/aind-data-transfer-service). Pipeline capsule ids can be added if triggering pipelines is necessary post-acquisition.
+With aind-watchdog-service, you can configure a directory for the app to watch, where manifest files (or beacon files) are dropped containing src files from an acquisition labeled by modality. The program can be configured with a web-hook URL to send messages to a Teams channel when data staging is complete and data transfer has been triggered through [aind-data-transfer-service](https://github.com/AllenNeuralDynamics/aind-data-transfer-service). Pipeline capsule ids can be added if triggering pipelines is necessary post-acquisition.
 
 # Usage
-* Create a watch_config file as json or yaml and store it's location in an environment variable called WATCH_CONFIG
+* Create a watch_config file as yaml. Create an environment variable called WATCH_CONFIG containing the location of the config file.
     * Review src/aind-watchdog-service/models/watch_config.py for configuration parameters
     * watch_config.yml must include:
-        * flag_dir (where watchdog observer should be looking for beacon files)
-        * webhook_url (to receive Teams notifications)
-        * run_script (bool - should be set to False if planning on staging data on VAST)
+        * **flag_dir**: where watchdog observer should be looking for beacon files
+        * **webhook_url**: to receive Teams notifications
 
-* Beacon or manifest file must contain the word "manifest" in the file name and the parameters according to the configurations set in aind-watchdog-service/models/job_config.py using either VastTransferConfig or RunScriptConfig for VAST transfer or custom script instructions, respectively. 
-    * yaml only (for now)
-    * To run a job that stages data on VAST, view the a template manifest under \tests\resources\manifest.yml
-        * for configuration parameters reference VastTransferConfig under src\aind_watchdog_service\models\job_configs.py
-    * Run a custom script
-        * To run a custom script that requires a differnt procedure than staging data directly on VAST, view the template manifest under \tests\resources\manifest_run_script.yml
-        * see src\aind_watchdog_service\models\job_configs.py
+* Manifest files are saved as yaml and must contain the following keys (note, some are optional)
+
+    * **name**: name of directory for the dataset stored on VAST
+    * **processor_full_name**: full name of person who acquired the data
+    * **subject_id**: mouse id
+    * **acquisition_datetime**: datetime of when data were acquired
+    * **platform**: platform name as defined in aind-data-schema-models
+    * **modalities**: modality name with source files or directories listed per modality
+    * **project_name**: project name as seen in the project and funding sources smart sheet
+    * **schemas**: location of rig.json, session.json and data_description.json
+    * **s3_bucket**: private, public or scratch
+    * **schedule_time**: when to schedule the transfer pipeline. Defaults to immediatly if not set (optional)
+    * **capsule_id**: Code Ocean pipeline or capsule id to trigger (optional)
+    * **mount**: Code Ocean pipeline or capsule id mount point
 
 # Configure Task Scheduler to boot aind-watchdog-service
 
+**Windows Task Scheduler** 
+
+* Should run for any user and run regardless of a user being logged in.
+* runs with highest priviledges
+* run program at log in and start up.
+* delay the start of the program by 30 seconds
+* only start one instance
+
+Check task manager to verify that two icons of watchdog are active. This is only one instance but Observer creates a second thread making it appear that two instance are running. 
+
+Start and stop watchdog through Task Scheduler. Task Scheduler will hold the PID of the program. If it is started on it's own and you try and stop watchdog with Task Scheduler, it will not stop.
+
+**systemd**
+
+XXX under construction XXX
 
 # Installation
 To use the software, in the root directory, run

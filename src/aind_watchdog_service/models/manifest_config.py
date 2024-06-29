@@ -56,7 +56,7 @@ class ManifestConfig(BaseModel):
             title="modality files",
         )
     )
-    schemas: Optional[List[str]] = Field(
+    schemas: List[str] = Field(
         default=[],
         description="Where schema files to be uploaded are saved",
         title="Schema directory",
