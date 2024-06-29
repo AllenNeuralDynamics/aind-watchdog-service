@@ -1,0 +1,39 @@
+acquisition_datetime: 2024-02-12 09:14:43+00:00
+capsule_id: null
+mount: null
+destination: D:/ophys
+processor_full_name: Some User
+modalities:
+  behavior:
+  - D:\behavior\data\1330132892_Behavior_20240212T091443.mp4
+  - D:\behavior\data\1330132892_Face_20240212T091444.mp4
+  - D:\behavior\data\1330132892_Eye_20240212T091443.mp4
+  - D:\behavior\data\1330132892_Behavior_20240212T091443.json
+  - D:\behavior\data\1330132892_Face_20240212T091444.json
+  - D:\behavior\data\1330132892_Eye_20240212T091443.json
+  ophys:
+  - D:\data\1330132892\1330132892_averaged_depth.tiff
+  - D:\data\1330132892\1330132892_averaged_surface.tiff
+  - D:\data\1330132892\1330132892_cortical_z_stack0.tiff
+  - D:\data\1330132892\1330132892_fullfield.roi
+  - D:\data\1330132892\1330132892_fullfield.tiff
+  - D:\data\1330132892\1330132892_local_z_stack0.tiff
+  - D:\data\1330132892\1330132892_local_z_stack1.tiff
+  - D:\data\1330132892\1330132892_local_z_stack2.tiff
+  - D:\data\1330132892\1330132892_local_z_stack3.tiff
+  - D:\data\1330132892\1330132892_platform.json
+  - D:\data\1330132892\1330132892_reticle.tif
+  - D:\data\1330132892\1330132892_stim.pkl
+  - D:\data\1330132892\1330132892_surface.roi
+  - D:\data\1330132892\1330132892_sync.h5
+  - D:\data\1330132892\1330132892_timeseries.roi
+  - D:\data\1330132892\1330132892_timeseries.tiff
+  - D:\data\1330132892\1330132892_vasculature.tif
+schemas:
+  - D:\data\1330132892\session.json
+  - D:/data/1330132892\rig.json
+name: multiplane-ophys_704576_2024-04-12_15-22-44
+platform: multiplane-ophys
+s3_bucket: private
+subject_id: 704576
+project_name: LearningomFISH-V1omFISH
