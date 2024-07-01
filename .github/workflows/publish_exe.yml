@@ -18,7 +18,8 @@ jobs:
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v3
 
-    - run: pip install -r requirements.txt pyinstaller
+    - run: pip install -e .
+    - run: pip install -e .[dev]
     - run: pyinstaller src\aind_watchdog_service\main.py --onefile --noconsole  -n aind-watchdog-service -i src\aind_watchdog_service\icon\watchdog.ico
     # Verify the executable runs
     - run: cp examples/example_watch_config_no_webhook.yml ./dist/
