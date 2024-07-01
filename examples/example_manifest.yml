@@ -1,0 +1,37 @@
+acquisition_datetime: 2024-06-18 10:34:32.749880
+capsule_id: 56bf687b-dbcd-4b93-a650-21b8584036ff
+destination: //allen/aind/scratch/2p-working-group/data-uploads
+modalities:
+  behavior:
+  - \\W10SV109650002\mvr\data\1374103167_Behavior_20240618T103420.mp4
+  - \\W10SV109650002\mvr\data\1374103167_Face_20240618T103421.mp4
+  - \\W10SV109650002\mvr\data\1374103167_Eye_20240618T103421.mp4
+  - \\W10SV109650002\mvr\data\1374103167_Behavior_20240618T103420.json
+  - \\W10SV109650002\mvr\data\1374103167_Face_20240618T103421.json
+  - \\W10SV109650002\mvr\data\1374103167_Eye_20240618T103421.json
+  ophys:
+  - D:\scanimage_ophys\data\1374103167\1374103167_averaged_depth.tiff
+  - D:\scanimage_ophys\data\1374103167\1374103167_averaged_surface.tiff
+  - D:\scanimage_ophys\data\1374103167\1374103167_fullfield.roi
+  - D:\scanimage_ophys\data\1374103167\1374103167_fullfield.tiff
+  - D:\scanimage_ophys\data\1374103167\1374103167_local_z_stack0.tiff
+  - D:\scanimage_ophys\data\1374103167\1374103167_platform.json
+  - D:\scanimage_ophys\data\1374103167\1374103167_reticle.tif
+  - D:\scanimage_ophys\data\1374103167\1374103167_stim.pkl
+  - D:\scanimage_ophys\data\1374103167\1374103167_surface.roi
+  - D:\scanimage_ophys\data\1374103167\1374103167_sync.h5
+  - D:\scanimage_ophys\data\1374103167\1374103167_timeseries.roi
+  - D:\scanimage_ophys\data\1374103167\1374103167_timeseries.tiff
+  - D:\scanimage_ophys\data\1374103167\1374103167_vasculature.tif
+mount: ophys
+name: multiplane-ophys_726087_2024-06-21_16-16-26
+platform: multiplane-ophys
+processor_full_name: Sam Seid
+project_name: Learning mFISH-V1omFISH
+s3_bucket: private
+schedule_time: 2024-06-22 03:00:00
+schemas:
+- C:/ProgramData/aind/rig.json
+- D:\scanimage_ophys\data\1374103167\session.json
+- D:\scanimage_ophys\data\1374103167\data_description.json
+subject_id: 726087

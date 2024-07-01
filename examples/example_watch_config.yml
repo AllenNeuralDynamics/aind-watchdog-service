@@ -1,0 +1,3 @@
+flag_dir: /some/dir
+manifest_complete: /some/dir/manifest_complete
+webhook_url: https://alleninstitute.webhook.office.com/webhookb2/70b02442-17e7-4273-b16d-c96e4bc584ec@32669cd6-737f-4b39-8bdd-d6951120d3fc/IncomingWebhook/c67df18b06aa470aa93f4d3a4cb8f4ce/b5d574af-077d-48d4-a6a5-232279015e6a

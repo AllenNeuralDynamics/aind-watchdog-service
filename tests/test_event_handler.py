@@ -1,20 +1,18 @@
 """Test EventHandler constructor."""
 
 import unittest
-from unittest.mock import patch, MagicMock
-import yaml
-from pathlib import Path
-from watchdog.events import FileModifiedEvent
-from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime as dt
 from datetime import timedelta
+from pathlib import Path
+from unittest.mock import MagicMock, patch
 
+import yaml
+from apscheduler.schedulers.background import BackgroundScheduler
+from watchdog.events import FileModifiedEvent
 
-from aind_watchdog_service.models.watch_config import (
-    WatchConfig,
-)
-from aind_watchdog_service.models.manifest_config import ManifestConfig
 from aind_watchdog_service.event_handler import EventHandler
+from aind_watchdog_service.models.manifest_config import ManifestConfig
+from aind_watchdog_service.models.watch_config import WatchConfig
 
 
 class MockFileModifiedEvent(FileModifiedEvent):

@@ -37,6 +37,12 @@ class WatchdogService:
         self._setup_logging(log_dir)
 
     def _setup_logging(self, log_dir):
+        """Setup logging
+        Parameters
+        ----------
+        log_dir : Path
+            Directory to store logs
+        """
         log_fp = Path(log_dir)
         if not log_fp.exists():
             log_fp.mkdir(parents=True)

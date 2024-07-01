@@ -1,22 +1,17 @@
 """Test main entry point."""
 
 import unittest
-from unittest.mock import patch, MagicMock
-import yaml
 from pathlib import Path
+from unittest.mock import MagicMock, patch
+
+import yaml
+from apscheduler.schedulers.background import BackgroundScheduler
 from watchdog.events import FileModifiedEvent
 from watchdog.observers import Observer
-from apscheduler.schedulers.background import BackgroundScheduler
 
-from aind_watchdog_service.models.watch_config import (
-    WatchConfig,
-)
-from aind_watchdog_service.main import (
-    WatchdogService,
-    start_watchdog,
-)
 from aind_watchdog_service.event_handler import EventHandler
-
+from aind_watchdog_service.main import WatchdogService, start_watchdog
+from aind_watchdog_service.models.watch_config import WatchConfig
 
 TEST_DIRECTORY = Path(__file__).resolve().parent
 
