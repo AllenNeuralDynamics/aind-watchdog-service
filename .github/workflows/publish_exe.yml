@@ -24,7 +24,8 @@ jobs:
     # Verify the executable runs
     - run: copy examples/example_watch_config_no_webhook.yml ./dist/
     - run: set WATCH_CONFIG=dist/example_watch_config_no_webhook.yml
-    - run: /dist/aind-watchdog-service.exe
+    - run: dir dist
+    - run: dist/aind-watchdog-service.exe
     - uses: actions/upload-artifact@v4
       with:
         path: dist/*
