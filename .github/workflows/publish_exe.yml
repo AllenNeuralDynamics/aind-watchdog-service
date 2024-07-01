@@ -19,13 +19,13 @@ jobs:
       uses: actions/setup-python@v3
 
     - run: pip install -e .
-    - run: pip install pyinstaller==6.6.0
-    - run: pyinstaller src/aind_watchdog_service/main.py --onefile --noconsole  -n aind-watchdog-service -i src/aind_watchdog_service/icon/watchdog.ico
+    - run: pip install -U pyinstaller
+    - run: pyinstaller src/aind_watchdog_service/main.py --onefile --noconsole  -n aind-watchdog-service -i src/aind_watchdog_service/icon/watchdog.ico --clean
     # Verify the executable runs
     - run: copy examples/example_watch_config_no_webhook.yml ./dist/
     - run: set WATCH_CONFIG=dist/example_watch_config_no_webhook.yml
     - run: dir dist
     - run: dist/aind-watchdog-service.exe
-    # - uses: actions/upload-artifact@v4
-    #   with:
-    #     path: dist/*
+    - uses: actions/upload-artifact@v4
+      with:
+        path: dist/*
