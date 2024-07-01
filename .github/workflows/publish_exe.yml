@@ -1,0 +1,29 @@
+name: Publish executable
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [ '3.9', '3.10', '3.11' ]
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+
+    - run: pip install -r requirements.txt pyinstaller
+    - run: src\aind': pyinstaller src\aind_watchdog_service\main.py --onefile --noconsole  -n aind-watchdog-service -i src\aind_watchdog_service\icon\watchdog.ico
+    # Verify the executable runs
+    - run: cp examples/example_watch_config_no_webhook.yml ./dist/
+    - run: set WATCH_CONFIG=dist/example_watch_config_no_webhook.yml
+    - run: ./dist/aind-watchdog-service.exe
+    - uses: actions/upload-artifact@v4
+      with:
+        path: dist/*
