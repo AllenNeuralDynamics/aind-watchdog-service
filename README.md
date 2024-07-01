@@ -37,7 +37,7 @@ With aind-watchdog-service, you can configure a directory for the app to watch, 
 
 # Windows System Installation
 
-* Install (copy) exe to desired location
+* Install (copy) exe to desired location *As of 7/1 - exe is temporarily located here //allen/aind/scratch/ariellel/aind-watchdog-service.exe*
 * Create a directory where manifest files will be dropped
 * Create a watch_config.yaml file.
 * Add watch_config.yaml path to env var titled WATCH_CONFIG
