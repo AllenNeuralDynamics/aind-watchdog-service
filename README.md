@@ -19,7 +19,7 @@ With aind-watchdog-service, you can configure a directory for the app to watch, 
         * **webhook_url**: to receive Teams notifications
         * **manifest_complete**: where watchdog will place completed manifest files
 
-* Manifest files are saved as yaml and must contain the following keys (note, some are optional)
+* Manifest files must besaved as yaml and contain *manifest* in the file name. The manifest file must contain the following keys *optional keys are marked as such*:
 
     * **name**: name of directory for the dataset stored on VAST
     * **processor_full_name**: full name of person who acquired the data
@@ -30,10 +30,11 @@ With aind-watchdog-service, you can configure a directory for the app to watch, 
     * **project_name**: project name as seen in the project and funding sources smart sheet
     * **schemas**: location of rig.json, session.json and data_description.json
     * **s3_bucket**: private, public or scratch
-    * **schedule_time**: when to schedule the transfer pipeline. Defaults to immediatly if not set (optional)
-    * **capsule_id**: Code Ocean pipeline or capsule id to trigger (optional)
-    * **mount**: Code Ocean pipeline or capsule id mount point
+    * **schedule_time**: when to schedule the transfer pipeline. Defaults to immediatly if not set **OPTIONAL**
+    * **capsule_id**: Code Ocean pipeline or capsule id to trigger **OPTIONAL**
+    * **mount**: Code Ocean pipeline or capsule id mount point **OPTIONAL**
 
+**If you are specifying a capsule id to run a pipeline, you must input the data name of the data mounted to the pipeline. If it is not specified, CO will run the asset mounted to the pipeline and not the dataset that was uploaded.**
 
 # Windows System Installation
 
@@ -48,20 +49,57 @@ With aind-watchdog-service, you can configure a directory for the app to watch, 
 # Configure Task Scheduler to control and monitor aind-watchdog-service
 
 **Windows Task Scheduler** 
+*Pre-requisites: Must be logged in as a user with admin priviliges or logged in under the service account. If you are logged in under the service account and that is the only account that runs on the computer, you will not need to configure this task for all users*
+* Select the windows button, type in Task Scheduler and run program
+* Highlight Task Scheduler Library in the left panel. In the right panel select New Folder and create a new folder called AIND
+![Task Scheduler](task_scheduler_main.png)
+* Right click on the AIND folder and select Create Task...
 
-* Should run for any user and run regardless of a user being logged in.
-* runs with highest priviledges
-* run program at log in and start up.
-* delay the start of the program by 30 seconds
-* only start one instance
+![Create Task](create_task.png)
 
-Check task manager to verify that two icons of watchdog are active. This is only one instance but Observer creates a second thread making it appear that two instance are running. 
+* Update the first panel by creating a name for the scheduled task with a description. Select Run whether user is logged on or not. Select Run with highest priviliges
 
-Start and stop watchdog through Task Scheduler. Task Scheduler will hold the PID of the program. If it is started on it's own and you try and stop watchdog with Task Scheduler, it will not stop.
+![First Panel](first_pane.png)
+* Go to the Triggers panel and create two new triggers. One will start aind-watchdog-service at start up and the other will start it at user log on. Replicate the panels shown below to configure these two triggers.
 
-**systemd**
+![Start Up](start_up_trigger.png)
 
-XXX under construction XXX
+![Log On](log_on.png)
+
+* **Notice the delay time for each task. This is necessary so that Windows boot order does not accidentally miss the task**
+
+* This final trigger panel should look like this:
+
+![Final Trigger](final_trigger.png)
+
+* The Actions panel is where the action is set to start aind-watchdog-service. Be sure to specify the location of your local .exe copy of aind-watchdog-service.
+
+![Action Start](action.png)
+
+* The final Action panel should look like this
+
+![Final Action Panel](final_action_panel.png)
+
+* Because we have specified the task to run for all user, you will be asked to enter your credentials. *The credentials you enter should be for an account with admin priviliges. If you are not logged in as the correct account you will need to log out and log back in as an authorized user and restart the process*
+
+* After entering the user credentials you may be kicked out of the scheduled task. If that happens, right click on the scheduled task called aind-watchdog-service and select properties to continue configuring the task (skip this step if you did not get kicked off)
+
+![Re-Enter Configuration](enter_configuration.png)
+
+* Select the Settings panel and un check Stop the task if it runs longer than. You do not want aind-watchdog-service to get clobbered by the system. Make sure the Settings panel looks exactly as shown below
+
+![Settings Configuration](settings_panel.png)
+
+* You may have to enter the user credentials again.
+
+* Once the task is configured, select okay to enter the main Task Scheduler Panel. You will now be able to start the task through Task Scheduler by selecting Run in the left panel of the main UI
+
+![Run](run.png)
+
+* After selecting Run open Task Manager to verify that two icons of watchdog are active. This is only one instance but the Observer in aind-watchdog-service creates a second thread making it appear that two instance are running.
+* To stop aind-watchdog-service, go to the main UI where you selected Run and select End. You should see the task stop in Task Manager. *Task scheduler doesn't always hold onto the second process thread. You may have to end that task manually through Task Manager before restarting a new instnace in Task Scheduler*
+
+
 # Installation
 To use the software, in the root directory, run
 ```bash
