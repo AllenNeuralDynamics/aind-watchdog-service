@@ -1,10 +1,8 @@
 name: Publish executable
-
 on:
   pull_request:
     branches:
       - main
-
 jobs:
   build:
     runs-on: windows-latest
@@ -12,12 +10,10 @@ jobs:
       fail-fast: false
       matrix:
         python-version: [ '3.9', '3.10', '3.11' ]
-
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v3
-
     - run: pip install -e .
     - run: pip install -U pyinstaller
     - run: pyinstaller src/aind_watchdog_service/main.py --onefile --noconsole  -n aind-watchdog-service -i src/aind_watchdog_service/icon/watchdog.ico --clean
