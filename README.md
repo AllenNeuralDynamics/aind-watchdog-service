@@ -17,6 +17,7 @@ With aind-watchdog-service, you can configure a directory for the app to watch, 
     * watch_config.yml must include:
         * **flag_dir**: where watchdog observer should be looking for beacon files
         * **webhook_url**: to receive Teams notifications
+        * **manifest_complete**: where watchdog will place completed manifest files
 
 * Manifest files are saved as yaml and must contain the following keys (note, some are optional)
 
@@ -33,7 +34,18 @@ With aind-watchdog-service, you can configure a directory for the app to watch, 
     * **capsule_id**: Code Ocean pipeline or capsule id to trigger (optional)
     * **mount**: Code Ocean pipeline or capsule id mount point
 
-# Configure Task Scheduler to boot aind-watchdog-service
+
+# Windows System Installation
+
+* Install (copy) exe to desired location
+* Create a directory where manifest files will be dropped
+* Create a watch_config.yaml file.
+* Add watch_config.yaml path to env var titled WATCH_CONFIG
+* Create a scheduled task (see below)
+* Start watchdog through the created task
+* Check Task Manager to verify watchdog is running
+
+# Configure Task Scheduler to control and monitor aind-watchdog-service
 
 **Windows Task Scheduler** 
 
@@ -50,7 +62,6 @@ Start and stop watchdog through Task Scheduler. Task Scheduler will hold the PID
 **systemd**
 
 XXX under construction XXX
-
 # Installation
 To use the software, in the root directory, run
 ```bash
