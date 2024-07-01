@@ -6,6 +6,7 @@ import os
 import platform
 import subprocess
 from pathlib import Path, PurePosixPath
+from typing import Union
 
 import requests
 from aind_data_transfer_models.core import (
@@ -35,7 +36,7 @@ class RunJob:
         event: FileModifiedEvent,
         config: ManifestConfig,
         watch_config: WatchConfig,
-        alert: str | None,
+        alert: Union[str, None],
     ):
         """initialize RunJob class"""
         self.event = event
