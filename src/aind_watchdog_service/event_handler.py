@@ -5,7 +5,6 @@ from datetime import datetime as dt
 from datetime import timedelta
 from pathlib import Path
 from typing import Dict
-import sys
 
 import yaml
 from apscheduler.schedulers.background import BackgroundScheduler
