@@ -15,9 +15,9 @@ With aind-watchdog-service, you can configure a directory for the app to watch, 
 * Create a watch_config file as yaml. Create an environment variable called WATCH_CONFIG containing the location of the config file.
     * Review src/aind-watchdog-service/models/watch_config.py for configuration parameters
     * watch_config.yml must include:
-        * **flag_dir**: where watchdog observer should be looking for beacon files
-        * **webhook_url**: to receive Teams notifications
+        * **flag_dir**: directory watchdog observer will monitor for manifest files
         * **manifest_complete**: where watchdog will place completed manifest files
+        * **webhook_url**: to receive Teams notifications **OPTIONAL**
 
 * Manifest files must besaved as yaml and contain *manifest* in the file name. The manifest file must contain the following keys *optional keys are marked as such*:
 
