@@ -23,9 +23,10 @@ jobs:
     - run: pyinstaller src/aind_watchdog_service/main.py --onefile --noconsole  -n aind-watchdog-service -i src/aind_watchdog_service/icon/watchdog.ico --clean
     # Verify the executable runs
     - run: copy examples/example_watch_config_no_webhook.yml ./dist/
-    - run: set WATCH_CONFIG=dist/example_watch_config_no_webhook.yml
+    - run: |
+      echo "WATCH_CONFIG=dist/example_watch_config_no_webhook.yml" >> "$GITHUB_ENV"
     - run: dir dist
     - run: dist/aind-watchdog-service.exe
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v3
       with:
         path: dist/*
