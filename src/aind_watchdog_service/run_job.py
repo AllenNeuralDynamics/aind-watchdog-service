@@ -95,24 +95,24 @@ class RunJob:
             self.config.destination_root, self.config.destination_subdir
         )
         modalities = self.config.modalities
-        # for modality in modalities.keys():
-        #     destination_directory = os.path.join(destination, parent_directory, modality)
-        #     for file in modalities[modality]:
-        #         if Path(file).exists():
-        #             destination_directory = self._clean_path(destination_directory)
-        #             transfer = self.build_s5cmd_copy_msg(
-        #                 file, destination_directory + "/"
-        #             )
-        #             if not transfer:
-        #                 logging.error("Error copying files %s", file)
-        #                 self._send_alert(
-        #                     "Error copying files", getattr(self, "alert"), str(file)
-        #                 )
-        #                 return False
-        #         else:
-        #             logging.error("File not found %s", file)
-        #             self._send_alert("File not found", getattr(self, "alert"), file)
-        #             return False
+        for modality in modalities.keys():
+            destination_directory = os.path.join(destination, parent_directory, modality)
+            for file in modalities[modality]:
+                if Path(file).exists():
+                    destination_directory = self._clean_path(destination_directory)
+                    transfer = self.build_s5cmd_copy_msg(
+                        file, destination_directory + "/"
+                    )
+                    if not transfer:
+                        logging.error("Error copying files %s", file)
+                        self._send_alert(
+                            "Error copying files", getattr(self, "alert"), str(file)
+                        )
+                        return False
+                else:
+                    logging.error("File not found %s", file)
+                    self._send_alert("File not found", getattr(self, "alert"), file)
+                    return False
         for schema in self.config.schemas:
             destination_directory = os.path.join(destination, parent_directory)
             destination_directory = self._clean_path(destination_directory)
