@@ -64,6 +64,24 @@ class RunJob:
             alert_bot = AlertBot(self.watch_config.webhook_url)
             alert_bot.send_message(title, message)
 
+    def _clean_path(self, path: str) -> str:
+        """Clean path for Windows
+
+        Parameters
+        ----------
+        path : str
+            path to clean
+
+        Returns
+        -------
+        str
+            cleaned path
+        """
+        if PLATFORM == "windows":
+            path = re.sub(r"\\+", "/", path)
+            return path
+        return path
+
     def copy_to_vast(self) -> bool:
         """Determine platform and copy files to VAST
 
@@ -73,28 +91,31 @@ class RunJob:
             status of the copy operation
         """
         parent_directory = self.config.name
-        destination = os.path.join(self.config.destination_root, self.config.destination_subdir)
+        destination = os.path.join(
+            self.config.destination_root, self.config.destination_subdir
+        )
         modalities = self.config.modalities
-        for modality in modalities.keys():
-            destination_directory = os.path.join(destination, parent_directory, modality)
-            for file in modalities[modality]:
-                if Path(file).exists():
-                    destination_directory = re.sub(r"\\+", "/", destination_directory)
-                    transfer = self.build_s5cmd_copy_msg(
-                        file, destination_directory + "/"
-                    )
-                    if not transfer:
-                        logging.error("Error copying files %s", file)
-                        self._send_alert(
-                            "Error copying files", getattr(self, "alert"), str(file)
-                        )
-                        return False
-                else:
-                    logging.error("File not found %s", file)
-                    self._send_alert("File not found", getattr(self, "alert"), file)
-                    return False
+        # for modality in modalities.keys():
+        #     destination_directory = os.path.join(destination, parent_directory, modality)
+        #     for file in modalities[modality]:
+        #         if Path(file).exists():
+        #             destination_directory = self._clean_path(destination_directory)
+        #             transfer = self.build_s5cmd_copy_msg(
+        #                 file, destination_directory + "/"
+        #             )
+        #             if not transfer:
+        #                 logging.error("Error copying files %s", file)
+        #                 self._send_alert(
+        #                     "Error copying files", getattr(self, "alert"), str(file)
+        #                 )
+        #                 return False
+        #         else:
+        #             logging.error("File not found %s", file)
+        #             self._send_alert("File not found", getattr(self, "alert"), file)
+        #             return False
         for schema in self.config.schemas:
             destination_directory = os.path.join(destination, parent_directory)
+            destination_directory = self._clean_path(destination_directory)
             transfer = self.build_s5cmd_copy_msg(schema, destination_directory + "/")
             if not transfer:
                 logging.error("Error copying schema %s", schema)
@@ -149,11 +170,13 @@ class RunJob:
     def trigger_transfer_service(self) -> None:
         """Triggers aind-data-transfer-service"""
         modality_configs = []
-        network_directory = "//" + self.config.destination_root.split("://")[1].replace("-", "/")
+        network_directory = "//" + self.config.destination_root.split("://")[1].replace(
+            "-", "/"
+        )
         destination = PurePosixPath(network_directory) / self.config.destination_subdir
         for modality in self.config.modalities.keys():
             m = ModalityConfigs(
-                source = destination / self.config.name / modality,modality=modality
+                source=destination / self.config.name / modality, modality=modality
             )
             modality_configs.append(m)
 
