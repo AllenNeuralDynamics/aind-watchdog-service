@@ -195,18 +195,18 @@ class RunJob:
 
         submit_request = SubmitJobRequest(upload_jobs=[upload_job_configs])
         post_request_content = json.loads(submit_request.model_dump_json(round_trip=True))
-        from pprint import pprint
+        logging.info(
+            "Sending request to aind-data-transfer-service: %s", post_request_content
+        )
+        submit_job_response = requests.post(
+            url="http://aind-data-transfer-service/api/v1/submit_jobs",
+            json=post_request_content,
+        )
 
-        pprint(post_request_content)
-        # submit_job_response = requests.post(
-        #     url="http://aind-data-transfer-service/api/v1/submit_jobs",
-        #     json=post_request_content,
-        # )
-
-        # if submit_job_response.status_code == 200:
-        #     return True
-        # else:
-        #     return False
+        if submit_job_response.status_code == 200:
+            return True
+        else:
+            return False
         return True
 
     def move_manifest_to_archive(self) -> None:
