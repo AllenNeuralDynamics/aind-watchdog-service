@@ -1,11 +1,11 @@
 """Job configs for VAST staging or executing a custom script"""
 
 from datetime import datetime
-from typing import Dict, Optional, List
+from typing import Dict, List, Literal, Optional
 
-from aind_data_schema_models.platforms import Platform
 from aind_data_schema_models.modalities import Modality
-from pydantic import BaseModel, Field, field_validator, ConfigDict
+from aind_data_schema_models.platforms import Platform
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ManifestConfig(BaseModel):
@@ -30,50 +30,47 @@ class ManifestConfig(BaseModel):
         description="Transfer time to schedule copy and upload. If None defaults to trigger the transfer immediately",  # noqa
         title="APScheduler transfer time",
     )
-    platform: str = Field(description="Platform type", title="Platform type")
-    capsule_id: Optional[str] = Field(
-        ..., description="Capsule ID of pipeline to run", title="Capsule"
+    platform: Literal[tuple(Platform._abbreviation_map.keys())] = Field(
+        description="Platform type", title="Platform type"
     )
-    s3_bucket: Optional[str] = Field(
+    capsule_id: Optional[str] = Field(
+        default=None, description="Capsule ID of pipeline to run", title="Capsule"
+    )
+    mount: Optional[str] = Field(
+        default=None, description="Mount point for pipeline run", title="Mount point"
+    )
+    s3_bucket: Optional[Literal["s3", "public", "private", "scratch"]] = Field(
         default=None, description="s3 endpoint", title="S3 endpoint"
     )
     project_name: str = Field(..., description="Project name", title="Project name")
 
-    destination: Optional[str] = Field(
-        default=None,
+    destination_root: Optional[str] = Field(
+        default="s3://aind-stage/",
         description="network path to VAST",
         title="VAST destination",
     )
-    modalities: Dict[str, List[str]] = Field(
-        default={},
-        description="list of ModalityFile objects containing modality names and associated files or directories",  # noqa
-        title="modality files",
+    destination_subdir: Optional[str] = Field(
+        default="",
+        description="subdirectory on VAST",
+        title="VAST subdirectory",
     )
-    schemas: Optional[List[str]] = Field(
+    modalities: Dict[Literal[tuple(Modality._abbreviation_map.keys())], List[str]] = (
+        Field(
+            default={},
+            description="list of ModalityFile objects containing modality names and associated files or directories",  # noqa
+            title="modality files",
+        )
+    )
+    schemas: List[str] = Field(
         default=[],
         description="Where schema files to be uploaded are saved",
         title="Schema directory",
     )
-    script: Dict[str, list[str]] = Field(
+    script: Dict[str, List[str]] = Field(
         default={}, description="Set of commands to run in subprocess.", title="Commands"
     )
-
-    @field_validator("platform")
-    @classmethod
-    def check_platform_string(cls, input_platform: str) -> str:
-        """Checks if str can be converted to platform model"""
-        if input_platform in Platform._abbreviation_map:
-            return input_platform
-        else:
-            raise AttributeError(f"Unknown platform: {input_platform}")
-
-    @field_validator("modalities")
-    @classmethod
-    def check_modality_string(
-        cls, input_modality: Dict[str, List[str]]
-    ) -> Dict[str, List[str]]:
-        """Checks if str can be converted to platform model"""
-        for key in input_modality.keys():
-            if key not in Modality._abbreviation_map:
-                raise AttributeError(f"Unknown modality: {input_modality}")
-        return input_modality
+    force_cloud_sync: Optional[bool] = Field(
+        default=False,
+        description="Upload data even if it's already in the cloud",
+        title="Force cloud sync",
+    )

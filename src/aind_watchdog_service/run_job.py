@@ -4,11 +4,18 @@ import json
 import logging
 import os
 import platform
+import re
 import subprocess
 from pathlib import Path, PurePosixPath
+from shutil import move
+from typing import Union
 
 import requests
-from aind_data_transfer_models.core import BasicUploadJobConfigs, ModalityConfigs
+from aind_data_transfer_models.core import (
+    BasicUploadJobConfigs,
+    ModalityConfigs,
+    SubmitJobRequest,
+)
 from watchdog.events import FileModifiedEvent
 
 from aind_watchdog_service.alert_bot import AlertBot
@@ -31,12 +38,31 @@ class RunJob:
         event: FileModifiedEvent,
         config: ManifestConfig,
         watch_config: WatchConfig,
+        alert: Union[str, None],
     ):
         """initialize RunJob class"""
         self.event = event
         self.config = config
         self.watch_config = watch_config
-        self.alert_bot = AlertBot(self.watch_config.webhook_url)
+        self.alert = None
+        if alert:
+            self.alert = alert
+
+    def _send_alert(self, title: str, send: bool, message: str = None) -> None:
+        """wrapper for AlertBot configured
+
+        Parameters
+        ----------
+        title : str
+            message to send
+        send : bool
+            send to Teams
+        message: str
+            Message to go in Teams card
+        """
+        if send:
+            alert_bot = AlertBot(self.watch_config.webhook_url)
+            alert_bot.send_message(title, message)
 
     def copy_to_vast(self) -> bool:
         """Determine platform and copy files to VAST
@@ -47,33 +73,32 @@ class RunJob:
             status of the copy operation
         """
         parent_directory = self.config.name
-        destination = self.config.destination
+        destination = os.path.join(self.config.destination_root, self.config.destination_subdir)
         modalities = self.config.modalities
-        network_destination = self.config.destination.replace("//allen/aind", "s3://aind-scratch")
-        if "s3" not in destination:
-            logging.error("Destination is not in proper format %s", destination)
-            self.alert_bot.send_message("Destination is not in proper format %s", destination)
-            return False
         for modality in modalities.keys():
-            destination_directory = os.path.join(network_destination, parent_directory, modality)
-            destination_directory
+            destination_directory = os.path.join(destination, parent_directory, modality)
             for file in modalities[modality]:
                 if Path(file).exists():
-                    transfer = self.build_s5cmd_copy_msg(file, destination_directory + "/")
+                    destination_directory = re.sub(r"\\+", "/", destination_directory)
+                    transfer = self.build_s5cmd_copy_msg(
+                        file, destination_directory + "/"
+                    )
                     if not transfer:
                         logging.error("Error copying files %s", file)
-                        self.alert_bot.send_message("Error copying files", str(file))
+                        self._send_alert(
+                            "Error copying files", getattr(self, "alert"), str(file)
+                        )
                         return False
                 else:
                     logging.error("File not found %s", file)
-                    self.alert_bot.send_message("File not found", file)
+                    self._send_alert("File not found", getattr(self, "alert"), file)
                     return False
         for schema in self.config.schemas:
             destination_directory = os.path.join(destination, parent_directory)
             transfer = self.build_s5cmd_copy_msg(schema, destination_directory + "/")
             if not transfer:
                 logging.error("Error copying schema %s", schema)
-                self.alert_bot.send_message("Error copying schema", schema)
+                self._send_alert("Error copying schema", getattr(self, "alert"), schema)
                 return False
         return True
 
@@ -90,14 +115,14 @@ class RunJob:
         subprocess.CompletedProcess
             subprocess completed process
         """
-        logging.info(f"Executing command: {cmd}")
+        logging.info("Executing command: %s", cmd)
         subproc = subprocess.run(
             cmd, check=False, stderr=subprocess.PIPE, stdout=subprocess.PIPE
         )
         return subproc
 
     def build_s5cmd_copy_msg(self, src: str, dest: str) -> bool:
-        """copy files using windows robocopy command
+        """copy files using s3 protocol with s5cmd
 
         Parameters
         ----------
@@ -111,78 +136,61 @@ class RunJob:
         bool
             True if copy was successful, False otherwise
         """
-        # Robocopy used over xcopy for better performance
-        # /j: unbuffered I/O (to speed up copy)
-        # /e: copy subdirectories (includes empty subdirs), /r:5: retry 5 times
         if not Path(src).exists():
             return False
         run = self.run_subprocess(
             ["s5cmd", "cp", src, dest],
         )
-        # Robocopy return code documenttion:
-        # https://learn.microsoft.com/en-us/troubleshoot/windows-server/backup-and-storage/return-codes-used-robocopy-utility # noqa
-        if run.returncode == 255:
+        if "ERROR" in run.stderr.decode():
+            logging.error("Error copying %s to %s: %s", src, dest, run.stderr.decode())
             return False
         return True
 
     def trigger_transfer_service(self) -> None:
         """Triggers aind-data-transfer-service"""
         modality_configs = []
+        network_directory = "//" + self.config.destination_root.split("://")[1].replace("-", "/")
+        destination = PurePosixPath(network_directory) / self.config.destination_subdir
         for modality in self.config.modalities.keys():
             m = ModalityConfigs(
-                source=PurePosixPath(self.config.destination)
-                / self.config.name
-                / modality,
-                modality=modality,
+                source = destination / self.config.name / modality,modality=modality
             )
             modality_configs.append(m)
+
         upload_job_configs = BasicUploadJobConfigs(
             s3_bucket=self.config.s3_bucket,
             platform=self.config.platform,
             subject_id=str(self.config.subject_id),
             acq_datetime=self.config.acquisition_datetime.strftime("%Y-%m-%d %H:%M:%S"),
             modalities=modality_configs,
-            metadata_dir=PurePosixPath(self.config.destination) / self.config.name,
+            metadata_dir=destination / self.config.name,
             process_capsule_id=self.config.capsule_id,
             project_name=self.config.project_name,
+            input_data_mount=self.config.mount,
+            force_cloud_sync=self.config.force_cloud_sync,
         )
 
-        # From aind-data-transfer-service README
-        hpc_settings = json.dumps({})
-        upload_job_settings = upload_job_configs.model_dump_json()
-        script = ""
+        submit_request = SubmitJobRequest(upload_jobs=[upload_job_configs])
+        post_request_content = json.loads(submit_request.model_dump_json(round_trip=True))
+        from pprint import pprint
 
-        hpc_job = {
-            "upload_job_settings": upload_job_settings,
-            "hpc_settings": hpc_settings,
-            "script": script,
-        }
+        pprint(post_request_content)
+        # submit_job_response = requests.post(
+        #     url="http://aind-data-transfer-service/api/v1/submit_jobs",
+        #     json=post_request_content,
+        # )
 
-        hpc_jobs = [hpc_job]
-        post_request_content = {"jobs": hpc_jobs}
-        submit_job_response = requests.post(
-            url="http://aind-data-transfer-service/api/submit_hpc_jobs",
-            json=post_request_content,
-        )
-        if submit_job_response.status_code == 200:
-            return True
-        else:
-            return False
+        # if submit_job_response.status_code == 200:
+        #     return True
+        # else:
+        #     return False
+        return True
 
     def move_manifest_to_archive(self) -> None:
         """Move manifest file to archive"""
         archive = self.watch_config.manifest_complete
-        if PLATFORM == "windows":
-            copy_file = self.execute_windows_command(self.event.src_path, archive)
-            if not copy_file:
-                logging.error("Error copying manifest file %s", self.event.src_path)
-                self.alert_bot.send_message(
-                    "Error copying manifest file", self.event.src_path
-                )
-                return
-            os.remove(self.event.src_path)
-        else:
-            self.run_subprocess(["mv", self.event.src_path, archive])
+        move(self.event.src_path, archive)
+        logging.info("Moved manifest to archive %s", archive)
 
     def run_job(self) -> None:
         """Triggers the vast transfer service
@@ -192,7 +200,8 @@ class RunJob:
         event : FileModifiedEvent
             modified event file
         """
-        self.alert_bot.send_message("Running job", self.event.src_path)
+        logging.info("Running job for %s", self.event.src_path)
+        self._send_alert("Running job", getattr(self, "alert"), self.event.src_path)
         if self.config.script:
             for command in self.config.script:
                 logging.info(
@@ -203,27 +212,35 @@ class RunJob:
                 )
                 if run.returncode != 0:
                     logging.error("Error running script %s", command)
-                    self.alert_bot.send_message(
+                    self._send_alert(
                         "Error running script",
+                        getattr(self, "alert"),
                         f"Could not execute {command} for {self.config.name}",
                     )
                     return
                 else:
-                    self.alert_bot.send_message(
-                        "Script executed", f"Ran {command} for {self.config.name}"
+                    self._send_alert(
+                        "Script executed",
+                        getattr(self, "alert"),
+                        f"Ran {command} for {self.config.name}",
                     )
 
         else:
             transfer = self.copy_to_vast()
             if not transfer:
-                self.alert_bot.send_message(
-                    "Could not copy data to destination", self.event.src_path
+                self._send_alert(
+                    "Could not copy data to destination",
+                    getattr(self, "alert"),
+                    self.event.src_path,
                 )
                 return
         if not self.trigger_transfer_service():
-            self.alert_bot.send_message(
-                "Could not trigger aind-data-transfer-service", self.event.src_path
+            self._send_alert(
+                "Could not trigger aind-data-transfer-service",
+                getattr(self, "alert"),
+                self.event.src_path,
             )
             return
-        self.alert_bot.send_message("Job complete", self.event.src_path)
+        self._send_alert("Job complete", getattr(self, "alert"), self.event.src_path)
+        logging.info("Job complete for %s", self.event.src_path)
         self.move_manifest_to_archive()

@@ -1,13 +1,15 @@
 """Example test template."""
 
 import unittest
-import yaml
-import pydantic_core
-from pathlib import Path
 from datetime import datetime as dt
-from aind_watchdog_service.models.watch_config import WatchConfig
-from aind_watchdog_service.models.manifest_config import ManifestConfig
+from pathlib import Path
 
+import pydantic_core
+from pydantic import ValidationError
+import yaml
+
+from aind_watchdog_service.models.manifest_config import ManifestConfig
+from aind_watchdog_service.models.watch_config import WatchConfig
 
 TEST_DIRECTORY = Path(__file__).resolve().parent
 
@@ -60,12 +62,12 @@ class TestManifestConfigs(unittest.TestCase):
         self.assertEqual(manifest_config.model_dump(), data)
 
         data["platform"] = "cafe"
-        with self.assertRaises(AttributeError):
+        with self.assertRaises(ValidationError):
             ManifestConfig(**data)
 
         data["platform"] = "multiplane-ophys"
         data["modalities"]["nikon"] = ["some file"]
-        with self.assertRaises(AttributeError):
+        with self.assertRaises(ValidationError):
             ManifestConfig(**data)
 
 
