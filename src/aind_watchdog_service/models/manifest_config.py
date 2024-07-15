@@ -41,8 +41,8 @@ class ManifestConfig(BaseModel):
 
     destination: Optional[str] = Field(
         default=None,
-        description="where to send data to on VAST",
-        title="VAST destination and maybe S3?",
+        description="network path to VAST",
+        title="VAST destination",
     )
     modalities: Dict[str, List[str]] = Field(
         default={},

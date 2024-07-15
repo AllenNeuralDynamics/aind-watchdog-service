@@ -49,18 +49,17 @@ class RunJob:
         parent_directory = self.config.name
         destination = self.config.destination
         modalities = self.config.modalities
+        network_destination = self.config.destination.replace("//allen/aind", "s3://aind-scratch")
+        if "s3" not in destination:
+            logging.error("Destination is not in proper format %s", destination)
+            self.alert_bot.send_message("Destination is not in proper format %s", destination)
+            return False
         for modality in modalities.keys():
-            destination_directory = Path(destination) / parent_directory / modality
-            if not destination_directory.is_dir():
-                destination_directory.mkdir(parents=True)
+            destination_directory = os.path.join(network_destination, parent_directory, modality)
+            destination_directory
             for file in modalities[modality]:
                 if Path(file).exists():
-                    if PLATFORM == "windows":
-                        transfer = self.execute_windows_command(
-                            file, destination_directory
-                        )
-                    else:
-                        transfer = self.execute_linux_command(file, destination_directory)
+                    transfer = self.build_s5cmd_copy_msg(file, destination_directory + "/")
                     if not transfer:
                         logging.error("Error copying files %s", file)
                         self.alert_bot.send_message("Error copying files", str(file))
@@ -71,10 +70,7 @@ class RunJob:
                     return False
         for schema in self.config.schemas:
             destination_directory = os.path.join(destination, parent_directory)
-            if PLATFORM == "windows":
-                transfer = self.execute_windows_command(schema, destination_directory)
-            else:
-                transfer = self.execute_linux_command(schema, destination_directory)
+            transfer = self.build_s5cmd_copy_msg(schema, destination_directory + "/")
             if not transfer:
                 logging.error("Error copying schema %s", schema)
                 self.alert_bot.send_message("Error copying schema", schema)
@@ -100,7 +96,7 @@ class RunJob:
         )
         return subproc
 
-    def execute_windows_command(self, src: str, dest: str) -> bool:
+    def build_s5cmd_copy_msg(self, src: str, dest: str) -> bool:
         """copy files using windows robocopy command
 
         Parameters
@@ -120,51 +116,12 @@ class RunJob:
         # /e: copy subdirectories (includes empty subdirs), /r:5: retry 5 times
         if not Path(src).exists():
             return False
-        if Path(src).is_dir():
-            run = self.run_subprocess(
-                ["robocopy", src, dest, "/z", "/e", "/j", "/r:5"],
-            )
-        else:
-            run = self.run_subprocess(
-                [
-                    "robocopy",
-                    str(Path(src).parent),
-                    dest,
-                    Path(src).name,
-                    "/j",
-                    "/r:5",
-                ]
-            )
+        run = self.run_subprocess(
+            ["s5cmd", "cp", src, dest],
+        )
         # Robocopy return code documenttion:
         # https://learn.microsoft.com/en-us/troubleshoot/windows-server/backup-and-storage/return-codes-used-robocopy-utility # noqa
-        if run.returncode > 7:
-            return False
-        return True
-
-    def execute_linux_command(self, src: str, dest: str) -> bool:
-        """copy files using linux cp command
-
-        Parameters
-        ----------
-        src : str
-            source file or directory
-        dest : str
-            destination directory
-
-        Returns
-        -------
-        bool
-            True if copy was successful, False otherwise
-        """
-        # Rsync used over cp for better performance
-        # -r: recursive, -t: preserve modification times
-        if not Path(src).exists():
-            return False
-        if Path(src).is_dir():
-            run = self.run_subprocess(["rsync", "-r", "-t", src, dest])
-        else:
-            run = self.run_subprocess(["rsync", "-t", src, dest])
-        if run.returncode != 0:
+        if run.returncode == 255:
             return False
         return True
 
