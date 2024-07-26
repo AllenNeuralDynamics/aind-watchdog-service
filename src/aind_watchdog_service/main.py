@@ -92,6 +92,7 @@ def start_watchdog(watch_config: WatchConfig) -> None:
 
 
 def main():
+    """Main function to parse arguments and start watchdog service"""
 
     parser = argparse.ArgumentParser(description="Watchdog service")
     parser.add_argument(
