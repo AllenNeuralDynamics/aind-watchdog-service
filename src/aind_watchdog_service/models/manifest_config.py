@@ -54,12 +54,17 @@ class ManifestConfig(BaseModel):
         description="subdirectory on VAST",
         title="VAST subdirectory",
     )
-    modalities: Dict[Literal[tuple(Modality._abbreviation_map.keys())], List[str]] = (
-        Field(
-            default={},
-            description="list of ModalityFile objects containing modality names and associated files or directories",  # noqa
-            title="modality files",
-        )
+    # numworkers: Optional[int] = Field(
+    #     default=64,
+    #     description="Number of workers to use for transfer",
+    #     title="Number of workers",
+    # )
+    modalities: Dict[
+        Literal[tuple(Modality._abbreviation_map.keys())], List[str]
+    ] = Field(
+        default={},
+        description="list of ModalityFile objects containing modality names and associated files or directories",  # noqa
+        title="modality files",
     )
     schemas: List[str] = Field(
         default=[],
@@ -74,3 +79,4 @@ class ManifestConfig(BaseModel):
         description="Upload data even if it's already in the cloud",
         title="Force cloud sync",
     )
+    max_attempts: Optional[int] = Field(default=10, description="Number of retries", title="Retries")

@@ -101,7 +101,8 @@ class RunJob:
                 if Path(file).exists():
                     destination_directory = self._clean_path(destination_directory)
                     transfer = self.build_s5cmd_copy_msg(
-                        file, destination_directory + "/"
+                        file, destination_directory + "/",
+                        max_attempts=self.config.max_attempts
                     )
                     if not transfer:
                         logging.error("Error copying files %s", file)
@@ -142,7 +143,7 @@ class RunJob:
         )
         return subproc
 
-    def build_s5cmd_copy_msg(self, src: str, dest: str) -> bool:
+    def build_s5cmd_copy_msg(self, src: str, dest: str, max_attempts=10) -> bool:
         """copy files using s3 protocol with s5cmd
 
         Parameters
@@ -151,7 +152,8 @@ class RunJob:
             source file or directory
         dest : str
             destination directory
-
+        max_attempts : int
+            maximum number of attempts to copy
         Returns
         -------
         bool
@@ -159,13 +161,21 @@ class RunJob:
         """
         if not Path(src).exists():
             return False
-        run = self.run_subprocess(
-            ["s5cmd", "cp", src, dest],
-        )
-        if "ERROR" in run.stderr.decode():
-            logging.error("Error copying %s to %s: %s", src, dest, run.stderr.decode())
-            return False
-        return True
+        for attempt in range(1, max_attempts + 1):
+            run = self.run_subprocess(
+                ["s5cmd", "cp", src, dest],
+            )
+            if "ERROR" in run.stderr.decode():
+                logging.error(
+                    "Error copying %s to %s: %s. Tried %s times",
+                    src,
+                    dest,
+                    run.stderr.decode(),
+                    attempt,
+                )
+                return False
+            else:
+                return True
 
     def trigger_transfer_service(self) -> None:
         """Triggers aind-data-transfer-service"""
@@ -207,7 +217,6 @@ class RunJob:
             return True
         else:
             return False
-        return True
 
     def move_manifest_to_archive(self) -> None:
         """Move manifest file to archive"""
