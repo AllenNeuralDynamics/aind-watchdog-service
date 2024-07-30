@@ -173,9 +173,12 @@ class RunJob:
                     run.stderr.decode(),
                     attempt,
                 )
-                return False
             else:
-                return True
+                break
+        if attempt == (max_attempts + 1) and "ERROR" in run.stderr.decode():
+            return False
+        return True
+         
 
     def trigger_transfer_service(self) -> None:
         """Triggers aind-data-transfer-service"""

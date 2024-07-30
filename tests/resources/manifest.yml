@@ -1,7 +1,8 @@
 acquisition_datetime: 2024-02-12 09:14:43+00:00
 capsule_id: capsule_id
 mount: mount_point
-destination: s3://aind-scratch/ophys
+destination_root: s3://aind-stage
+destination_subdir: test
 processor_full_name: Some User
 modalities:
   behavior:

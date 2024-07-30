@@ -130,8 +130,8 @@ class TestRunSubprocess(unittest.TestCase):
                 self.watch_config,
                 self.watch_config.webhook_url,
             )
-            winx_dir = execute_manifest_config.execute_windows_command(src_dir, dest)
-            winx_file = execute_manifest_config.execute_windows_command(src_file, dest)
+            winx_dir = execute_manifest_config.build_s5cmd_copy_msg(src_dir, dest)
+            winx_file = execute_manifest_config.build_s5cmd_copy_msg(src_file, dest)
             self.assertEqual(winx_dir, True)
             self.assertEqual(winx_file, True)
             mock_subproc.assert_called()
@@ -144,60 +144,57 @@ class TestRunSubprocess(unittest.TestCase):
                 self.watch_config,
                 self.watch_config.webhook_url,
             )
-            winx_dir = execute_manifest_config.execute_windows_command(src_dir, dest)
-            winx_file = execute_manifest_config.execute_windows_command(src_file, dest)
+            winx_dir = execute_manifest_config.build_s5cmd_copy_msg(src_dir, dest)
+            winx_file = execute_manifest_config.build_s5cmd_copy_msg(src_file, dest)
             self.assertEqual(winx_dir, False)
             self.assertEqual(winx_file, False)
             mock_subproc.assert_called()
 
-        with patch.object(Path, "exists") as mock_file:
-            mock_file.return_value = True
-            execute_manifest_config = RunJob(
-                self.mock_event,
-                self.manifest_config,
-                self.watch_config,
-                self.watch_config.webhook_url,
-            )
-            winx_dir = execute_manifest_config.execute_linux_command(src_dir, dest)
-            winx_file = execute_manifest_config.execute_linux_command(src_file, dest)
-            self.assertEqual(winx_dir, True)
-            self.assertEqual(winx_file, True)
-            mock_subproc.assert_called()
+        # with patch.object(Path, "exists") as mock_file:
+        #     mock_file.return_value = True
+        #     execute_manifest_config = RunJob(
+        #         self.mock_event,
+        #         self.manifest_config,
+        #         self.watch_config,
+        #         self.watch_config.webhook_url,
+        #     )
+        #     winx_dir = execute_manifest_config.execute_linux_command(src_dir, dest)
+        #     winx_file = execute_manifest_config.execute_linux_command(src_file, dest)
+        #     self.assertEqual(winx_dir, True)
+        #     self.assertEqual(winx_file, True)
+        #     mock_subproc.assert_called()
 
-        with patch.object(Path, "exists") as mock_file:
-            mock_file.return_value = False
-            execute_manifest_config = RunJob(
-                self.mock_event,
-                self.manifest_config,
-                self.watch_config,
-                self.watch_config.webhook_url,
-            )
-            winx_dir = execute_manifest_config.execute_linux_command(src_dir, dest)
-            winx_file = execute_manifest_config.execute_linux_command(src_file, dest)
-            self.assertEqual(winx_dir, False)
-            self.assertEqual(winx_file, False)
-            mock_subproc.assert_called()
+        # with patch.object(Path, "exists") as mock_file:
+        #     mock_file.return_value = False
+        #     execute_manifest_config = RunJob(
+        #         self.mock_event,
+        #         self.manifest_config,
+        #         self.watch_config,
+        #         self.watch_config.webhook_url,
+        #     )
+        #     winx_dir = execute_manifest_config.execute_linux_command(src_dir, dest)
+        #     winx_file = execute_manifest_config.execute_linux_command(src_file, dest)
+        #     self.assertEqual(winx_dir, False)
+        #     self.assertEqual(winx_file, False)
+        #     mock_subproc.assert_called()
 
     @patch("os.path.join")
     @patch("os.makedirs")
-    @patch("aind_watchdog_service.run_job.RunJob.execute_windows_command")
-    @patch("aind_watchdog_service.run_job.RunJob.execute_linux_command")
+    @patch("aind_watchdog_service.run_job.RunJob.build_s5cmd_copy_msg")
     @patch("aind_watchdog_service.alert_bot.AlertBot")
     @patch("logging.error")
     def test_copy_to_vast(
         self,
         mock_log_err: MagicMock,
         mock_alert: MagicMock,
-        mock_execute_linux: MagicMock,
-        mock_execute_windows: MagicMock,
+        mock_s5cmd_command: MagicMock,
         mock_mkdir: MagicMock,
         mock_join: MagicMock,
     ):
         """test copy to vast"""
         mock_join.return_value = "/path/to/join"
         mock_mkdir.return_value = None
-        mock_execute_windows.return_value = True
-        mock_execute_linux.return_value = True
+        mock_s5cmd_command.return_value = True
         mock_alert.return_value = requests.Response
         with patch.object(Path, "is_dir") as mock_dir:
             mock_dir.return_value = True
@@ -217,7 +214,7 @@ class TestRunSubprocess(unittest.TestCase):
             mock_dir.return_value = True
             with patch.object(Path, "exists") as mock_file:
                 mock_file.return_value = False
-                mock_execute_windows.return_value = False
+                mock_s5cmd_command.return_value = False
                 result = RunJob(
                     self.mock_event,
                     self.manifest_config,
@@ -429,7 +426,7 @@ class TestRunSubprocess(unittest.TestCase):
 
     @patch("os.remove")
     @patch("aind_watchdog_service.run_job.PLATFORM", "windows")
-    @patch("aind_watchdog_service.run_job.RunJob.execute_windows_command")
+    @patch("aind_watchdog_service.run_job.RunJob.build_s5cmd_copy_msg")
     def test_move_manifest_win(self, mock_execute: MagicMock, mock_remove: MagicMock):
         """Test the move manifest function"""
         mock_execute.return_value = True
