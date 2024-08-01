@@ -194,12 +194,13 @@ class RunJob:
             process_capsule_id=self.config.capsule_id,
             project_name=self.config.project_name,
             input_data_mount=self.config.mount,
+            force_cloud_sync=self.config.force_cloud_sync,
         )
 
         submit_request = SubmitJobRequest(upload_jobs=[upload_job_configs])
         post_request_content = json.loads(submit_request.model_dump_json(round_trip=True))
         submit_job_response = requests.post(
-            url="http://aind-data-transfer-service/api/v1/submit_jobs",
+            url=self.config.transfer_endpoint,
             json=post_request_content,
         )
 

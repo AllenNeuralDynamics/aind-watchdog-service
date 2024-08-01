@@ -30,6 +30,11 @@ class ManifestConfig(BaseModel):
         description="Transfer time to schedule copy and upload. If None defaults to trigger the transfer immediately",  # noqa
         title="APScheduler transfer time",
     )
+    transfer_endpoint: Optional[str] = Field(
+        default="http://aind-data-transfer-service/api/v1/submit_jobs",
+        description="Transfer endpoint for data transfer",
+        title="Transfer endpoint",
+    )
     platform: Literal[tuple(Platform._abbreviation_map.keys())] = Field(
         description="Platform type", title="Platform type"
     )
@@ -40,7 +45,7 @@ class ManifestConfig(BaseModel):
         ..., description="Mount point for pipeline run", title="Mount point"
     )
     s3_bucket: Optional[Literal["s3", "public", "private", "scratch"]] = Field(
-        default=None, description="s3 endpoint", title="S3 endpoint"
+        default="scratch", description="s3 endpoint", title="S3 endpoint"
     )
     project_name: str = Field(..., description="Project name", title="Project name")
 
@@ -63,4 +68,8 @@ class ManifestConfig(BaseModel):
     )
     script: Dict[str, List[str]] = Field(
         default={}, description="Set of commands to run in subprocess.", title="Commands"
+    )
+    force_cloud_sync: Optional[bool] = Field(
+        default=False,
+        description="Force cloud sync if True", title="Force cloud sync"
     )
