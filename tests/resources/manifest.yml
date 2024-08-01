@@ -33,6 +33,7 @@ schemas:
   - D:\data\1330132892\session.json
   - D:/data/1330132892\rig.json
 name: multiplane-ophys_704576_2024-04-12_15-22-44
+mount: multiplane-ophys_704576_2024-04-12_15-22-44
 platform: multiplane-ophys
 s3_bucket: private
 subject_id: 704576
