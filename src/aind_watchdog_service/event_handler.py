@@ -2,7 +2,7 @@
 
 import logging
 from datetime import datetime as dt
-from datetime import timedelta
+from datetime import timedelta, time
 from pathlib import Path
 from typing import Dict
 
@@ -64,23 +64,22 @@ class EventHandler(FileSystemEventHandler):
 
             self.scheduler.remove_job(self.jobs[event.src_path].id)
 
-    def _get_trigger_time(self, transfer_time: dt) -> dt:
+    def _get_trigger_time(self, transfer_time: time) -> dt:
         """Get trigger time from the job
 
         Parameters
         ----------
-        transfer_time : str
-            In HH:MM format
-
+        transfer_time : datetime.time
+            time to trigger the job
         Returns
         -------
         dt
             datetime object
         """
-        hour = transfer_time.time().hour
-        trigger_time = dt.now().replace(hour=hour, minute=0, second=0, microsecond=0)
-        if (trigger_time - dt.now()).total_seconds() < 0:
-            trigger_time = trigger_time + timedelta(days=1)
+        trigger_time = dt.combine(dt.now().date(), transfer_time)
+        trigger_time = (
+            trigger_time if trigger_time > dt.now() else trigger_time + timedelta(days=1)
+        )
         print(f"Trigger time {trigger_time}")
         return trigger_time
 
