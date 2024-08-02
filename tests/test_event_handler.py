@@ -104,21 +104,18 @@ class TestEventHandler(unittest.TestCase):
                 event_handler = EventHandler(mock_scheduler, watch_config)
 
                 # Test time trigger conditions for addition of one day when hour has already passed # noqa
-                time_now = dt.now() - timedelta(hours=2)
-                trigger_time = event_handler._get_trigger_time(time_now)
-                test_time = dt.now().replace(
-                    hour=dt.now().hour - 2, minute=0, second=0, microsecond=0
+                # TODO we should consider a test fixture that freezes time here. This test is NOT deterministic # noqa
+                date_now = dt.now()
+                trigger_date = event_handler._get_trigger_time(
+                    (date_now - timedelta(minutes=1)).time()
                 )
-                test_time = test_time + timedelta(days=1)
-                self.assertEqual(trigger_time, test_time)
+                self.assertEqual(trigger_date, date_now + timedelta(days=1, minutes=-1))
 
                 # Test trigger time when hour has not passed
-                time_now = dt.now() + timedelta(hours=2)
-                trigger_time = event_handler._get_trigger_time(time_now)
-                test_time = dt.now().replace(
-                    hour=dt.now().hour + 2, minute=0, second=0, microsecond=0
+                trigger_time = event_handler._get_trigger_time(
+                    (date_now + timedelta(minutes=1)).time()
                 )
-                self.assertEqual(trigger_time, test_time)
+                self.assertEqual(trigger_time, date_now + timedelta(minutes=1))
 
 
 if __name__ == "__main__":
