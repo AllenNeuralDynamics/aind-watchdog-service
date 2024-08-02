@@ -76,9 +76,10 @@ class EventHandler(FileSystemEventHandler):
         dt
             datetime object
         """
-        trigger_time = dt.combine(dt.now().date(), transfer_time)
+        _now = dt.now()
+        trigger_time = dt.combine(_now.date(), transfer_time)
         trigger_time = (
-            trigger_time if trigger_time > dt.now() else trigger_time + timedelta(days=1)
+            trigger_time if trigger_time > _now else trigger_time + timedelta(days=1)
         )
         print(f"Trigger time {trigger_time}")
         return trigger_time
