@@ -1,6 +1,6 @@
 """Job configs for VAST staging or executing a custom script"""
 
-from datetime import datetime
+from datetime import datetime, time
 from typing import Dict, List, Literal, Optional
 
 from aind_data_schema_models.modalities import Modality
@@ -25,7 +25,7 @@ class ManifestConfig(BaseModel):
         description="acquisition datetime in YYYY-MM-DD HH:mm:ss format",
         title="Acquisition datetime",
     )
-    schedule_time: Optional[datetime] = Field(
+    schedule_time: Optional[time] = Field(
         default=None,
         description="Transfer time to schedule copy and upload. If None defaults to trigger the transfer immediately",  # noqa
         title="APScheduler transfer time",
