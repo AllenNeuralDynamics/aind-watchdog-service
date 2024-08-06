@@ -125,8 +125,11 @@ def main():
         logging.error("If passing --flag-dir or --manifest-complete, both are required!")
         sys.exit(1)
 
+    watch_config: WatchConfig
+
     if (args.flag_dir is not None) and (args.manifest_complete is not None):
         try:
+
             watch_config = WatchConfig(
                 flag_dir=args.flag_dir,
                 manifest_complete=args.manifest_complete,
@@ -161,7 +164,7 @@ def main():
                 logging.error("Error loading config %s", e)
                 sys.exit(1)
 
-        start_watchdog(watch_config)
+    start_watchdog(watch_config)
 
 
 if __name__ == "__main__":
