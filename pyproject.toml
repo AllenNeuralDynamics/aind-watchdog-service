@@ -35,6 +35,11 @@ dev = [
     'furo',
 ]
 
+publish = [
+    'setuptools==69.5.1',
+    'pyinstaller==6.6.0',
+]
+
 [tool.setuptools.packages.find]
 where = ["src"]
 
