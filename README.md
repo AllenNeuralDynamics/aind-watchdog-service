@@ -99,6 +99,35 @@ With aind-watchdog-service, you can configure a directory for the app to watch, 
 * After selecting Run open Task Manager to verify that two icons of watchdog are active. This is only one instance but the Observer in aind-watchdog-service creates a second thread making it appear that two instance are running.
 * To stop aind-watchdog-service, go to the main UI where you selected Run and select End. You should see the task stop in Task Manager. *Task scheduler doesn't always hold onto the second process thread. You may have to end that task manually through Task Manager before restarting a new instnace in Task Scheduler*
 
+# Automatic deployment and setup
+
+The following PowerShell script can be used to download a release from GitHub and set up a scheduled task to run the service on startup and user logon.
+
+```powershell
+$url = "PATH TO GITHUB RELEASE"
+$outputPath = Join-Path -Path $PSScriptRoot -ChildPath "watchdog.exe"
+$outputPath = $outputPath | Resolve-Path
+Invoke-WebRequest -Uri $url -OutFile $outputPath
+
+
+$taskAction = New-ScheduledTaskAction -Execute "$outputPath"
+$taskTriggerStartup = New-ScheduledTaskTrigger -AtStartup
+$taskTriggerLogOn = New-ScheduledTaskTrigger -AtLogOn
+$taskTriggerStartup.Delay = "PT30S"
+$taskTriggerLogOn.Delay = "PT30S"
+
+$taskSettings = New-ScheduledTaskSettingsSet -DontStopOnIdleEnd -ExecutionTimeLimit '00:00:00'
+$taskPrincipal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType S4U -RunLevel Highest
+$taskPath = "AIND"
+$taskName = "aind-watchdog-service"
+if (Get-ScheduledTask -TaskPath ("\" + $taskPath + "\") -TaskName $taskName -ErrorAction SilentlyContinue) {
+    Unregister-ScheduledTask -TaskPath ("\" + $taskPath + "\") -TaskName $taskName -Confirm:$false
+}
+$fullTaskPath = "\" + $taskPath + "\" + $taskName
+Register-ScheduledTask -TaskName $fullTaskPath -Action $taskAction -Trigger @($taskTriggerStartup, $taskTriggerLogOn) -Settings $taskSettings -Principal $taskPrincipal
+
+```
+
 
 # Installation
 To use the software, in the root directory, run
