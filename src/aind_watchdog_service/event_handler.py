@@ -81,7 +81,7 @@ class EventHandler(FileSystemEventHandler):
         trigger_time = dt.now().replace(hour=hour, minute=0, second=0, microsecond=0)
         if (trigger_time - dt.now()).total_seconds() < 0:
             trigger_time = trigger_time + timedelta(days=1)
-        print(f"Trigger time {trigger_time}")
+        logging.info(f"Trigger time {trigger_time}")
         return trigger_time
 
     def schedule_job(self, event: FileCreatedEvent, job_config: ManifestConfig) -> None:
