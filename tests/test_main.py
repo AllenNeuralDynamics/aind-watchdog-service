@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import yaml
 from apscheduler.schedulers.background import BackgroundScheduler
-from watchdog.events import FileModifiedEvent
+from watchdog.events import FileCreatedEvent
 from watchdog.observers import Observer
 
 from aind_watchdog_service.event_handler import EventHandler
@@ -16,8 +16,8 @@ from aind_watchdog_service.models.watch_config import WatchConfig
 TEST_DIRECTORY = Path(__file__).resolve().parent
 
 
-class MockFileModifiedEvent(FileModifiedEvent):
-    """Mock FileModifiedEvent for testing EventHandler"""
+class MockFileCreatedEvent(FileCreatedEvent):
+    """Mock FileCreatedEvent for testing EventHandler"""
 
     def __init__(self, src_path):
         """init"""
@@ -81,7 +81,7 @@ class TestWatchdogService(unittest.TestCase):
         with open(watch_config_fp) as yam:
             cls.watch_config_dict = yaml.safe_load(yam)
         cls.watch_config = WatchConfig(**cls.watch_config_dict)
-        cls.mock_event = MockFileModifiedEvent("/path/to/file.txt")
+        cls.mock_event = MockFileCreatedEvent("/path/to/file.txt")
 
     @patch("aind_watchdog_service.main.WatchdogService._setup_logging")
     @patch("logging.error")
