@@ -31,9 +31,15 @@ dev = [
     'flake8',
     'interrogate',
     'isort',
+]
+
+docs = [
     'Sphinx',
     'furo',
+    'autodoc_pydantic',
+    'myst_parser',
 ]
+
 
 publish = [
     'setuptools==69.5.1',
