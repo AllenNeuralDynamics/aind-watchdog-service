@@ -50,16 +50,16 @@ class TestManifestConfigs(unittest.TestCase):
             data = yaml.safe_load(yam)
         # Check the the case where directories exist
         manifest_config = ManifestConfig(**data)
-        self.assertEqual(manifest_config.model_dump(), data)
+        self.assertDictEqual(manifest_config.model_dump(), data)
 
         # Check transfer_time variants
         data["transfer_time"] = "12:00"
         with self.assertRaises(pydantic_core._pydantic_core.ValidationError):
             ManifestConfig(**data)
         del data["transfer_time"]
-        data["schedule_time"] = dt.now()
+        data["schedule_time"] = dt.now().time()
         manifest_config = ManifestConfig(**data)
-        self.assertEqual(manifest_config.model_dump(), data)
+        self.assertDictEqual(manifest_config.model_dump(), data)
 
         data["platform"] = "cafe"
         with self.assertRaises(ValidationError):

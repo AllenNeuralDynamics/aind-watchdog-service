@@ -1,11 +1,11 @@
 """Job configs for VAST staging or executing a custom script"""
 
-from datetime import datetime
+from datetime import datetime, time
 from typing import Dict, List, Literal, Optional
 
 from aind_data_schema_models.modalities import Modality
 from aind_data_schema_models.platforms import Platform
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class ManifestConfig(BaseModel):
@@ -25,7 +25,7 @@ class ManifestConfig(BaseModel):
         description="acquisition datetime in YYYY-MM-DD HH:mm:ss format",
         title="Acquisition datetime",
     )
-    schedule_time: Optional[datetime] = Field(
+    schedule_time: Optional[time] = Field(
         default=None,
         description="Transfer time to schedule copy and upload. If None defaults to trigger the transfer immediately",  # noqa
         title="APScheduler transfer time",
@@ -64,3 +64,19 @@ class ManifestConfig(BaseModel):
     script: Dict[str, List[str]] = Field(
         default={}, description="Set of commands to run in subprocess.", title="Commands"
     )
+
+    @field_validator("schedule_time", mode="before")
+    @classmethod
+    def normalized_scheduled_time(cls, value) -> Optional[time]:
+        """Normalize scheduled time"""
+        if value is None:
+            return value
+        else:
+            if isinstance(value, datetime):
+                return value.time()
+            elif isinstance(value, str):
+                return datetime.strptime(value, "%H:%M:%S").time()
+            elif isinstance(value, time):
+                return value
+            else:
+                raise ValueError("Invalid time format")
