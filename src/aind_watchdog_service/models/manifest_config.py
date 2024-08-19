@@ -2,12 +2,12 @@
 
 from datetime import datetime, time
 from typing import Dict, List, Literal, Optional
-from typing_extensions import Self
 
 from aind_data_schema_models.modalities import Modality
 from aind_data_schema_models.platforms import Platform
 from aind_data_transfer_models.core import BucketType
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from typing_extensions import Self
 
 
 class ManifestConfig(BaseModel):
