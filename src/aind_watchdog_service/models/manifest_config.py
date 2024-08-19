@@ -5,11 +5,13 @@ from typing import Dict, List, Literal, Optional
 
 from aind_data_schema_models.modalities import Modality
 from aind_data_schema_models.platforms import Platform
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from aind_data_transfer_models.core import BucketType
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from typing_extensions import Self
 
 
 class ManifestConfig(BaseModel):
-    """Configuration for session: based on engineerings lims_scheduler_d manifest files"""
+    """Job configs for data transfer to VAST and executing a custom script"""
 
     model_config = ConfigDict(extra="forbid")
     name: str = Field(
@@ -22,7 +24,7 @@ class ManifestConfig(BaseModel):
     )
     subject_id: int = Field(..., description="Subject ID", title="Subject ID")
     acquisition_datetime: datetime = Field(
-        description="acquisition datetime in YYYY-MM-DD HH:mm:ss format",
+        description="Acquisition datetime",
         title="Acquisition datetime",
     )
     schedule_time: Optional[time] = Field(
@@ -30,12 +32,12 @@ class ManifestConfig(BaseModel):
         description="Transfer time to schedule copy and upload. If None defaults to trigger the transfer immediately",  # noqa
         title="APScheduler transfer time",
     )
-    force_cloud_sync: Optional[bool] = Field(
+    force_cloud_sync: bool = Field(
         default=False,
         description="Overwrite data in AWS",
         title="Force cloud sync",
     )
-    transfer_endpoint: Optional[str] = Field(
+    transfer_endpoint: str = Field(
         default="http://aind-data-transfer-service/api/v1/submit_jobs",
         description="Transfer endpoint for data transfer",
         title="Transfer endpoint",
@@ -49,15 +51,15 @@ class ManifestConfig(BaseModel):
     mount: Optional[str] = Field(
         ..., description="Mount point for pipeline run", title="Mount point"
     )
-    s3_bucket: Optional[Literal["s3", "public", "private", "scratch"]] = Field(
-        default="scratch", description="s3 endpoint", title="S3 endpoint"
+    s3_bucket: BucketType = Field(
+        default=BucketType.PRIVATE, description="s3 endpoint", title="S3 endpoint"
     )
     project_name: str = Field(..., description="Project name", title="Project name")
-
-    destination: Optional[str] = Field(
-        default=None,
-        description="where to send data to on VAST",
-        title="VAST destination and maybe S3?",
+    destination: str = Field(
+        ...,
+        description="Remote directory on VAST where to copy the data to.",
+        title="Destination directory",
+        examples=[r"\\allen\aind\scratch\test"],
     )
     modalities: Dict[Literal[tuple(Modality._abbreviation_map.keys())], List[str]] = (
         Field(
@@ -90,3 +92,12 @@ class ManifestConfig(BaseModel):
                 return value
             else:
                 raise ValueError("Invalid time format")
+
+    @model_validator(mode="after")
+    def validate_capsule(self) -> Self:
+        """Validate capsule and mount"""
+        if (self.capsule_id is None) ^ (self.mount is None):
+            raise ValueError(
+                "Both capsule and mount must be provided, or must both be None"
+            )
+        return self
