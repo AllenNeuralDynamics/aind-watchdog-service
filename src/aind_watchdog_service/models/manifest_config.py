@@ -50,8 +50,8 @@ class ManifestConfig(BaseModel):
     mount: Optional[str] = Field(
         ..., description="Mount point for pipeline run", title="Mount point"
     )
-    s3_bucket: Optional[Literal["s3", "public", "private", "scratch"]] = Field(
-        default="scratch", description="s3 endpoint", title="S3 endpoint"
+    s3_bucket: BucketType = Field(
+        default=BucketType.PRIVATE, description="s3 endpoint", title="S3 endpoint"
     )
     project_name: str = Field(..., description="Project name", title="Project name")
     destination: str = Field(
