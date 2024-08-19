@@ -2,13 +2,13 @@
 
 import logging
 from datetime import datetime as dt
-from datetime import timedelta
+from datetime import timedelta, time
 from pathlib import Path
 from typing import Dict
 
 import yaml
 from apscheduler.schedulers.background import BackgroundScheduler
-from watchdog.events import FileModifiedEvent, FileSystemEventHandler
+from watchdog.events import FileCreatedEvent, FileSystemEventHandler
 
 from aind_watchdog_service.alert_bot import AlertBot
 from aind_watchdog_service.models.manifest_config import ManifestConfig
@@ -25,17 +25,16 @@ class EventHandler(FileSystemEventHandler):
         self.scheduler = scheduler
         self.config = config
         self.jobs: Dict[str, str] = {}
+        self.alert = None
         if config.webhook_url:
             self.alert = AlertBot(config.webhook_url)
-        else:
-            raise ValueError("Webhook URL not provided")
 
-    def _load_manifest(self, event: FileModifiedEvent) -> ManifestConfig:
+    def _load_manifest(self, event: FileCreatedEvent) -> ManifestConfig:
         """Instructions to transfer to VAST
 
         Parameters
         ----------
-        event : FileModifiedEvent
+        event : FileCreatedEvent
            file modified event
 
         Returns
@@ -50,15 +49,13 @@ class EventHandler(FileSystemEventHandler):
                 return config
             except Exception as e:
                 logging.error("Error loading config %s", repr(e))
-                self.alert.send_message("Error loading config", repr(e))
-                return None
 
-    def _remove_job(self, event: FileModifiedEvent) -> None:
+    def _remove_job(self, event: FileCreatedEvent) -> None:
         """Removes job from scheduler queue
 
         Parameters
         ----------
-        event : FileModifiedEvent
+        event : FileCreatedEvent
            event to remove
         """
         if self.jobs.get(event.src_path, ""):
@@ -67,53 +64,54 @@ class EventHandler(FileSystemEventHandler):
 
             self.scheduler.remove_job(self.jobs[event.src_path].id)
 
-    def _get_trigger_time(self, transfer_time: dt) -> dt:
+    def _get_trigger_time(self, transfer_time: time) -> dt:
         """Get trigger time from the job
 
         Parameters
         ----------
-        transfer_time : str
-            In HH:MM format
-
+        transfer_time : datetime.time
+            time to trigger the job
         Returns
         -------
         dt
             datetime object
         """
-        hour = transfer_time.time().hour
-        trigger_time = dt.now().replace(hour=hour, minute=0, second=0, microsecond=0)
-        if (trigger_time - dt.now()).total_seconds() < 0:
-            trigger_time = trigger_time + timedelta(days=1)
+        _now = dt.now()
+        trigger_time = dt.combine(_now.date(), transfer_time)
+        trigger_time = (
+            trigger_time if trigger_time > _now else trigger_time + timedelta(days=1)
+        )
+        print(f"Trigger time {trigger_time}")
         return trigger_time
 
-    def schedule_job(self, event: FileModifiedEvent, job_config: ManifestConfig) -> None:
+    def schedule_job(self, event: FileCreatedEvent, job_config: ManifestConfig) -> None:
         """Schedule job to run
 
         Parameters
         ----------
-        event : FileModifiedEvent
+        event : FileCreatedEvent
             event to trigger job
         config : dict
             configuration for the job
         """
         if not job_config.schedule_time:
             logging.info("Scheduling job to run now %s", event.src_path)
-            run = RunJob(event, job_config, self.config)
+            run = RunJob(event, job_config, self.config, self.alert)
             job_id = self.scheduler.add_job(run.run_job)
 
         else:
             trigger = self._get_trigger_time(job_config.schedule_time)
             logging.info("Scheduling job to run at %s %s", trigger, event.src_path)
-            run = RunJob(event, job_config, self.config)
+            run = RunJob(event, job_config, self.config, self.alert)
             job_id = self.scheduler.add_job(run.run_job, "date", run_date=trigger)
         self.jobs[event.src_path] = job_id
 
-    def on_deleted(self, event: FileModifiedEvent) -> None:
+    def on_deleted(self, event: FileCreatedEvent) -> None:
         """Event handler for file deleted event
 
         Parameters
         ----------
-        event : FileModifiedEvent
+        event : FileCreatedEvent
             file deleted event
 
         Returns
@@ -127,12 +125,12 @@ class EventHandler(FileSystemEventHandler):
             self._remove_job(self.jobs[event.src_path].id)
         logging.info("Jobs in queue %s", self.scheduler.get_jobs())
 
-    def on_modified(self, event: FileModifiedEvent) -> None:
+    def on_created(self, event: FileCreatedEvent) -> None:
         """Event handler for file modified event
 
         Parameters
         ----------
-        event : FileModifiedEvent
+        event : FileCreatedEvent
             file modified event
 
         Returns

@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools", "setuptools-scm"]
+requires = ["setuptools", "setuptools-scm", "pyinstaller"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -19,7 +19,7 @@ dynamic = ["version"]
 dependencies = [
     'watchdog',
     'pyyaml',
-    'aind-data-transfer-models@git+https://github.com/AllenNeuralDynamics/aind-data-transfer-models',
+    'aind-data-transfer-models',
     'APScheduler',
     'requests'
 ]
@@ -32,7 +32,12 @@ dev = [
     'interrogate',
     'isort',
     'Sphinx',
-    'furo'
+    'furo',
+]
+
+publish = [
+    'setuptools==69.5.1',
+    'pyinstaller==6.6.0',
 ]
 
 [tool.setuptools.packages.find]

@@ -1,13 +1,15 @@
 """Example test template."""
 
 import unittest
-import yaml
-import pydantic_core
-from pathlib import Path
 from datetime import datetime as dt
-from aind_watchdog_service.models.watch_config import WatchConfig
-from aind_watchdog_service.models.manifest_config import ManifestConfig
+from pathlib import Path
 
+import pydantic_core
+from pydantic import ValidationError
+import yaml
+
+from aind_watchdog_service.models.manifest_config import ManifestConfig
+from aind_watchdog_service.models.watch_config import WatchConfig
 
 TEST_DIRECTORY = Path(__file__).resolve().parent
 
@@ -48,24 +50,24 @@ class TestManifestConfigs(unittest.TestCase):
             data = yaml.safe_load(yam)
         # Check the the case where directories exist
         manifest_config = ManifestConfig(**data)
-        self.assertEqual(manifest_config.model_dump(), data)
+        self.assertDictEqual(manifest_config.model_dump(), data)
 
         # Check transfer_time variants
         data["transfer_time"] = "12:00"
         with self.assertRaises(pydantic_core._pydantic_core.ValidationError):
             ManifestConfig(**data)
         del data["transfer_time"]
-        data["schedule_time"] = dt.now()
+        data["schedule_time"] = dt.now().time()
         manifest_config = ManifestConfig(**data)
-        self.assertEqual(manifest_config.model_dump(), data)
+        self.assertDictEqual(manifest_config.model_dump(), data)
 
         data["platform"] = "cafe"
-        with self.assertRaises(AttributeError):
+        with self.assertRaises(ValidationError):
             ManifestConfig(**data)
 
         data["platform"] = "multiplane-ophys"
         data["modalities"]["nikon"] = ["some file"]
-        with self.assertRaises(AttributeError):
+        with self.assertRaises(ValidationError):
             ManifestConfig(**data)
 
 

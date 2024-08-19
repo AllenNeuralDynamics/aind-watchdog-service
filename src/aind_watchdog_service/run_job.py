@@ -6,10 +6,15 @@ import os
 import platform
 import subprocess
 from pathlib import Path, PurePosixPath
+from typing import Union
 
 import requests
-from aind_data_transfer_models.core import BasicUploadJobConfigs, ModalityConfigs
-from watchdog.events import FileModifiedEvent
+from aind_data_transfer_models.core import (
+    BasicUploadJobConfigs,
+    ModalityConfigs,
+    SubmitJobRequest,
+)
+from watchdog.events import FileCreatedEvent
 
 from aind_watchdog_service.alert_bot import AlertBot
 from aind_watchdog_service.models.manifest_config import ManifestConfig
@@ -28,15 +33,34 @@ class RunJob:
 
     def __init__(
         self,
-        event: FileModifiedEvent,
+        event: FileCreatedEvent,
         config: ManifestConfig,
         watch_config: WatchConfig,
+        alert: Union[str, None],
     ):
         """initialize RunJob class"""
         self.event = event
         self.config = config
         self.watch_config = watch_config
-        self.alert_bot = AlertBot(self.watch_config.webhook_url)
+        self.alert = None
+        if alert:
+            self.alert = alert
+
+    def _send_alert(self, title: str, send: bool, message: str = None) -> None:
+        """wrapper for AlertBot configured
+
+        Parameters
+        ----------
+        title : str
+            message to send
+        send : bool
+            send to Teams
+        message: str
+            Message to go in Teams card
+        """
+        if send:
+            alert_bot = AlertBot(self.watch_config.webhook_url)
+            alert_bot.send_message(title, message)
 
     def copy_to_vast(self) -> bool:
         """Determine platform and copy files to VAST
@@ -63,11 +87,13 @@ class RunJob:
                         transfer = self.execute_linux_command(file, destination_directory)
                     if not transfer:
                         logging.error("Error copying files %s", file)
-                        self.alert_bot.send_message("Error copying files", str(file))
+                        self._send_alert(
+                            "Error copying files", getattr(self, "alert"), str(file)
+                        )
                         return False
                 else:
                     logging.error("File not found %s", file)
-                    self.alert_bot.send_message("File not found", file)
+                    self._send_alert("File not found", getattr(self, "alert"), file)
                     return False
         for schema in self.config.schemas:
             destination_directory = os.path.join(destination, parent_directory)
@@ -77,7 +103,7 @@ class RunJob:
                 transfer = self.execute_linux_command(schema, destination_directory)
             if not transfer:
                 logging.error("Error copying schema %s", schema)
-                self.alert_bot.send_message("Error copying schema", schema)
+                self._send_alert("Error copying schema", getattr(self, "alert"), schema)
                 return False
         return True
 
@@ -179,6 +205,7 @@ class RunJob:
                 modality=modality,
             )
             modality_configs.append(m)
+
         upload_job_configs = BasicUploadJobConfigs(
             s3_bucket=self.config.s3_bucket,
             platform=self.config.platform,
@@ -188,25 +215,16 @@ class RunJob:
             metadata_dir=PurePosixPath(self.config.destination) / self.config.name,
             process_capsule_id=self.config.capsule_id,
             project_name=self.config.project_name,
+            input_data_mount=self.config.mount,
         )
 
-        # From aind-data-transfer-service README
-        hpc_settings = json.dumps({})
-        upload_job_settings = upload_job_configs.model_dump_json()
-        script = ""
-
-        hpc_job = {
-            "upload_job_settings": upload_job_settings,
-            "hpc_settings": hpc_settings,
-            "script": script,
-        }
-
-        hpc_jobs = [hpc_job]
-        post_request_content = {"jobs": hpc_jobs}
+        submit_request = SubmitJobRequest(upload_jobs=[upload_job_configs])
+        post_request_content = json.loads(submit_request.model_dump_json(round_trip=True))
         submit_job_response = requests.post(
-            url="http://aind-data-transfer-service/api/submit_hpc_jobs",
+            url="http://aind-data-transfer-service/api/v1/submit_jobs",
             json=post_request_content,
         )
+
         if submit_job_response.status_code == 200:
             return True
         else:
@@ -219,8 +237,10 @@ class RunJob:
             copy_file = self.execute_windows_command(self.event.src_path, archive)
             if not copy_file:
                 logging.error("Error copying manifest file %s", self.event.src_path)
-                self.alert_bot.send_message(
-                    "Error copying manifest file", self.event.src_path
+                self._send_alert(
+                    "Error copying manifest file",
+                    getattr(self, "alert"),
+                    self.event.src_path,
                 )
                 return
             os.remove(self.event.src_path)
@@ -232,10 +252,11 @@ class RunJob:
 
         Parameters
         ----------
-        event : FileModifiedEvent
+        event : FileCreatedEvent
             modified event file
         """
-        self.alert_bot.send_message("Running job", self.event.src_path)
+        logging.info("Running job for %s", self.event.src_path)
+        self._send_alert("Running job", getattr(self, "alert"), self.event.src_path)
         if self.config.script:
             for command in self.config.script:
                 logging.info(
@@ -246,27 +267,35 @@ class RunJob:
                 )
                 if run.returncode != 0:
                     logging.error("Error running script %s", command)
-                    self.alert_bot.send_message(
+                    self._send_alert(
                         "Error running script",
+                        getattr(self, "alert"),
                         f"Could not execute {command} for {self.config.name}",
                     )
                     return
                 else:
-                    self.alert_bot.send_message(
-                        "Script executed", f"Ran {command} for {self.config.name}"
+                    self._send_alert(
+                        "Script executed",
+                        getattr(self, "alert"),
+                        f"Ran {command} for {self.config.name}",
                     )
 
         else:
             transfer = self.copy_to_vast()
             if not transfer:
-                self.alert_bot.send_message(
-                    "Could not copy data to destination", self.event.src_path
+                self._send_alert(
+                    "Could not copy data to destination",
+                    getattr(self, "alert"),
+                    self.event.src_path,
                 )
                 return
         if not self.trigger_transfer_service():
-            self.alert_bot.send_message(
-                "Could not trigger aind-data-transfer-service", self.event.src_path
+            self._send_alert(
+                "Could not trigger aind-data-transfer-service",
+                getattr(self, "alert"),
+                self.event.src_path,
             )
             return
-        self.alert_bot.send_message("Job complete", self.event.src_path)
+        self._send_alert("Job complete", getattr(self, "alert"), self.event.src_path)
+        logging.info("Job complete for %s", self.event.src_path)
         self.move_manifest_to_archive()
