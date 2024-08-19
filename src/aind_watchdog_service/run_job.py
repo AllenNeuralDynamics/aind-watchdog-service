@@ -6,7 +6,7 @@ import os
 import platform
 import subprocess
 from pathlib import Path, PurePosixPath
-from typing import Union
+from typing import Union, Optional
 
 import requests
 from aind_data_transfer_models.core import (
@@ -46,7 +46,7 @@ class RunJob:
         if alert:
             self.alert = alert
 
-    def _send_alert(self, title: str, send: bool, message: str = None) -> None:
+    def _send_alert(self, title: str, send: bool, message: Optional[str] = None) -> None:
         """wrapper for AlertBot configured
 
         Parameters
@@ -194,7 +194,7 @@ class RunJob:
             return False
         return True
 
-    def trigger_transfer_service(self) -> None:
+    def trigger_transfer_service(self) -> bool:
         """Triggers aind-data-transfer-service"""
         modality_configs = []
         for modality in self.config.modalities.keys():
