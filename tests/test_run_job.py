@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 
 import requests
 import yaml
-from watchdog.events import FileModifiedEvent
+from watchdog.events import FileCreatedEvent
 
 from aind_watchdog_service.models.manifest_config import ManifestConfig
 from aind_watchdog_service.models.watch_config import WatchConfig
@@ -17,8 +17,8 @@ from aind_watchdog_service.run_job import RunJob
 TEST_DIRECTORY = Path(__file__).resolve().parent
 
 
-class MockFileModifiedEvent(FileModifiedEvent):
-    """Mock FileModifiedEvent for testing EventHandler"""
+class MockFileCreatedEvent(FileCreatedEvent):
+    """Mock FileCreatedEvent for testing EventHandler"""
 
     def __init__(self, src_path):
         """init"""
@@ -57,7 +57,7 @@ class TestRunSubprocess(unittest.TestCase):
         cls.manifest_config = ManifestConfig(**manifest_config)
         cls.manifest_with_run_script = ManifestConfig(**manifest_with_run_script)
         cls.manifest_config_upload_only = ManifestConfig(**manifest_upload_only)
-        cls.mock_event = MockFileModifiedEvent("/path/to/file.txt")
+        cls.mock_event = MockFileCreatedEvent("/path/to/file.txt")
         cls.run_script_config = manifest_with_run_script
 
     @patch("subprocess.run")
