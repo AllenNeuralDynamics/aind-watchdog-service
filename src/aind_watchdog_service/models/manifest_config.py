@@ -1,7 +1,8 @@
 """Job configs for VAST staging or executing a custom script"""
 
 from datetime import datetime, time
-from typing import Dict, List, Literal, Optional, Self
+from typing import Dict, List, Literal, Optional
+from typing_extensions import Self
 
 from aind_data_schema_models.modalities import Modality
 from aind_data_schema_models.platforms import Platform
