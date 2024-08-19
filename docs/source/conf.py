@@ -4,11 +4,12 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+import os
 from datetime import date
+
 # -- Path Setup --------------------------------------------------------------
 from os.path import abspath, dirname
 from pathlib import Path
-import os
 
 from aind_watchdog_service import __version__ as package_version
 
@@ -82,5 +83,6 @@ def copy_assets(src: os.PathLike, dst: os.PathLike) -> None:
         shutil.copytree(src, dst)
     else:
         raise ValueError(f"Source directory {src} does not exist.")
+
 
 copy_assets("../../assets", "../build/html/assets")
