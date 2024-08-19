@@ -210,7 +210,7 @@ class RunJob:
             s3_bucket=self.config.s3_bucket,
             platform=self.config.platform,
             subject_id=str(self.config.subject_id),
-            acq_datetime=self.config.acquisition_datetime.strftime("%Y-%m-%d %H:%M:%S"),
+            acq_datetime=self.config.acquisition_datetime,
             modalities=modality_configs,
             metadata_dir=PurePosixPath(self.config.destination) / self.config.name,
             process_capsule_id=self.config.capsule_id,
