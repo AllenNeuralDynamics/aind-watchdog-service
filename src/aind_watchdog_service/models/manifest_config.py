@@ -30,6 +30,11 @@ class ManifestConfig(BaseModel):
         description="Transfer time to schedule copy and upload. If None defaults to trigger the transfer immediately",  # noqa
         title="APScheduler transfer time",
     )
+    force_cloud_sync: Optional[bool] = Field(
+        default=False,
+        description="Overwrite data in AWS",
+        title="Force cloud sync",
+    )
     transfer_endpoint: Optional[str] = Field(
         default="http://aind-data-transfer-service/api/v1/submit_jobs",
         description="Transfer endpoint for data transfer",
