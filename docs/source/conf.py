@@ -80,6 +80,8 @@ def copy_assets(src: os.PathLike, dst: os.PathLike) -> None:
     import shutil
 
     if Path(src).is_dir():
+        if Path(dst).is_dir():
+            shutil.rmtree(dst)
         shutil.copytree(src, dst)
     else:
         raise ValueError(f"Source directory {src} does not exist.")

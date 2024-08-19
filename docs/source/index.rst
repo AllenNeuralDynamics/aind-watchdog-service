@@ -4,7 +4,7 @@ Welcome to the Aind Watchdog Service documentation!
 .. mdinclude:: ../../README.md
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 4
    :caption: Contents:
 
    self
