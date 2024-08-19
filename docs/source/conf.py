@@ -8,6 +8,7 @@ from datetime import date
 # -- Path Setup --------------------------------------------------------------
 from os.path import abspath, dirname
 from pathlib import Path
+import os
 
 from aind_watchdog_service import __version__ as package_version
 
@@ -71,3 +72,15 @@ def linkcode_resolve(domain, info):
         return None
     filename = info["module"].replace(".", "/")
     return f"{SOURCE_ROOT}/{filename}.py"
+
+
+def copy_assets(src: os.PathLike, dst: os.PathLike) -> None:
+    """Copy assets from the source directory to the destination directory."""
+    import shutil
+
+    if Path(src).is_dir():
+        shutil.copytree(src, dst)
+    else:
+        raise ValueError(f"Source directory {src} does not exist.")
+
+copy_assets("../../assets", "../build/html/assets")
