@@ -14,7 +14,7 @@ from aind_data_transfer_models.core import (
     ModalityConfigs,
     SubmitJobRequest,
 )
-from watchdog.events import FileModifiedEvent
+from watchdog.events import FileCreatedEvent
 
 from aind_watchdog_service.alert_bot import AlertBot
 from aind_watchdog_service.models.manifest_config import ManifestConfig
@@ -33,7 +33,7 @@ class RunJob:
 
     def __init__(
         self,
-        event: FileModifiedEvent,
+        event: FileCreatedEvent,
         config: ManifestConfig,
         watch_config: WatchConfig,
         alert: Union[str, None],
@@ -253,7 +253,7 @@ class RunJob:
 
         Parameters
         ----------
-        event : FileModifiedEvent
+        event : FileCreatedEvent
             modified event file
         """
         logging.info("Running job for %s", self.event.src_path)

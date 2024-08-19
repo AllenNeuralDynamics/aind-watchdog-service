@@ -8,15 +8,15 @@ from unittest.mock import MagicMock, patch
 
 import yaml
 from apscheduler.schedulers.background import BackgroundScheduler
-from watchdog.events import FileModifiedEvent
+from watchdog.events import FileCreatedEvent
 
 from aind_watchdog_service.event_handler import EventHandler
 from aind_watchdog_service.models.manifest_config import ManifestConfig
 from aind_watchdog_service.models.watch_config import WatchConfig
 
 
-class MockFileModifiedEvent(FileModifiedEvent):
-    """Mock FileModifiedEvent for testing EventHandler"""
+class MockFileCreatedEvent(FileCreatedEvent):
+    """Mock FileCreatedEvent for testing EventHandler"""
 
     def __init__(self, src_path):
         """init"""
@@ -67,21 +67,21 @@ class TestEventHandler(unittest.TestCase):
     @patch("logging.info")
     @patch("aind_watchdog_service.event_handler.EventHandler._load_manifest")
     @patch("aind_watchdog_service.event_handler.EventHandler.schedule_job")
-    def test_event_handler_on_modified(
+    def test_event_handler_on_created(
         self,
         mock_schedule_job: MagicMock,
         mock_vast_transfer: MagicMock,
         mock_log_info: MagicMock,
     ):
-        """Test on_modified method"""
+        """Test on_created method"""
 
         mock_vast_transfer.return_value = ManifestConfig(**self.manifest_config)
         mock_scheduler = MockScheduler()
 
         watch_config = WatchConfig(**self.config)
         event_handler = EventHandler(mock_scheduler, watch_config)
-        mock_event = MockFileModifiedEvent("/path/to/manifest.txt")
-        event_handler.on_modified(mock_event)
+        mock_event = MockFileCreatedEvent("/path/to/manifest.txt")
+        event_handler.on_created(mock_event)
         with patch.object(Path, "is_dir") as mock_dir:
             mock_dir.return_value = False
             mock_log_info.assert_called_with("Found event file %s", mock_event.src_path)
@@ -104,21 +104,18 @@ class TestEventHandler(unittest.TestCase):
                 event_handler = EventHandler(mock_scheduler, watch_config)
 
                 # Test time trigger conditions for addition of one day when hour has already passed # noqa
-                time_now = dt.now() - timedelta(hours=2)
-                trigger_time = event_handler._get_trigger_time(time_now)
-                test_time = dt.now().replace(
-                    hour=dt.now().hour - 2, minute=0, second=0, microsecond=0
+                # TODO we should consider a test fixture that freezes time here. This test is NOT deterministic # noqa
+                date_now = dt.now()
+                trigger_date = event_handler._get_trigger_time(
+                    (date_now - timedelta(minutes=1)).time()
                 )
-                test_time = test_time + timedelta(days=1)
-                self.assertEqual(trigger_time, test_time)
+                self.assertEqual(trigger_date, date_now + timedelta(days=1, minutes=-1))
 
                 # Test trigger time when hour has not passed
-                time_now = dt.now() + timedelta(hours=2)
-                trigger_time = event_handler._get_trigger_time(time_now)
-                test_time = dt.now().replace(
-                    hour=dt.now().hour + 2, minute=0, second=0, microsecond=0
+                trigger_time = event_handler._get_trigger_time(
+                    (date_now + timedelta(minutes=1)).time()
                 )
-                self.assertEqual(trigger_time, test_time)
+                self.assertEqual(trigger_time, date_now + timedelta(minutes=1))
 
 
 if __name__ == "__main__":
