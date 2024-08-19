@@ -18,9 +18,7 @@ jobs:
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v3
 
-    - run: pip install -e .
-    - run: pip install -U setuptools==69.5.1
-    - run: pip install -U pyinstaller==6.6.0
+    - run: pip install -e .[publish]
     - run: pip list
     - run: pyinstaller src/aind_watchdog_service/main.py --onefile --noconsole  -n aind-watchdog-service -i src/aind_watchdog_service/icon/watchdog.ico --clean
     # Verify the executable runs
