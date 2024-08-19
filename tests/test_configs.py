@@ -45,7 +45,7 @@ class TestManifestConfigs(unittest.TestCase):
 
     def test_manifest_config(self):
         """Test te ManifestConfig class."""
-        # Open config for to pass and compare
+        # Open config for to pass and compare   
         with open(self.path_to_manifest) as yam:
             data = yaml.safe_load(yam)
         # Check the the case where directories exist
