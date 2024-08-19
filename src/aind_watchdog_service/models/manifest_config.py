@@ -23,7 +23,7 @@ class ManifestConfig(BaseModel):
     )
     subject_id: int = Field(..., description="Subject ID", title="Subject ID")
     acquisition_datetime: datetime = Field(
-        description="acquisition datetime in YYYY-MM-DD HH:mm:ss format",
+        description="Acquisition datetime",
         title="Acquisition datetime",
     )
     schedule_time: Optional[time] = Field(

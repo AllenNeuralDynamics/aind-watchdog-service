@@ -6,7 +6,7 @@ import os
 import platform
 import subprocess
 from pathlib import Path, PurePosixPath
-from typing import Union, Optional
+from typing import Optional, Union
 
 import requests
 from aind_data_transfer_models.core import (
