@@ -1,12 +1,8 @@
 import unittest
-from datetime import datetime as dt
 from pathlib import Path
 
-import pydantic_core
 import yaml
-from pydantic import ValidationError
 
-from aind_watchdog_service.models.manifest_config import ManifestConfig
 from aind_watchdog_service.models.watch_config import WatchConfig
 
 TEST_DIRECTORY = Path(__file__).resolve().parent
