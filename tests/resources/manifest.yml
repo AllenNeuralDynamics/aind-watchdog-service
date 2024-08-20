@@ -3,6 +3,8 @@ capsule_id: capsule_id
 mount: mount_point
 destination: D:/ophys
 processor_full_name: Some User
+force_cloud_sync: False
+transfer_endpoint: http://aind-data-transfer-service/api/v1/submit_jobs
 modalities:
   behavior:
   - D:\behavior\data\1330132892_Behavior_20240212T091443.mp4

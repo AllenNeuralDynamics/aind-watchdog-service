@@ -2,7 +2,7 @@
 
 import logging
 from datetime import datetime as dt
-from datetime import timedelta, time
+from datetime import time, timedelta
 from pathlib import Path
 from typing import Dict
 

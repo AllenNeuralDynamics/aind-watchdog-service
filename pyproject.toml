@@ -57,8 +57,6 @@ line-length = 90
 target_version = ['py39']
 exclude = '''
 
-[tool.flake8]
-max-line-length = 90
 
 (
   /(

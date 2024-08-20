@@ -1,12 +1,15 @@
 """Configuration file for the Sphinx documentation builder."""
+
 #
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
-# -- Path Setup --------------------------------------------------------------
-from os.path import dirname, abspath
-from pathlib import Path
 from datetime import date
+
+# -- Path Setup --------------------------------------------------------------
+from os.path import abspath, dirname
+from pathlib import Path
+
 from aind_watchdog_service import __version__ as package_version
 
 INSTITUTE_NAME = "Allen Institute for Neural Dynamics"

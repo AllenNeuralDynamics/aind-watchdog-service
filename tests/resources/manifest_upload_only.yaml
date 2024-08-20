@@ -2,6 +2,8 @@ acquisition_datetime: 2024-02-12 09:14:43+00:00
 capsule_id: null
 mount: null
 destination: D:/ophys
+force_cloud_sync: False
+transfer_endpoint: http://aind-data-transfer-service/api/v1/submit_jobs
 processor_full_name: Some User
 modalities:
   behavior:

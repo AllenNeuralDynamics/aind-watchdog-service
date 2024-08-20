@@ -6,7 +6,7 @@ import os
 import platform
 import subprocess
 from pathlib import Path, PurePosixPath
-from typing import Union
+from typing import Optional, Union
 
 import requests
 from aind_data_transfer_models.core import (
@@ -46,7 +46,7 @@ class RunJob:
         if alert:
             self.alert = alert
 
-    def _send_alert(self, title: str, send: bool, message: str = None) -> None:
+    def _send_alert(self, title: str, send: bool, message: Optional[str] = None) -> None:
         """wrapper for AlertBot configured
 
         Parameters
@@ -194,7 +194,7 @@ class RunJob:
             return False
         return True
 
-    def trigger_transfer_service(self) -> None:
+    def trigger_transfer_service(self) -> bool:
         """Triggers aind-data-transfer-service"""
         modality_configs = []
         for modality in self.config.modalities.keys():
@@ -210,18 +210,19 @@ class RunJob:
             s3_bucket=self.config.s3_bucket,
             platform=self.config.platform,
             subject_id=str(self.config.subject_id),
-            acq_datetime=self.config.acquisition_datetime.strftime("%Y-%m-%d %H:%M:%S"),
+            acq_datetime=self.config.acquisition_datetime,
             modalities=modality_configs,
             metadata_dir=PurePosixPath(self.config.destination) / self.config.name,
             process_capsule_id=self.config.capsule_id,
             project_name=self.config.project_name,
             input_data_mount=self.config.mount,
+            force_cloud_sync=self.config.force_cloud_sync,
         )
 
         submit_request = SubmitJobRequest(upload_jobs=[upload_job_configs])
         post_request_content = json.loads(submit_request.model_dump_json(round_trip=True))
         submit_job_response = requests.post(
-            url="http://aind-data-transfer-service/api/v1/submit_jobs",
+            url=self.config.transfer_endpoint,
             json=post_request_content,
         )
 
