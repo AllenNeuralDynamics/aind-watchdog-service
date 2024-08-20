@@ -81,9 +81,6 @@ exclude_lines = [
 ]
 fail_under = 85
 
-[tool.flake8]
-max-line-length = 90
-
 [tool.isort]
 line_length = 90
 profile = "black"
