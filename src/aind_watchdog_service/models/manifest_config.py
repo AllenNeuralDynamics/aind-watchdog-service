@@ -3,16 +3,23 @@
 from datetime import datetime, time
 from typing import Dict, List, Literal, Optional
 
-from aind_data_schema_models import modalities
-from aind_data_schema_models import platforms
+from aind_data_schema_models import modalities, platforms
 from aind_data_transfer_models.core import BucketType
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator, BeforeValidator
-from typing_extensions import Self, Annotated
+from pydantic import (
+    BaseModel,
+    BeforeValidator,
+    ConfigDict,
+    Field,
+    field_validator,
+    model_validator,
+)
+from typing_extensions import Annotated, Self
 
 Platform = Literal[tuple(set(platforms.Platform.abbreviation_map.keys()))]
 Modality = Annotated[
     Literal[tuple(set(list(modalities.Modality.abbreviation_map.keys()) + ["ophys"]))],
-    BeforeValidator(lambda x: "pophys" if x == "ophys" else x)]
+    BeforeValidator(lambda x: "pophys" if x == "ophys" else x),
+]
 
 
 class ManifestConfig(BaseModel):
@@ -47,9 +54,7 @@ class ManifestConfig(BaseModel):
         description="Transfer endpoint for data transfer",
         title="Transfer endpoint",
     )
-    platform: Platform = Field(
-        description="Platform type", title="Platform type"
-    )
+    platform: Platform = Field(description="Platform type", title="Platform type")
     capsule_id: Optional[str] = Field(
         ..., description="Capsule ID of pipeline to run", title="Capsule"
     )
