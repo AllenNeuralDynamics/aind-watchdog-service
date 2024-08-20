@@ -26,6 +26,21 @@ jobs:
     - run: set WATCH_CONFIG=dist/example_watch_config_no_webhook.yml
     - run: dir dist
     - run: dist/aind-watchdog-service.exe
+    - name: Create
+      id: create_release
+      uses: actions/create-release@v1
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
     - uses: actions/upload-artifact@v3
       with:
         path: dist/*
+    - name: Upload release
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: dist/aind-watchdog-service.exe
+        asset_name: aind-watchdog-service.exe
+        asset_content_type: application/vnd.microsoft.portable-executable
