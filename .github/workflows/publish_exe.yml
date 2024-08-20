@@ -4,9 +4,7 @@ on:
   pull_request:
     branches:
       - main
-  push:
-    branches:
-      - feature/add-artifact-to-release
+      - development
   workflow_dispatch:
 
 jobs:
