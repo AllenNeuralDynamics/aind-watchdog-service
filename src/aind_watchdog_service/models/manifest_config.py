@@ -3,11 +3,14 @@
 from datetime import datetime, time
 from typing import Dict, List, Literal, Optional
 
-from aind_data_schema_models.modalities import Modality
-from aind_data_schema_models.platforms import Platform
+from aind_data_schema_models import modalities
+from aind_data_schema_models import platforms
 from aind_data_transfer_models.core import BucketType
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from typing_extensions import Self
+
+Platforms = tuple(set(platforms.Platform.abbreviation_map.keys()))
+Modality = tuple(set(list(modalities.Modality.abbreviation_map.keys()) + ["ophys"]))
 
 
 class ManifestConfig(BaseModel):
@@ -42,7 +45,7 @@ class ManifestConfig(BaseModel):
         description="Transfer endpoint for data transfer",
         title="Transfer endpoint",
     )
-    platform: Literal[tuple(Platform.abbreviation_map.keys())] = Field(
+    platform: Literal[Platforms] = Field(
         description="Platform type", title="Platform type"
     )
     capsule_id: Optional[str] = Field(
@@ -61,7 +64,7 @@ class ManifestConfig(BaseModel):
         title="Destination directory",
         examples=[r"\\allen\aind\scratch\test"],
     )
-    modalities: Dict[Literal[tuple(Modality.abbreviation_map.keys())], List[str]] = Field(
+    modalities: Dict[Literal[Modality], List[str]] = Field(
         default={},
         description="list of ModalityFile objects containing modality names and associated files or directories",  # noqa
         title="modality files",
