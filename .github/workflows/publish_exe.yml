@@ -43,12 +43,12 @@ jobs:
     - uses: actions/upload-artifact@v3
       with:
         path: dist/*
-    - name: Upload release
+    - name: Upload exe release
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: dist/
-        asset_name: aind-watchdog-service
+        asset_path: dist/aind-watchdog-service.exe
+        asset_name: aind-watchdog-service.exe
         asset_content_type: application/vnd.microsoft.portable-executable
