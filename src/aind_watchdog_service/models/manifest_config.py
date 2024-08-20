@@ -61,12 +61,10 @@ class ManifestConfig(BaseModel):
         title="Destination directory",
         examples=[r"\\allen\aind\scratch\test"],
     )
-    modalities: Dict[Literal[tuple(Modality.abbreviation_map.keys())], List[str]] = (
-        Field(
-            default={},
-            description="list of ModalityFile objects containing modality names and associated files or directories",  # noqa
-            title="modality files",
-        )
+    modalities: Dict[Literal[tuple(Modality.abbreviation_map.keys())], List[str]] = Field(
+        default={},
+        description="list of ModalityFile objects containing modality names and associated files or directories",  # noqa
+        title="modality files",
     )
     schemas: List[str] = Field(
         default=[],
