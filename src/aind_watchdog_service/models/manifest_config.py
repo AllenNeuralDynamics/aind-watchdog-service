@@ -42,7 +42,7 @@ class ManifestConfig(BaseModel):
         description="Transfer endpoint for data transfer",
         title="Transfer endpoint",
     )
-    platform: Literal[tuple(Platform._abbreviation_map.keys())] = Field(
+    platform: Literal[tuple(Platform.abbreviation_map.keys())] = Field(
         description="Platform type", title="Platform type"
     )
     capsule_id: Optional[str] = Field(
@@ -61,7 +61,7 @@ class ManifestConfig(BaseModel):
         title="Destination directory",
         examples=[r"\\allen\aind\scratch\test"],
     )
-    modalities: Dict[Literal[tuple(Modality._abbreviation_map.keys())], List[str]] = (
+    modalities: Dict[Literal[tuple(Modality.abbreviation_map.keys())], List[str]] = (
         Field(
             default={},
             description="list of ModalityFile objects containing modality names and associated files or directories",  # noqa
