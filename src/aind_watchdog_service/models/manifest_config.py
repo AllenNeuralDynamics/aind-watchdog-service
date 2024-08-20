@@ -9,7 +9,7 @@ from aind_data_transfer_models.core import BucketType
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator, BeforeValidator
 from typing_extensions import Self, Annotated
 
-Platforms = Literal[tuple(set(platforms.Platform.abbreviation_map.keys()))]
+Platform = Literal[tuple(set(platforms.Platform.abbreviation_map.keys()))]
 Modality = Annotated[
     Literal[tuple(set(list(modalities.Modality.abbreviation_map.keys()) + ["ophys"]))],
     BeforeValidator(lambda x: "pophys" if x == "ophys" else x)]
@@ -47,7 +47,7 @@ class ManifestConfig(BaseModel):
         description="Transfer endpoint for data transfer",
         title="Transfer endpoint",
     )
-    platform: Platforms = Field(
+    platform: Platform = Field(
         description="Platform type", title="Platform type"
     )
     capsule_id: Optional[str] = Field(
