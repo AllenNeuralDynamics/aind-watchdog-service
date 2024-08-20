@@ -20,6 +20,7 @@ dependencies = [
     'watchdog',
     'pyyaml',
     'aind-data-transfer-models',
+    'aind-data-schema-models>=0.4',
     'APScheduler',
     'requests'
 ]
