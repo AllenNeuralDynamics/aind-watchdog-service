@@ -4,6 +4,9 @@ on:
   pull_request:
     branches:
       - main
+  push:
+    branches:
+      - feature/add-artifact-to-release
   workflow_dispatch:
 
 jobs:
