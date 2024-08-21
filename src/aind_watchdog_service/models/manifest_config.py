@@ -15,9 +15,14 @@ from pydantic import (
 )
 from typing_extensions import Annotated, Self
 
+# This is a really bad idea, but until we can figure out a better solution
+# from aind-data-schema we will settle for this.
+# A relevant issue has been opened in the aind-data-schemas repo:
+# https://github.com/AllenNeuralDynamics/aind-data-schema/issues/960
+
 Platform = Literal[tuple(set(platforms.Platform.abbreviation_map.keys()))]
 Modality = Annotated[
-    Literal[tuple(set(list(modalities.Modality.abbreviation_map.keys()) + ["ophys"]))],
+    Literal[tuple(set(modalities.Modality.abbreviation_map.keys()))],
     BeforeValidator(lambda x: "pophys" if x == "ophys" else x),
 ]
 
