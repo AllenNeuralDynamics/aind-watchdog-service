@@ -13,7 +13,7 @@ modalities:
   - D:\behavior\data\1330132892_Behavior_20240212T091443.json
   - D:\behavior\data\1330132892_Face_20240212T091444.json
   - D:\behavior\data\1330132892_Eye_20240212T091443.json
-  ophys:
+  pophys:
   - D:\data\1330132892\1330132892_averaged_depth.tiff
   - D:\data\1330132892\1330132892_averaged_surface.tiff
   - D:\data\1330132892\1330132892_cortical_z_stack0.tiff
