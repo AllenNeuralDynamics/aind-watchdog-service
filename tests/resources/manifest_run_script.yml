@@ -16,3 +16,4 @@ s3_bucket: private
 subject_id: 704576
 schedule_time: null
 project_name: LearningomFISH-V1omFISH
+destination: /allen/aind/scratch
