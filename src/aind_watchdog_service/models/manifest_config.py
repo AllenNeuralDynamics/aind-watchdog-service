@@ -3,14 +3,28 @@
 from datetime import datetime, time
 from typing import Dict, List, Literal, Optional
 
-from aind_data_schema_models import modalities
-from aind_data_schema_models import platforms
+from aind_data_schema_models import modalities, platforms
 from aind_data_transfer_models.core import BucketType
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
-from typing_extensions import Self
+from pydantic import (
+    BaseModel,
+    BeforeValidator,
+    ConfigDict,
+    Field,
+    field_validator,
+    model_validator,
+)
+from typing_extensions import Annotated, Self
 
-Platforms = tuple(set(platforms.Platform.abbreviation_map.keys()))
-Modality = tuple(set(list(modalities.Modality.abbreviation_map.keys()) + ["ophys"]))
+# This is a really bad idea, but until we can figure out a better solution
+# from aind-data-schema we will settle for this.
+# A relevant issue has been opened in the aind-data-schemas repo:
+# https://github.com/AllenNeuralDynamics/aind-data-schema/issues/960
+
+Platform = Literal[tuple(set(platforms.Platform.abbreviation_map.keys()))]
+Modality = Annotated[
+    Literal[tuple(set(modalities.Modality.abbreviation_map.keys()))],
+    BeforeValidator(lambda x: "pophys" if x == "ophys" else x),
+]
 
 
 class ManifestConfig(BaseModel):
@@ -45,9 +59,7 @@ class ManifestConfig(BaseModel):
         description="Transfer endpoint for data transfer",
         title="Transfer endpoint",
     )
-    platform: Literal[Platforms] = Field(
-        description="Platform type", title="Platform type"
-    )
+    platform: Platform = Field(description="Platform type", title="Platform type")
     capsule_id: Optional[str] = Field(
         ..., description="Capsule ID of pipeline to run", title="Capsule"
     )
@@ -64,7 +76,7 @@ class ManifestConfig(BaseModel):
         title="Destination directory",
         examples=[r"\\allen\aind\scratch\test"],
     )
-    modalities: Dict[Literal[Modality], List[str]] = Field(
+    modalities: Dict[Modality, List[str]] = Field(
         default={},
         description="list of ModalityFile objects containing modality names and associated files or directories",  # noqa
         title="modality files",
