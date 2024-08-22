@@ -23,7 +23,8 @@ class WatchdogService:
     def __init__(
         self,
         watch_config: WatchConfig,
-        log_dir: Path = "C:/ProgramData/aind/aind-watchdog-service",
+        log_dir: Path = Path(os.getenv("PROGRAMDATA", "C:/ProgramData"))
+        / "aind/aind-watchdog-service",
     ):
         """Construct WatchDogService, setup logging
 
