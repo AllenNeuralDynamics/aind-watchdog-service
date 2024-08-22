@@ -1,6 +1,5 @@
 """Build watchdog service executable"""
 
-from importlib_resources import files
 from PyInstaller import __main__ as pyi
 
 
