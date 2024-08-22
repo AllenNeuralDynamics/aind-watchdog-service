@@ -20,7 +20,7 @@ jobs:
 
     - run: pip install -e .[publish]
     - run: pip list
-    - run: pyinstaller src/aind_watchdog_service/main.py --onefile --noconsole  -n aind-watchdog-service -i src/aind_watchdog_service/icon/watchdog.ico --clean
+    - run: python build_watchdog.py
     # Verify the executable runs
     - run: copy examples/example_watch_config_no_webhook.yml ./dist/
     - run: set WATCH_CONFIG=dist/example_watch_config_no_webhook.yml
