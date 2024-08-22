@@ -35,7 +35,8 @@ jobs:
       id: get_version
       run: |
         import os
-        init_file = os.path.join('aind_watchdog_service', '__init__.py')
+        init_file = os.path.join('src/aind_watchdog_service', '__init__.py')
+        print(init_file)
         with open(init_file, 'r') as f:
             for line in f:
                 if line.startswith('__version__'):
