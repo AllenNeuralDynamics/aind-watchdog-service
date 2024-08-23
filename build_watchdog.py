@@ -13,7 +13,7 @@ def main():
         "-i",
         "src/aind_watchdog_service/icon/watchdog.ico",
         "--additional-hooks-dir=.",
-        "--console",
+        "--noconsole",
         "--onefile",
         "--clean"
     ]
