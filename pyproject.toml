@@ -38,7 +38,7 @@ docs = [
     'Sphinx',
     'furo',
     'autodoc_pydantic',
-    'myst_parser',
+    'sphinx_mdinclude'
 ]
 
 
