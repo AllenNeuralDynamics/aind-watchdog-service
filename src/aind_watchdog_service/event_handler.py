@@ -30,7 +30,7 @@ class EventHandler(FileSystemEventHandler):
         if config.webhook_url:
             self.alert = AlertBot(config.webhook_url)
 
-    def _load_manifest(self, event: FileCreatedEvent) -> None:
+    def _load_manifest(self, event: FileCreatedEvent) -> ManifestConfig:
         """Instructions to transfer to VAST
 
         Parameters
@@ -43,13 +43,13 @@ class EventHandler(FileSystemEventHandler):
         dict
            manifest configuration
         """
-        with open(event.src_path, "r") as f:
+        with open(event.src_path, "r", encoding="utf-8") as f:
             try:
                 data = yaml.safe_load(f)
                 config = ManifestConfig(**data)
-                return config
             except Exception as e:
                 logging.error("Error loading config %s", repr(e))
+        return config
 
     def _get_trigger_time(self, transfer_time: time) -> dt:
         """Get trigger time from the job
