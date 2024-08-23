@@ -8,6 +8,7 @@ from typing import Dict
 
 import yaml
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.job import Job
 from watchdog.events import FileCreatedEvent, FileSystemEventHandler
 
 from aind_watchdog_service.alert_bot import AlertBot
@@ -24,7 +25,7 @@ class EventHandler(FileSystemEventHandler):
         super().__init__()
         self.scheduler = scheduler
         self.config = config
-        self.jobs: Dict[str, str] = {}
+        self.jobs: Dict[str, Job] = {}
         self.alert = None
         if config.webhook_url:
             self.alert = AlertBot(config.webhook_url)
