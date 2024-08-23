@@ -59,8 +59,9 @@ class RunJob:
             Message to go in Teams card
         """
         if send:
-            alert_bot = AlertBot(self.watch_config.webhook_url)
-            alert_bot.send_message(title, message)
+            if self.config.webhook_url:
+                alert_bot = AlertBot(self.watch_config.webhook_url)
+                alert_bot.send_message(title, message)
 
     def copy_to_vast(self) -> bool:
         """Determine platform and copy files to VAST
