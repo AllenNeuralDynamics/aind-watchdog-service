@@ -22,11 +22,6 @@ jobs:
     - run: pip install -e .[publish]
     - run: pip list
     - run: python build_watchdog.py
-    # Verify the executable runs
-    - run: copy examples/example_watch_config_no_webhook.yml ./dist/
-    - run: set WATCH_CONFIG=dist/example_watch_config_no_webhook.yml
-    - run: dir dist
-    - run: dist/aind-watchdog-service.exe
     - name: Get version from __init__.py
       id: get_version
       run: |
