@@ -68,7 +68,7 @@ class EventHandler(FileSystemEventHandler):
         trigger_time = (
             trigger_time if trigger_time > _now else trigger_time + timedelta(days=1)
         )
-        print(f"Trigger time {trigger_time}")
+        logging.info("Trigger time %s", trigger_time)
         return trigger_time
 
     def schedule_job(self, event: FileCreatedEvent, job_config: ManifestConfig) -> None:
