@@ -87,4 +87,4 @@ def copy_assets(src: os.PathLike, dst: os.PathLike) -> None:
         raise ValueError(f"Source directory {src} does not exist.")
 
 
-copy_assets("../../assets", "../build/html/assets")
+copy_assets(Path("../assets"), Path("./_build/html/assets"))

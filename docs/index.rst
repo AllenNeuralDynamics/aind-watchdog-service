@@ -1,7 +1,7 @@
 Welcome to the Aind Watchdog Service documentation!
 =========================================================
 
-.. mdinclude:: ../../README.md
+.. mdinclude:: ../README.md
 
 .. toctree::
    :maxdepth: 4
