@@ -36,17 +36,13 @@ class RunJob:
         event: FileCreatedEvent,
         config: ManifestConfig,
         watch_config: WatchConfig,
-        alert: Union[str, None],
     ):
         """initialize RunJob class"""
         self.event = event
         self.config = config
         self.watch_config = watch_config
-        self.alert = None
-        if alert:
-            self.alert = alert
 
-    def _send_alert(self, title: str, send: bool, message: Optional[str] = None) -> None:
+    def _send_alert(self, title: str, message: Optional[str] = None) -> None:
         """wrapper for AlertBot configured
 
         Parameters
@@ -58,10 +54,9 @@ class RunJob:
         message: str
             Message to go in Teams card
         """
-        if send:
-            if self.config.webhook_url:
-                alert_bot = AlertBot(self.watch_config.webhook_url)
-                alert_bot.send_message(title, message)
+        if self.config.webhook_url:
+            alert_bot = AlertBot(self.watch_config.webhook_url)
+            alert_bot.send_message(title, message)
 
     def copy_to_vast(self) -> bool:
         """Determine platform and copy files to VAST
@@ -88,13 +83,11 @@ class RunJob:
                         transfer = self.execute_linux_command(file, destination_directory)
                     if not transfer:
                         logging.error("Error copying files %s", file)
-                        self._send_alert(
-                            "Error copying files", getattr(self, "alert"), str(file)
-                        )
+                        self._send_alert("Error copying files", str(file))
                         return False
                 else:
                     logging.error("File not found %s", file)
-                    self._send_alert("File not found", getattr(self, "alert"), file)
+                    self._send_alert("File not found", file)
                     return False
         for schema in self.config.schemas:
             destination_directory = os.path.join(destination, parent_directory)
@@ -104,7 +97,7 @@ class RunJob:
                 transfer = self.execute_linux_command(schema, destination_directory)
             if not transfer:
                 logging.error("Error copying schema %s", schema)
-                self._send_alert("Error copying schema", getattr(self, "alert"), schema)
+                self._send_alert("Error copying schema", schema)
                 return False
         return True
 
@@ -223,9 +216,7 @@ class RunJob:
         submit_request = SubmitJobRequest(upload_jobs=[upload_job_configs])
         post_request_content = json.loads(submit_request.model_dump_json(round_trip=True))
         submit_job_response = requests.post(
-            url=self.config.transfer_endpoint,
-            json=post_request_content,
-            timeout=5
+            url=self.config.transfer_endpoint, json=post_request_content, timeout=5
         )
 
         if submit_job_response.status_code == 200:
@@ -242,7 +233,6 @@ class RunJob:
                 logging.error("Error copying manifest file %s", self.event.src_path)
                 self._send_alert(
                     "Error copying manifest file",
-                    getattr(self, "alert"),
                     self.event.src_path,
                 )
                 return
@@ -259,7 +249,7 @@ class RunJob:
             modified event file
         """
         logging.info("Running job for %s", self.event.src_path)
-        self._send_alert("Running job", getattr(self, "alert"), self.event.src_path)
+        self._send_alert("Running job", self.event.src_path)
         if self.config.script:
             for command in self.config.script:
                 logging.info(
@@ -272,14 +262,12 @@ class RunJob:
                     logging.error("Error running script %s", command)
                     self._send_alert(
                         "Error running script",
-                        getattr(self, "alert"),
                         f"Could not execute {command} for {self.config.name}",
                     )
                     return
                 else:
                     self._send_alert(
                         "Script executed",
-                        getattr(self, "alert"),
                         f"Ran {command} for {self.config.name}",
                     )
 
@@ -288,17 +276,15 @@ class RunJob:
             if not transfer:
                 self._send_alert(
                     "Could not copy data to destination",
-                    getattr(self, "alert"),
                     self.event.src_path,
                 )
                 return
         if not self.trigger_transfer_service():
             self._send_alert(
                 "Could not trigger aind-data-transfer-service",
-                getattr(self, "alert"),
                 self.event.src_path,
             )
             return
-        self._send_alert("Job complete", getattr(self, "alert"), self.event.src_path)
+        self._send_alert("Job complete", self.event.src_path)
         logging.info("Job complete for %s", self.event.src_path)
         self.move_manifest_to_archive()
