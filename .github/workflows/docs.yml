@@ -15,6 +15,7 @@ jobs:
         publish: false
         python_version: 3.11
         checkout: true
+        documentation_path: ./docs/source
     - uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
