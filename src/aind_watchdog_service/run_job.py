@@ -225,6 +225,7 @@ class RunJob:
         submit_job_response = requests.post(
             url=self.config.transfer_endpoint,
             json=post_request_content,
+            timeout=5
         )
 
         if submit_job_response.status_code == 200:
