@@ -50,20 +50,6 @@ class EventHandler(FileSystemEventHandler):
             except Exception as e:
                 logging.error("Error loading config %s", repr(e))
 
-    def _remove_job(self, event: FileCreatedEvent) -> None:
-        """Removes job from scheduler queue
-
-        Parameters
-        ----------
-        event : FileCreatedEvent
-           event to remove
-        """
-        if self.jobs.get(event.src_path, ""):
-            logging.info("Removing job_id %s", self.jobs[event.src_path].id)
-            del self.jobs[event.src_path]
-
-            self.scheduler.remove_job(self.jobs[event.src_path].id)
-
     def _get_trigger_time(self, transfer_time: time) -> dt:
         """Get trigger time from the job
 
@@ -120,9 +106,8 @@ class EventHandler(FileSystemEventHandler):
         """
         if event.src_path in self.jobs:
             logging.info("Deleting job %s", event.src_path)
+            self.scheduler.remove_job(self.jobs[event.src_path].id)
             del self.jobs[event.src_path]
-        if self.jobs.get(event.src_path, ""):
-            self._remove_job(self.jobs[event.src_path].id)
         logging.info("Jobs in queue %s", self.scheduler.get_jobs())
 
     def on_created(self, event: FileCreatedEvent) -> None:
@@ -143,11 +128,10 @@ class EventHandler(FileSystemEventHandler):
         if "manifest" not in event.src_path:
             return
         # If scheduled manifest is being modified, remove original job
-        if (
-            self.jobs.get(event.src_path, "")
-            and self.jobs[event.src_path].id in self.scheduler.get_jobs()
-        ):
-            self._remove_job(self.jobs[event.src_path])
+        if event.src_path in self.jobs:
+            logging.info("Deleting job %s", event.src_path)
+            self.scheduler.remove_job(self.jobs[event.src_path].id)
+            del self.jobs[event.src_path]
         logging.info("Found event file %s", event.src_path)
         transfer_config = self._load_manifest(event)
         if transfer_config:
