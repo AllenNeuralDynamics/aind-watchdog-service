@@ -42,9 +42,7 @@ class RunJob:
         self.event = event
         self.config = config
         self.watch_config = watch_config
-        self.alert = None
-        if alert:
-            self.alert = alert
+        self.alert = alert if alert else None
 
     def _send_alert(self, title: str, send: bool, message: Optional[str] = None) -> None:
         """wrapper for AlertBot configured
@@ -59,7 +57,7 @@ class RunJob:
             Message to go in Teams card
         """
         if send:
-            if self.config.webhook_url:
+            if self.watch_config.webhook_url:
                 alert_bot = AlertBot(self.watch_config.webhook_url)
                 alert_bot.send_message(title, message)
 
