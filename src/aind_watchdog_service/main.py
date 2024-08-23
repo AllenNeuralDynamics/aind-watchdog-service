@@ -92,8 +92,19 @@ def start_watchdog(watch_config: WatchConfig) -> None:
     watchdog_service.start_service()
 
 
-def main():
-    """Main function to parse arguments and start watchdog service"""
+def parse_args(args_list: list[str]) -> argparse.Namespace:
+    """read in arguments from the command line
+
+    Parameters
+    ----------
+    args_list : list[str]
+        args read in by the command line
+
+    Returns
+    -------
+    argparse.Namespace
+        parsed arguments
+    """
 
     parser = argparse.ArgumentParser(description="Watchdog service")
     parser.add_argument(
@@ -116,7 +127,35 @@ def main():
         "-w", "--webhook-url", type=str, help="Teams webhook url for user notification"
     )
 
-    args = parser.parse_args()
+    return parser.parse_args(args_list)
+
+
+def read_config(config_path: str) -> WatchConfig:
+    """read yaml configuration file
+
+    Parameters
+    ----------
+    config_path : str
+        path to configuration file
+
+    Returns
+    -------
+    WatchConfig
+        watchdog model
+    """
+    with open(config_path, encoding="UTF-8") as y:
+        data = yaml.safe_load(y)
+        try:
+            return WatchConfig(**data)
+        except ValidationError as e:
+            logging.error("Error loading config %s", e)
+            sys.exit(1)
+
+
+def main():
+    """Main function to parse arguments and start watchdog service"""
+
+    args = parse_args(sys.argv[1:])
 
     if args.config_path:
         args.flag_dir = None
@@ -127,7 +166,6 @@ def main():
         sys.exit(1)
 
     watch_config: WatchConfig
-
     if (args.flag_dir is not None) and (args.manifest_complete is not None):
         try:
 
@@ -157,13 +195,7 @@ def main():
             logging.error("Configuration file %s does not exist", configuration)
             raise FileNotFoundError(f"Configuration file {configuration} does not exist")
 
-        with open(configuration, encoding="UTF-8") as y:
-            data = yaml.safe_load(y)
-            try:
-                watch_config = WatchConfig(**data)
-            except ValidationError as e:
-                logging.error("Error loading config %s", e)
-                sys.exit(1)
+        watch_config = read_config(configuration)
 
     start_watchdog(watch_config)
 

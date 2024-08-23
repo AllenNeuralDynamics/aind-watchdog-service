@@ -1,6 +1,7 @@
 """Test main entry point."""
 
 import unittest
+from argparse import Namespace
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -10,7 +11,7 @@ from watchdog.events import FileCreatedEvent
 from watchdog.observers import Observer
 
 from aind_watchdog_service.event_handler import EventHandler
-from aind_watchdog_service.main import WatchdogService, start_watchdog
+from aind_watchdog_service.main import WatchdogService, main, parse_args, start_watchdog
 from aind_watchdog_service.models.watch_config import WatchConfig
 
 TEST_DIRECTORY = Path(__file__).resolve().parent
@@ -113,22 +114,121 @@ class TestWatchdogService(unittest.TestCase):
                     mock_setup_logging.assert_called_once()
                     mock_log_info.assert_called()
                     mock_log_err.assert_not_called()
-                    # mock_event_handler.assert_called_once()
-                    # mock_sleep.assert_called_once()
-                    # with self.assertRaises(KeyboardInterrupt):
-                    #     signal.raise_signal(signal.SIGINT)
-        # with patch.object(Path, "exists") as mock_exists:
-        #     mock_exists.return_value = False
-        #     with self.assertRaises(FileNotFoundError):
-        #         watchdog_service.initiate_observer()
-        # mock_log_err.assert_called_once()
 
+    def test_parse_args(self):
+        """Test parse_args"""
+        args_list = ["--config-path", "config.yml"]
+        expected_args = Namespace(
+            config_path="config.yml",
+            flag_dir=None,
+            manifest_complete=None,
+            webhook_url=None,
+        )
+        result = parse_args(args_list)
+        self.assertEqual(result, expected_args)
+
+        args_list = [
+            "--flag-dir",
+            "/some/dir",
+            "--manifest-complete",
+            "/some/dir/manifest_complete",
+            "--webhook-url",
+            "https://alleninstitute.webhook.office.com/webhookb2/70b02442-17e7-4273-b16d-c96e4bc584ec@32669cd6-737f-4b39-8bdd-d6951120d3fc/IncomingWebhook/c67df18b06aa470aa93f4d3a4cb8f4ce/b5d574af-077d-48d4-a6a5-232279015e6a",  # noqa
+        ]
+        result = parse_args(args_list)
+        expected_args = Namespace(
+            config_path=None,
+            flag_dir="/some/dir",
+            manifest_complete="/some/dir/manifest_complete",
+            webhook_url="https://alleninstitute.webhook.office.com/webhookb2/70b02442-17e7-4273-b16d-c96e4bc584ec@32669cd6-737f-4b39-8bdd-d6951120d3fc/IncomingWebhook/c67df18b06aa470aa93f4d3a4cb8f4ce/b5d574af-077d-48d4-a6a5-232279015e6a",  # noqa
+        )
+        self.assertEqual(result, expected_args)
+
+    @patch("aind_watchdog_service.main.parse_args")
+    @patch("aind_watchdog_service.main.start_watchdog")
+    @patch("os.getenv")
+    @patch("aind_watchdog_service.main.read_config")
+    @patch("logging.error")
     @patch("aind_watchdog_service.main.WatchdogService")
-    def test_main(self, mock_watchdog: MagicMock):
-        """Test main, WatchdogService constructor"""
+    def test_main(
+        self,
+        mock_watchdog: MagicMock,
+        mock_log_error: MagicMock,
+        mock_read_config: MagicMock,
+        mock_env_var: MagicMock,
+        mock_start_watchdog: MagicMock,
+        mock_parse_args: MagicMock,
+    ) -> None:
+        """Test main function"""
+
         mock_watchdog.return_value = MockWatchdogService(self.watch_config)
         start_watchdog(self.watch_config_dict)
         mock_watchdog.assert_called_once()
+
+        mock_parse_args.return_value = Namespace(
+            config_path="config.yml",
+            flag_dir=None,
+            manifest_complete=None,
+            webhook_url=None,
+        )
+        mock_start_watchdog.return_value = None
+
+        mock_env_var.return_value = None
+
+        with patch.object(Path, "exists") as mock_exists:
+            mock_exists.return_value = True
+            mock_read_config.return_value = self.watch_config_dict
+            main()
+            mock_start_watchdog.assert_called_once()
+
+        with patch.object(Path, "exists") as mock_exists:
+            mock_exists.return_value = False
+            mock_read_config.return_value = self.watch_config_dict
+            with self.assertRaises(FileNotFoundError):
+                main()
+
+        mock_env_var.return_value = "config.yml"
+        mock_parse_args.return_value = Namespace(
+            config_path=None,
+            flag_dir=None,
+            manifest_complete=None,
+            webhook_url=None,
+        )
+        with patch.object(Path, "exists") as mock_exists:
+            mock_exists.return_value = True
+            mock_read_config.return_value = self.watch_config_dict
+            main()
+            mock_start_watchdog.assert_called()
+
+        mock_env_var.return_value = None
+        mock_parse_args.return_value = Namespace(
+            config_path=None,
+            flag_dir="some/dir",
+            manifest_complete="some/dir/manifest_complete",
+            webhook_url=None,
+        )
+
+        with patch.object(Path, "exists") as mock_exists:
+            mock_exists.return_value = False
+            mock_read_config.return_value = self.watch_config_dict
+            main()
+            mock_start_watchdog.assert_called()
+
+        mock_parse_args.return_value = Namespace(
+            config_path=None,
+            flag_dir=None,
+            manifest_complete="some/dir/manifest_complete",
+            webhook_url=None,
+        )
+        mock_log_error.assert_called()
+
+        mock_parse_args.return_value = Namespace(
+            config_path=None,
+            flag_dir="some/dir",
+            manifest_complete=None,
+            webhook_url=None,
+        )
+        mock_log_error.assert_called()
 
 
 if __name__ == "__main__":
