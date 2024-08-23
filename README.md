@@ -12,12 +12,14 @@
 With aind-watchdog-service, you can configure a directory for the app to watch, where manifest files (or beacon files) are dropped containing src files from an acquisition labeled by modality. The program can be configured with a web-hook URL to send messages to a Teams channel when data staging is complete and data transfer has been triggered through [aind-data-transfer-service](https://github.com/AllenNeuralDynamics/aind-data-transfer-service). Pipeline capsule ids can be added if triggering pipelines is necessary post-acquisition.
 
 # Usage
-* Create a watch_config file as yaml. Create an environment variable called WATCH_CONFIG containing the location of the config file.
+* There are two options for configuring the watchdog service.
+    * Create a watch_config file as yaml. Create an environment variable called WATCH_CONFIG containing the location of the config file.
     * Review src/aind-watchdog-service/models/watch_config.py for configuration parameters
     * watch_config.yml must include:
         * **flag_dir**: directory watchdog observer will monitor for manifest files
         * **manifest_complete**: where watchdog will place completed manifest files
         * **webhook_url**: to receive Teams notifications **OPTIONAL**
+    * Run the command line interface to execute the the service. For options pass the -h parameter.
 
 * Manifest files must be saved as yaml and contain *manifest* in the file name. The manifest file must contain the following keys *optional keys are marked as such*:
 
