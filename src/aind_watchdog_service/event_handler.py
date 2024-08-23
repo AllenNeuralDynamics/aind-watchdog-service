@@ -11,7 +11,6 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.job import Job
 from watchdog.events import FileCreatedEvent, FileSystemEventHandler
 
-from aind_watchdog_service.alert_bot import AlertBot
 from aind_watchdog_service.models.manifest_config import ManifestConfig
 from aind_watchdog_service.models.watch_config import WatchConfig
 from aind_watchdog_service.run_job import RunJob
@@ -26,11 +25,8 @@ class EventHandler(FileSystemEventHandler):
         self.scheduler = scheduler
         self.config = config
         self.jobs: Dict[str, Job] = {}
-        self.alert = None
-        if config.webhook_url:
-            self.alert = AlertBot(config.webhook_url)
 
-    def _load_manifest(self, event: FileCreatedEvent) -> None:
+    def _load_manifest(self, event: FileCreatedEvent) -> ManifestConfig:
         """Instructions to transfer to VAST
 
         Parameters
@@ -43,13 +39,13 @@ class EventHandler(FileSystemEventHandler):
         dict
            manifest configuration
         """
-        with open(event.src_path, "r") as f:
+        with open(event.src_path, "r", encoding="utf-8") as f:
             try:
                 data = yaml.safe_load(f)
                 config = ManifestConfig(**data)
-                return config
             except Exception as e:
                 logging.error("Error loading config %s", repr(e))
+        return config
 
     def _get_trigger_time(self, transfer_time: time) -> dt:
         """Get trigger time from the job
@@ -83,13 +79,13 @@ class EventHandler(FileSystemEventHandler):
         """
         if not job_config.schedule_time:
             logging.info("Scheduling job to run now %s", event.src_path)
-            run = RunJob(event, job_config, self.config, self.alert)
+            run = RunJob(event, job_config, self.config)
             job_id = self.scheduler.add_job(run.run_job)
 
         else:
             trigger = self._get_trigger_time(job_config.schedule_time)
             logging.info("Scheduling job to run at %s %s", trigger, event.src_path)
-            run = RunJob(event, job_config, self.config, self.alert)
+            run = RunJob(event, job_config, self.config)
             job_id = self.scheduler.add_job(run.run_job, "date", run_date=trigger)
         self.jobs[event.src_path] = job_id
 

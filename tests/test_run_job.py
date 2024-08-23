@@ -74,7 +74,6 @@ class TestRunSubprocess(unittest.TestCase):
             self.mock_event,
             self.manifest_config,
             self.watch_config,
-            self.watch_config.webhook_url,
         )
         result = execute_manifest_config.run_subprocess(cmd)
         # # Assert that mock_subproc was called with the correct arguments
@@ -101,7 +100,6 @@ class TestRunSubprocess(unittest.TestCase):
             self.mock_event,
             self.manifest_config,
             self.watch_config,
-            self.watch_config.webhook_url,
         )
         result = execute_script_config.run_subprocess(cmd)
         # # Assert that mock_subproc was called with the correct arguments
@@ -128,7 +126,6 @@ class TestRunSubprocess(unittest.TestCase):
                 self.mock_event,
                 self.manifest_config,
                 self.watch_config,
-                self.watch_config.webhook_url,
             )
             winx_dir = execute_manifest_config.execute_windows_command(src_dir, dest)
             winx_file = execute_manifest_config.execute_windows_command(src_file, dest)
@@ -142,7 +139,6 @@ class TestRunSubprocess(unittest.TestCase):
                 self.mock_event,
                 self.manifest_config,
                 self.watch_config,
-                self.watch_config.webhook_url,
             )
             winx_dir = execute_manifest_config.execute_windows_command(src_dir, dest)
             winx_file = execute_manifest_config.execute_windows_command(src_file, dest)
@@ -156,7 +152,6 @@ class TestRunSubprocess(unittest.TestCase):
                 self.mock_event,
                 self.manifest_config,
                 self.watch_config,
-                self.watch_config.webhook_url,
             )
             winx_dir = execute_manifest_config.execute_linux_command(src_dir, dest)
             winx_file = execute_manifest_config.execute_linux_command(src_file, dest)
@@ -170,7 +165,6 @@ class TestRunSubprocess(unittest.TestCase):
                 self.mock_event,
                 self.manifest_config,
                 self.watch_config,
-                self.watch_config.webhook_url,
             )
             winx_dir = execute_manifest_config.execute_linux_command(src_dir, dest)
             winx_file = execute_manifest_config.execute_linux_command(src_file, dest)
@@ -207,7 +201,6 @@ class TestRunSubprocess(unittest.TestCase):
                     self.mock_event,
                     self.manifest_config,
                     self.watch_config,
-                    self.watch_config.webhook_url,
                 )
                 mock_log_err.assert_not_called()
                 response = result.copy_to_vast()
@@ -222,7 +215,6 @@ class TestRunSubprocess(unittest.TestCase):
                     self.mock_event,
                     self.manifest_config,
                     self.watch_config,
-                    self.watch_config.webhook_url,
                 )
                 response = result.copy_to_vast()
                 mock_log_err.assert_called()
@@ -245,7 +237,6 @@ class TestRunSubprocess(unittest.TestCase):
             self.mock_event,
             self.manifest_config,
             self.watch_config,
-            self.watch_config.webhook_url,
         )
         response = execute.trigger_transfer_service()
         self.assertEqual(response, True)
@@ -266,7 +257,6 @@ class TestRunSubprocess(unittest.TestCase):
             self.mock_event,
             self.manifest_config,
             self.watch_config,
-            self.watch_config.webhook_url,
         )
         response = execute.trigger_transfer_service()
         self.assertEqual(response, False)
@@ -300,7 +290,6 @@ class TestRunSubprocess(unittest.TestCase):
                     self.mock_event,
                     self.manifest_config,
                     self.watch_config,
-                    self.watch_config.webhook_url,
                 )
                 execute.run_job()
                 mock_alert.assert_called_with("Job complete", self.mock_event.src_path)
@@ -312,7 +301,6 @@ class TestRunSubprocess(unittest.TestCase):
                     self.mock_event,
                     self.manifest_config,
                     self.watch_config,
-                    self.watch_config.webhook_url,
                 )
                 execute.run_job()
                 mock_alert.assert_called_with(
@@ -326,7 +314,6 @@ class TestRunSubprocess(unittest.TestCase):
                     self.mock_event,
                     self.manifest_config,
                     self.watch_config,
-                    self.watch_config.webhook_url,
                 )
                 execute.run_job()
                 mock_alert.assert_called_with(
@@ -340,7 +327,6 @@ class TestRunSubprocess(unittest.TestCase):
                     self.mock_event,
                     self.manifest_config,
                     self.watch_config,
-                    self.watch_config.webhook_url,
                 )
                 execute.run_job()
 
@@ -376,7 +362,6 @@ class TestRunSubprocess(unittest.TestCase):
             self.mock_event,
             self.manifest_with_run_script,
             self.watch_config,
-            self.watch_config.webhook_url,
         )
         execute.run_job()
         mock_alert.assert_called_with("Job complete", self.mock_event.src_path)
@@ -392,7 +377,6 @@ class TestRunSubprocess(unittest.TestCase):
             self.mock_event,
             self.manifest_with_run_script,
             self.watch_config,
-            self.watch_config.webhook_url,
         )
         execute.run_job()
         mock_log_error.assert_called_with("Error running script %s", "cmd1")
@@ -422,7 +406,6 @@ class TestRunSubprocess(unittest.TestCase):
             self.mock_event,
             self.manifest_with_run_script,
             self.watch_config_no_webhook,
-            self.watch_config_no_webhook.webhook_url,
         )
         execute.run_job()
         mock_alert.assert_not_called()
@@ -437,7 +420,6 @@ class TestRunSubprocess(unittest.TestCase):
             self.mock_event,
             self.manifest_config,
             self.watch_config,
-            self.watch_config.webhook_url,
         )
         execute.move_manifest_to_archive()
         mock_remove.assert_called_once()
@@ -453,7 +435,6 @@ class TestRunSubprocess(unittest.TestCase):
             self.mock_event,
             self.manifest_config,
             self.watch_config,
-            self.watch_config.webhook_url,
         )
         execute.move_manifest_to_archive()
         mock_subproc.assert_called_once()
@@ -487,7 +468,6 @@ class TestRunSubprocess(unittest.TestCase):
                     self.mock_event,
                     self.manifest_config_upload_only,
                     self.watch_config,
-                    self.watch_config.webhook_url,
                 )
                 execute.run_job()
                 mock_alert.assert_called_with("Job complete", self.mock_event.src_path)

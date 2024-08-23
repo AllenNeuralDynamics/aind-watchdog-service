@@ -54,7 +54,7 @@ class RunJob:
         message: str
             Message to go in Teams card
         """
-        if self.config.webhook_url:
+        if self.watch_config.webhook_url:
             alert_bot = AlertBot(self.watch_config.webhook_url)
             alert_bot.send_message(title, message)
 
