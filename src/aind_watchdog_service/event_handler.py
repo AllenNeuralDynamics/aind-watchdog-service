@@ -29,7 +29,7 @@ class EventHandler(FileSystemEventHandler):
         if config.webhook_url:
             self.alert = AlertBot(config.webhook_url)
 
-    def _load_manifest(self, event: FileCreatedEvent) -> ManifestConfig:
+    def _load_manifest(self, event: FileCreatedEvent) -> None:
         """Instructions to transfer to VAST
 
         Parameters
