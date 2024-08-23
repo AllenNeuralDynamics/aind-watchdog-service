@@ -1,10 +1,10 @@
 acquisition_datetime: 2024-02-12 09:14:43+00:00
-capsule_id: capsule_id
-mount: mount_point
+capsule_id: null
+mount: null
 destination: D:/ophys
-processor_full_name: Some User
 force_cloud_sync: False
 transfer_endpoint: http://aind-data-transfer-service/api/v1/submit_jobs
+processor_full_name: Some User
 modalities:
   behavior:
   - D:\behavior\data\1330132892_Behavior_20240212T091443.mp4
@@ -35,10 +35,7 @@ schemas:
   - D:\data\1330132892\session.json
   - D:/data/1330132892\rig.json
 name: multiplane-ophys_704576_2024-04-12_15-22-44
-mount: multiplane-ophys_704576_2024-04-12_15-22-44
 platform: multiplane-ophys
 s3_bucket: private
 subject_id: 704576
-schedule_time: null
 project_name: LearningomFISH-V1omFISH
-script: {}

@@ -1,15 +1,34 @@
 """Job configs for VAST staging or executing a custom script"""
 
-from datetime import datetime
-from typing import Dict, Optional, List
+from datetime import datetime, time
+from typing import Dict, List, Literal, Optional
 
-from aind_data_schema_models.platforms import Platform
-from aind_data_schema_models.modalities import Modality
-from pydantic import BaseModel, Field, field_validator, ConfigDict
+from aind_data_schema_models import modalities, platforms
+from aind_data_transfer_models.core import BucketType
+from pydantic import (
+    BaseModel,
+    BeforeValidator,
+    ConfigDict,
+    Field,
+    field_validator,
+    model_validator,
+)
+from typing_extensions import Annotated, Self
+
+# This is a really bad idea, but until we can figure out a better solution
+# from aind-data-schema we will settle for this.
+# A relevant issue has been opened in the aind-data-schemas repo:
+# https://github.com/AllenNeuralDynamics/aind-data-schema/issues/960
+
+Platform = Literal[tuple(set(platforms.Platform.abbreviation_map.keys()))]
+Modality = Annotated[
+    Literal[tuple(set(modalities.Modality.abbreviation_map.keys()))],
+    BeforeValidator(lambda x: "pophys" if x == "ophys" else x),
+]
 
 
 class ManifestConfig(BaseModel):
-    """Configuration for session: based on engineerings lims_scheduler_d manifest files"""
+    """Job configs for data transfer to VAST and executing a custom script"""
 
     model_config = ConfigDict(extra="forbid")
     name: str = Field(
@@ -22,58 +41,76 @@ class ManifestConfig(BaseModel):
     )
     subject_id: int = Field(..., description="Subject ID", title="Subject ID")
     acquisition_datetime: datetime = Field(
-        description="acquisition datetime in YYYY-MM-DD HH:mm:ss format",
+        description="Acquisition datetime",
         title="Acquisition datetime",
     )
-    schedule_time: Optional[datetime] = Field(
+    schedule_time: Optional[time] = Field(
         default=None,
         description="Transfer time to schedule copy and upload. If None defaults to trigger the transfer immediately",  # noqa
         title="APScheduler transfer time",
     )
-    platform: str = Field(description="Platform type", title="Platform type")
+    force_cloud_sync: bool = Field(
+        default=False,
+        description="Overwrite data in AWS",
+        title="Force cloud sync",
+    )
+    transfer_endpoint: str = Field(
+        default="http://aind-data-transfer-service/api/v1/submit_jobs",
+        description="Transfer endpoint for data transfer",
+        title="Transfer endpoint",
+    )
+    platform: Platform = Field(description="Platform type", title="Platform type")
     capsule_id: Optional[str] = Field(
         ..., description="Capsule ID of pipeline to run", title="Capsule"
     )
-    s3_bucket: Optional[str] = Field(
-        default=None, description="s3 endpoint", title="S3 endpoint"
+    mount: Optional[str] = Field(
+        ..., description="Mount point for pipeline run", title="Mount point"
+    )
+    s3_bucket: BucketType = Field(
+        default=BucketType.PRIVATE, description="s3 endpoint", title="S3 endpoint"
     )
     project_name: str = Field(..., description="Project name", title="Project name")
-
-    destination: Optional[str] = Field(
-        default=None,
-        description="where to send data to on VAST",
-        title="VAST destination and maybe S3?",
+    destination: str = Field(
+        ...,
+        description="Remote directory on VAST where to copy the data to.",
+        title="Destination directory",
+        examples=[r"\\allen\aind\scratch\test"],
     )
-    modalities: Dict[str, List[str]] = Field(
+    modalities: Dict[Modality, List[str]] = Field(
         default={},
         description="list of ModalityFile objects containing modality names and associated files or directories",  # noqa
         title="modality files",
     )
-    schemas: Optional[List[str]] = Field(
+    schemas: List[str] = Field(
         default=[],
         description="Where schema files to be uploaded are saved",
         title="Schema directory",
     )
-    script: Dict[str, list[str]] = Field(
+    script: Dict[str, List[str]] = Field(
         default={}, description="Set of commands to run in subprocess.", title="Commands"
     )
 
-    @field_validator("platform")
+    @field_validator("schedule_time", mode="before")
     @classmethod
-    def check_platform_string(cls, input_platform: str) -> str:
-        """Checks if str can be converted to platform model"""
-        if input_platform in Platform._abbreviation_map:
-            return input_platform
+    def normalized_scheduled_time(cls, value) -> Optional[time]:
+        """Normalize scheduled time"""
+        if value is None:
+            return value
         else:
-            raise AttributeError(f"Unknown platform: {input_platform}")
+            if isinstance(value, datetime):
+                return value.time()
+            elif isinstance(value, str):
+                return datetime.strptime(value, "%H:%M:%S").time()
+            elif isinstance(value, time):
+                return value
+            else:
+                raise ValueError("Invalid time format")
 
-    @field_validator("modalities")
-    @classmethod
-    def check_modality_string(
-        cls, input_modality: Dict[str, List[str]]
-    ) -> Dict[str, List[str]]:
-        """Checks if str can be converted to platform model"""
-        for key in input_modality.keys():
-            if key not in Modality._abbreviation_map:
-                raise AttributeError(f"Unknown modality: {input_modality}")
-        return input_modality
+    @model_validator(mode="after")
+    def validate_capsule(self) -> Self:
+        """Validate capsule and mount"""
+        if (self.capsule_id is None) ^ (self.mount is None):
+            raise ValueError(
+                "Both capsule and mount must be provided, or must both be None"
+            )
+        return self

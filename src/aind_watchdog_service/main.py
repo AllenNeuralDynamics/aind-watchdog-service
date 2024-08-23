@@ -1,5 +1,6 @@
 """ Main module to start the watchdog observer and scheduler """
 
+import argparse
 import logging
 import os
 import sys
@@ -8,6 +9,7 @@ from pathlib import Path
 
 import yaml
 from apscheduler.schedulers.background import BackgroundScheduler
+from pydantic import ValidationError
 from watchdog.observers import Observer
 
 from aind_watchdog_service.event_handler import EventHandler
@@ -21,7 +23,8 @@ class WatchdogService:
     def __init__(
         self,
         watch_config: WatchConfig,
-        log_dir: Path = "C:/ProgramData/aind/aind-watchdog-service",
+        log_dir: Path = Path(os.getenv("PROGRAMDATA", "C:/ProgramData"))
+        / "aind/aind-watchdog-service",
     ):
         """Construct WatchDogService, setup logging
 
@@ -37,6 +40,12 @@ class WatchdogService:
         self._setup_logging(log_dir)
 
     def _setup_logging(self, log_dir):
+        """Setup logging
+        Parameters
+        ----------
+        log_dir : Path
+            Directory to store logs
+        """
         log_fp = Path(log_dir)
         if not log_fp.exists():
             log_fp.mkdir(parents=True)
@@ -76,24 +85,120 @@ class WatchdogService:
         self.initiate_observer()
 
 
-def start_watchdog(config: dict) -> None:
+def start_watchdog(watch_config: WatchConfig) -> None:
     """Load configuration, initiate WatchdogService and start service"""
-    try:
-        watch_config = WatchConfig(**config)
-    except Exception as e:
-        logging.error("Error loading config %s", e)
-        sys.exit(1)
+
     watchdog_service = WatchdogService(watch_config)
     watchdog_service.start_service()
 
 
-if __name__ == "__main__":
-    configuration = os.getenv("WATCH_CONFIG")
-    if not configuration:
-        logging.error("Environment variable WATCH_CONFIG not set. Please set and restart")
-        raise AttributeError(
-            "Environment variable WATCH_CONFIG not set. Please set and restart"
-        )
-    with open(configuration) as y:
+def parse_args(args_list: list[str]) -> argparse.Namespace:
+    """read in arguments from the command line
+
+    Parameters
+    ----------
+    args_list : list[str]
+        args read in by the command line
+
+    Returns
+    -------
+    argparse.Namespace
+        parsed arguments
+    """
+
+    parser = argparse.ArgumentParser(description="Watchdog service")
+    parser.add_argument(
+        "-c",
+        "--config-path",
+        type=str,
+        help="Configuration file for watchdog service. Takes precedence over environment \
+            variable WATCH_CONFIG and other arguments",
+    )
+    parser.add_argument(
+        "-f", "--flag-dir", type=str, help="Directory for watchdog to poll"
+    )
+    parser.add_argument(
+        "-m",
+        "--manifest-complete",
+        type=str,
+        help="Manifest directory for triggered data",
+    )
+    parser.add_argument(
+        "-w", "--webhook-url", type=str, help="Teams webhook url for user notification"
+    )
+
+    return parser.parse_args(args_list)
+
+
+def read_config(config_path: str) -> WatchConfig:
+    """read yaml configuration file
+
+    Parameters
+    ----------
+    config_path : str
+        path to configuration file
+
+    Returns
+    -------
+    WatchConfig
+        watchdog model
+    """
+    with open(config_path, encoding="UTF-8") as y:
         data = yaml.safe_load(y)
-    start_watchdog(data)
+        try:
+            return WatchConfig(**data)
+        except ValidationError as e:
+            logging.error("Error loading config %s", e)
+            sys.exit(1)
+
+
+def main():
+    """Main function to parse arguments and start watchdog service"""
+
+    args = parse_args(sys.argv[1:])
+
+    if args.config_path:
+        args.flag_dir = None
+        args.manifest_complete = None
+
+    if (args.flag_dir is None) ^ (args.manifest_complete is None):
+        logging.error("If passing --flag-dir or --manifest-complete, both are required!")
+        sys.exit(1)
+
+    watch_config: WatchConfig
+    if (args.flag_dir is not None) and (args.manifest_complete is not None):
+        try:
+
+            watch_config = WatchConfig(
+                flag_dir=args.flag_dir,
+                manifest_complete=args.manifest_complete,
+                webhook_url=args.webhook_url,
+            )
+        except ValidationError as e:
+            logging.error(
+                "Error constructing WatchConfig model from cli arguments: %s", e
+            )
+    else:
+        configuration = (
+            args.config_path if args.config_path else os.getenv("WATCH_CONFIG")
+        )
+
+        if not configuration:
+            logging.error(
+                "Environment variable WATCH_CONFIG not set and a path was not passed.\
+                    Please set and restart"
+            )
+            raise AttributeError(
+                "Environment variable WATCH_CONFIG not set. Please set and restart"
+            )
+        if not Path(configuration).exists():
+            logging.error("Configuration file %s does not exist", configuration)
+            raise FileNotFoundError(f"Configuration file {configuration} does not exist")
+
+        watch_config = read_config(configuration)
+
+    start_watchdog(watch_config)
+
+
+if __name__ == "__main__":
+    main()

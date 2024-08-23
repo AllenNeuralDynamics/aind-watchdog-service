@@ -2,15 +2,15 @@
 
 import logging
 from datetime import datetime as dt
-from datetime import timedelta
+from datetime import time, timedelta
 from pathlib import Path
 from typing import Dict
 
 import yaml
 from apscheduler.schedulers.background import BackgroundScheduler
-from watchdog.events import FileModifiedEvent, FileSystemEventHandler
+from apscheduler.job import Job
+from watchdog.events import FileCreatedEvent, FileSystemEventHandler
 
-from aind_watchdog_service.alert_bot import AlertBot
 from aind_watchdog_service.models.manifest_config import ManifestConfig
 from aind_watchdog_service.models.watch_config import WatchConfig
 from aind_watchdog_service.run_job import RunJob
@@ -24,18 +24,14 @@ class EventHandler(FileSystemEventHandler):
         super().__init__()
         self.scheduler = scheduler
         self.config = config
-        self.jobs: Dict[str, str] = {}
-        if config.webhook_url:
-            self.alert = AlertBot(config.webhook_url)
-        else:
-            raise ValueError("Webhook URL not provided")
+        self.jobs: Dict[str, Job] = {}
 
-    def _load_manifest(self, event: FileModifiedEvent) -> ManifestConfig:
+    def _load_manifest(self, event: FileCreatedEvent) -> ManifestConfig:
         """Instructions to transfer to VAST
 
         Parameters
         ----------
-        event : FileModifiedEvent
+        event : FileCreatedEvent
            file modified event
 
         Returns
@@ -43,55 +39,40 @@ class EventHandler(FileSystemEventHandler):
         dict
            manifest configuration
         """
-        with open(event.src_path, "r") as f:
+        with open(event.src_path, "r", encoding="utf-8") as f:
             try:
                 data = yaml.safe_load(f)
                 config = ManifestConfig(**data)
-                return config
             except Exception as e:
                 logging.error("Error loading config %s", repr(e))
-                self.alert.send_message("Error loading config", repr(e))
-                return None
+        return config
 
-    def _remove_job(self, event: FileModifiedEvent) -> None:
-        """Removes job from scheduler queue
-
-        Parameters
-        ----------
-        event : FileModifiedEvent
-           event to remove
-        """
-        if self.jobs.get(event.src_path, ""):
-            logging.info("Removing job_id %s", self.jobs[event.src_path].id)
-            del self.jobs[event.src_path]
-
-            self.scheduler.remove_job(self.jobs[event.src_path].id)
-
-    def _get_trigger_time(self, transfer_time: dt) -> dt:
+    def _get_trigger_time(self, transfer_time: time) -> dt:
         """Get trigger time from the job
 
         Parameters
         ----------
-        transfer_time : str
-            In HH:MM format
-
+        transfer_time : datetime.time
+            time to trigger the job
         Returns
         -------
         dt
             datetime object
         """
-        hour = transfer_time.time().hour
-        trigger_time = dt.now().replace(hour=hour, minute=0, second=0, microsecond=0)
-        if (trigger_time - dt.now()).total_seconds() < 0:
-            trigger_time = trigger_time + timedelta(days=1)
+        _now = dt.now()
+        trigger_time = dt.combine(_now.date(), transfer_time)
+        trigger_time = (
+            trigger_time if trigger_time > _now else trigger_time + timedelta(days=1)
+        )
+        logging.info("Trigger time %s", trigger_time)
         return trigger_time
 
-    def schedule_job(self, event: FileModifiedEvent, job_config: ManifestConfig) -> None:
+    def schedule_job(self, event: FileCreatedEvent, job_config: ManifestConfig) -> None:
         """Schedule job to run
 
         Parameters
         ----------
-        event : FileModifiedEvent
+        event : FileCreatedEvent
             event to trigger job
         config : dict
             configuration for the job
@@ -108,12 +89,12 @@ class EventHandler(FileSystemEventHandler):
             job_id = self.scheduler.add_job(run.run_job, "date", run_date=trigger)
         self.jobs[event.src_path] = job_id
 
-    def on_deleted(self, event: FileModifiedEvent) -> None:
+    def on_deleted(self, event: FileCreatedEvent) -> None:
         """Event handler for file deleted event
 
         Parameters
         ----------
-        event : FileModifiedEvent
+        event : FileCreatedEvent
             file deleted event
 
         Returns
@@ -122,17 +103,16 @@ class EventHandler(FileSystemEventHandler):
         """
         if event.src_path in self.jobs:
             logging.info("Deleting job %s", event.src_path)
+            self.scheduler.remove_job(self.jobs[event.src_path].id)
             del self.jobs[event.src_path]
-        if self.jobs.get(event.src_path, ""):
-            self._remove_job(self.jobs[event.src_path].id)
         logging.info("Jobs in queue %s", self.scheduler.get_jobs())
 
-    def on_modified(self, event: FileModifiedEvent) -> None:
+    def on_created(self, event: FileCreatedEvent) -> None:
         """Event handler for file modified event
 
         Parameters
         ----------
-        event : FileModifiedEvent
+        event : FileCreatedEvent
             file modified event
 
         Returns
@@ -145,11 +125,10 @@ class EventHandler(FileSystemEventHandler):
         if "manifest" not in event.src_path:
             return
         # If scheduled manifest is being modified, remove original job
-        if (
-            self.jobs.get(event.src_path, "")
-            and self.jobs[event.src_path].id in self.scheduler.get_jobs()
-        ):
-            self._remove_job(self.jobs[event.src_path])
+        if event.src_path in self.jobs:
+            logging.info("Deleting job %s", event.src_path)
+            self.scheduler.remove_job(self.jobs[event.src_path].id)
+            del self.jobs[event.src_path]
         logging.info("Found event file %s", event.src_path)
         transfer_config = self._load_manifest(event)
         if transfer_config:
