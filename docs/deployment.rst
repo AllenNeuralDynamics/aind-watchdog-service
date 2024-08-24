@@ -4,17 +4,25 @@ Deployment
 
 The following script can be used to download and automatically setup the watchdog in a Windows machine:
 
+> [!WARNING]
+> Due to restrictive group policies, you may need to run the script with elevated privileges (e.g. as administrator).
+
 ```powershell
 
 $url = "https://github.com/AllenNeuralDynamics/aind-watchdog-service/releases/download/0.1.0-rc1/aind-watchdog-service.exe"
-$outputPath = Join-Path -Path $env:APPDATA -ChildPath "aind-watchdog-service"
-if (-not (Test-Path -Path $outputPath)) {
-    $null = New-Item -Path $outputPath -ItemType Directory
-}
-$outputPath = Join-Path -Path $outputPath -ChildPath "watchdog.exe"
-Invoke-WebRequest -Uri $url -OutFile $outputPath
+$outputPath = Join-Path -Path $env:ProgramData -ChildPath "aind-watchdog-service"
+$manifestsPath = Join-Path -Path $outputPath -ChildPath "manifests"
+$completedPath = Join-Path -Path $outputPath -ChildPath "completed"
 
-$taskAction = New-ScheduledTaskAction -Execute "$outputPath"
+foreach ($path in @($outputPath, $manifestsPath, $completedPath)) {
+    if (-not (Test-Path $path)) {
+        New-Item -ItemType Directory -Path $path | Out-Null
+    }
+}
+
+$exePath = Join-Path -Path $outputPath -ChildPath "watchdog.exe"
+$response = Invoke-WebRequest -Uri $url -OutFile $exePath -TimeoutSec 5
+$taskAction = New-ScheduledTaskAction -Execute "$exePath -f $manifestsPath -m $completedPath"
 $taskTriggerStartup = New-ScheduledTaskTrigger -AtStartup
 $taskTriggerLogOn = New-ScheduledTaskTrigger -AtLogOn
 $taskTriggerStartup.Delay = "PT30S"
@@ -28,5 +36,6 @@ if (Get-ScheduledTask -TaskPath ("\" + $taskPath + "\") -TaskName $taskName -Err
 }
 $fullTaskPath = "\" + $taskPath + "\" + $taskName
 Register-ScheduledTask -TaskName $fullTaskPath -Action $taskAction -Trigger @($taskTriggerStartup, $taskTriggerLogOn) -Settings $taskSettings -Principal $taskPrincipal
+
 
 ```
