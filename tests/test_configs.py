@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pydantic_core
 import yaml
+from aind_data_schema_models import modalities, platforms
 from pydantic import ValidationError
 
 from aind_watchdog_service.models.manifest_config import ManifestConfig
@@ -69,6 +70,37 @@ class TestManifestConfigs(unittest.TestCase):
         data["modalities"]["nikon"] = ["some file"]
         with self.assertRaises(ValidationError):
             ManifestConfig(**data)
+
+    def test_manifest_from_platform_modalities(self):
+        """Test the manifest from platform modalities."""
+
+        modality = getattr(modalities.Modality, "BEHAVIOR", None)
+        self.assertIsNotNone(modality)
+        platform = getattr(platforms.Platform, "BEHAVIOR", None)
+        self.assertIsNotNone(platform)
+
+        def _create_manifest(modality, platform) -> ManifestConfig:
+            return ManifestConfig(
+                name="test",
+                destination="path",
+                modalities={modality: ["path"]},
+                platform=platform,
+                schemas=["path"],
+                processor_full_name="na",
+                subject_id="007",
+                acquisition_datetime=dt.now(),
+                project_name="no project",
+                mount=None,
+                capsule_id=None,
+            )
+
+        self.assertEqual(
+            _create_manifest(modality=modality, platform=platform),
+            _create_manifest(
+                modality=getattr(modality, "abbreviation"),
+                platform=getattr(platform, "abbreviation"),
+            ),
+        )
 
 
 if __name__ == "__main__":
