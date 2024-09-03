@@ -6,10 +6,10 @@ from pathlib import Path
 
 import pydantic_core
 import yaml
+from aind_data_schema_models import modalities, platforms
 from pydantic import ValidationError
 
 from aind_watchdog_service.models.manifest_config import ManifestConfig
-from aind_data_schema_models import modalities, platforms
 from aind_watchdog_service.models.watch_config import WatchConfig
 
 TEST_DIRECTORY = Path(__file__).resolve().parent
@@ -70,7 +70,7 @@ class TestManifestConfigs(unittest.TestCase):
         data["modalities"]["nikon"] = ["some file"]
         with self.assertRaises(ValidationError):
             ManifestConfig(**data)
-        
+
     def test_manifest_config_posix_coercion(self):
         """Test the posix coercion."""
         # Open config for to pass and compare
@@ -94,7 +94,11 @@ class TestManifestConfigs(unittest.TestCase):
             )
 
         self.assertEqual(_create_manifest(non_posix_file), _create_manifest(posix_file))
-        self.assertEqual(_create_manifest(non_posix_file).destination, Path.as_posix(Path(non_posix_file)))
+        self.assertEqual(
+            _create_manifest(non_posix_file).destination,
+            Path.as_posix(Path(non_posix_file)),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
