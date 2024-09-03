@@ -10,6 +10,7 @@ Welcome to the Aind Watchdog Service documentation!
    self
    aind-watchdog-service
    models
+   deployment
    GitHub Source Code <https://github.com/AllenNeuralDynamics/aind-watchdog-service>
 
 Indices and tables
