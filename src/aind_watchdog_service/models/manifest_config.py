@@ -1,6 +1,7 @@
 """Job configs for VAST staging or executing a custom script"""
 
 from datetime import datetime, time
+from pathlib import Path
 from typing import Any, Dict, List, Literal, Optional
 
 from aind_data_schema_models import modalities, platforms
@@ -143,3 +144,25 @@ class ManifestConfig(BaseModel):
             return ret if ret else value
         else:
             return value
+
+    @field_validator("destination", mode="after")
+    @classmethod
+    def validate_destination_path(cls, value: str) -> str:
+        return cls._path_to_posix(value)
+
+    @field_validator("schemas", mode="after")
+    @classmethod
+    def validate_schema_paths(cls, value: List[str]) -> List[str]:
+        return [cls._path_to_posix(path) for path in value]
+
+    @field_validator("modalities", mode="after")
+    @classmethod
+    def validate_modality_paths(cls, value: Dict[Any, List[str]]) -> Dict[Any, List[str]]:
+        return {
+            modality: [cls._path_to_posix(path) for path in paths]
+            for modality, paths in value.items()
+        }
+
+    @staticmethod
+    def _path_to_posix(path: str) -> str:
+        return str(Path(path).as_posix())
