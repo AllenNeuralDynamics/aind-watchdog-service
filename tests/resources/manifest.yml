@@ -7,33 +7,33 @@ force_cloud_sync: False
 transfer_endpoint: http://aind-data-transfer-service/api/v1/submit_jobs
 modalities:
   behavior:
-  - D:\behavior\data\1330132892_Behavior_20240212T091443.mp4
-  - D:\behavior\data\1330132892_Face_20240212T091444.mp4
-  - D:\behavior\data\1330132892_Eye_20240212T091443.mp4
-  - D:\behavior\data\1330132892_Behavior_20240212T091443.json
-  - D:\behavior\data\1330132892_Face_20240212T091444.json
-  - D:\behavior\data\1330132892_Eye_20240212T091443.json
+  - D:/behavior/data/1330132892_Behavior_20240212T091443.mp4
+  - D:/behavior/data/1330132892_Face_20240212T091444.mp4
+  - D:/behavior/data/1330132892_Eye_20240212T091443.mp4
+  - D:/behavior/data/1330132892_Behavior_20240212T091443.json
+  - D:/behavior/data/1330132892_Face_20240212T091444.json
+  - D:/behavior/data/1330132892_Eye_20240212T091443.json
   pophys:
-  - D:\data\1330132892\1330132892_averaged_depth.tiff
-  - D:\data\1330132892\1330132892_averaged_surface.tiff
-  - D:\data\1330132892\1330132892_cortical_z_stack0.tiff
-  - D:\data\1330132892\1330132892_fullfield.roi
-  - D:\data\1330132892\1330132892_fullfield.tiff
-  - D:\data\1330132892\1330132892_local_z_stack0.tiff
-  - D:\data\1330132892\1330132892_local_z_stack1.tiff
-  - D:\data\1330132892\1330132892_local_z_stack2.tiff
-  - D:\data\1330132892\1330132892_local_z_stack3.tiff
-  - D:\data\1330132892\1330132892_platform.json
-  - D:\data\1330132892\1330132892_reticle.tif
-  - D:\data\1330132892\1330132892_stim.pkl
-  - D:\data\1330132892\1330132892_surface.roi
-  - D:\data\1330132892\1330132892_sync.h5
-  - D:\data\1330132892\1330132892_timeseries.roi
-  - D:\data\1330132892\1330132892_timeseries.tiff
-  - D:\data\1330132892\1330132892_vasculature.tif
+  - D:/data/1330132892/1330132892_averaged_depth.tiff
+  - D:/data/1330132892/1330132892_averaged_surface.tiff
+  - D:/data/1330132892/1330132892_cortical_z_stack0.tiff
+  - D:/data/1330132892/1330132892_fullfield.roi
+  - D:/data/1330132892/1330132892_fullfield.tiff
+  - D:/data/1330132892/1330132892_local_z_stack0.tiff
+  - D:/data/1330132892/1330132892_local_z_stack1.tiff
+  - D:/data/1330132892/1330132892_local_z_stack2.tiff
+  - D:/data/1330132892/1330132892_local_z_stack3.tiff
+  - D:/data/1330132892/1330132892_platform.json
+  - D:/data/1330132892/1330132892_reticle.tif
+  - D:/data/1330132892/1330132892_stim.pkl
+  - D:/data/1330132892/1330132892_surface.roi
+  - D:/data/1330132892/1330132892_sync.h5
+  - D:/data/1330132892/1330132892_timeseries.roi
+  - D:/data/1330132892/1330132892_timeseries.tiff
+  - D:/data/1330132892/1330132892_vasculature.tif
 schemas:
-  - D:\data\1330132892\session.json
-  - D:/data/1330132892\rig.json
+  - D:/data/1330132892/session.json
+  - D:/data/1330132892/rig.json
 name: multiplane-ophys_704576_2024-04-12_15-22-44
 mount: multiplane-ophys_704576_2024-04-12_15-22-44
 platform: multiplane-ophys
