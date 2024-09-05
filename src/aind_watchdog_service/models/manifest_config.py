@@ -62,10 +62,10 @@ class ManifestConfig(BaseModel):
     )
     platform: Platform = Field(description="Platform type", title="Platform type")
     capsule_id: Optional[str] = Field(
-        ..., description="Capsule ID of pipeline to run", title="Capsule"
+        default=None, description="Capsule ID of pipeline to run", title="Capsule"
     )
     mount: Optional[str] = Field(
-        ..., description="Mount point for pipeline run", title="Mount point"
+        default=None, description="Mount point for pipeline run", title="Mount point"
     )
     s3_bucket: BucketType = Field(
         default=BucketType.PRIVATE, description="s3 endpoint", title="S3 endpoint"

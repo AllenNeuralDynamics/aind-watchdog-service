@@ -89,6 +89,9 @@ class TestManifestConfigs(unittest.TestCase):
                 processor_full_name="na",
                 subject_id="007",
                 acquisition_datetime=dt(2024, 9, 3, 13, 38, 48, 36456),
+                project_name="no project",
+                mount=None,
+                capsule_id=None,
             )
 
         self.assertEqual(
