@@ -71,6 +71,37 @@ class TestManifestConfigs(unittest.TestCase):
         with self.assertRaises(ValidationError):
             ManifestConfig(**data)
 
+    def test_manifest_from_platform_modalities(self):
+        """Test the manifest from platform modalities."""
+
+        modality = getattr(modalities.Modality, "BEHAVIOR", None)
+        self.assertIsNotNone(modality)
+        platform = getattr(platforms.Platform, "BEHAVIOR", None)
+        self.assertIsNotNone(platform)
+
+        def _create_manifest(modality, platform) -> ManifestConfig:
+            return ManifestConfig(
+                name="test",
+                destination="path",
+                modalities={modality: ["path"]},
+                platform=platform,
+                schemas=["path"],
+                processor_full_name="na",
+                subject_id="007",
+                acquisition_datetime=dt(2024, 9, 3, 13, 38, 48, 36456),
+                project_name="no project",
+                mount=None,
+                capsule_id=None,
+            )
+
+        self.assertEqual(
+            _create_manifest(modality=modality, platform=platform),
+            _create_manifest(
+                modality=getattr(modality, "abbreviation"),
+                platform=getattr(platform, "abbreviation"),
+            ),
+        )
+
     def test_manifest_config_posix_coercion(self):
         """Test the posix coercion."""
         # Open config for to pass and compare

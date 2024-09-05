@@ -62,10 +62,10 @@ class ManifestConfig(BaseModel):
     )
     platform: Platform = Field(description="Platform type", title="Platform type")
     capsule_id: Optional[str] = Field(
-        ..., description="Capsule ID of pipeline to run", title="Capsule"
+        default=None, description="Capsule ID of pipeline to run", title="Capsule"
     )
     mount: Optional[str] = Field(
-        ..., description="Mount point for pipeline run", title="Mount point"
+        default=None, description="Mount point for pipeline run", title="Mount point"
     )
     s3_bucket: BucketType = Field(
         default=BucketType.PRIVATE, description="s3 endpoint", title="S3 endpoint"
@@ -115,6 +115,35 @@ class ManifestConfig(BaseModel):
                 "Both capsule and mount must be provided, or must both be None"
             )
         return self
+
+    @field_validator("modalities", mode="before")
+    @classmethod
+    def normalize_modalities(cls, value) -> Dict[Modality, List[str]]:
+        """Normalize modalities"""
+        if isinstance(value, dict):
+            _ret: Dict[str, Any] = {}
+            for modality, v in value.items():
+                if isinstance(modality, getattr(modalities.Modality, "ALL")):
+                    key = getattr(modality, "abbreviation", None)
+                    if key is None:
+                        _ret[modality] = v
+                    else:
+                        _ret[key] = v
+                else:
+                    _ret[modality] = v
+            return _ret
+        else:
+            return value
+
+    @field_validator("platform", mode="before")
+    @classmethod
+    def normalize_platform(cls, value) -> Platform:
+        """Normalize modalities"""
+        if isinstance(value, getattr(platforms.Platform, "ALL")):
+            ret = getattr(value, "abbreviation", None)
+            return ret if ret else value
+        else:
+            return value
 
     @field_validator("destination", mode="after")
     @classmethod
