@@ -14,7 +14,6 @@ from aind_data_transfer_models.core import (
     ModalityConfigs,
     SubmitJobRequest,
 )
-from watchdog.events import FileCreatedEvent
 
 from aind_watchdog_service.alert_bot import AlertBot
 from aind_watchdog_service.models.manifest_config import ManifestConfig

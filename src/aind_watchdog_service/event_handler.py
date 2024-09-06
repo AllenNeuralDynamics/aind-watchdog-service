@@ -7,8 +7,8 @@ from pathlib import Path
 from typing import Dict
 
 import yaml
-from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.job import Job
+from apscheduler.schedulers.background import BackgroundScheduler
 from watchdog.events import FileCreatedEvent, FileSystemEventHandler
 
 from aind_watchdog_service.models.manifest_config import ManifestConfig
