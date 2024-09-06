@@ -29,7 +29,7 @@ class EventHandler(FileSystemEventHandler):
 
     def _startup_manifest_check(self) -> None:
         """ " Check for manifests to process in the manifest directory on startup"""
-        manifest_dir = Path(self.config.flag_dir).glob("*.y*")
+        manifest_dir = Path(self.config.flag_dir).glob("*manifest*.*")
         for manifest in manifest_dir:
             transfer_config = self._load_manifest(manifest)
             if transfer_config:
