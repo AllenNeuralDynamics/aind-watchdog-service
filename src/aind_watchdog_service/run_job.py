@@ -33,12 +33,12 @@ class RunJob:
 
     def __init__(
         self,
-        event: FileCreatedEvent,
+        src_path: str,
         config: ManifestConfig,
         watch_config: WatchConfig,
     ):
         """initialize RunJob class"""
-        self.event = event
+        self.src_path = src_path
         self.config = config
         self.watch_config = watch_config
 
@@ -228,17 +228,17 @@ class RunJob:
         """Move manifest file to archive"""
         archive = self.watch_config.manifest_complete
         if PLATFORM == "windows":
-            copy_file = self.execute_windows_command(self.event.src_path, archive)
+            copy_file = self.execute_windows_command(self.src_path, archive)
             if not copy_file:
-                logging.error("Error copying manifest file %s", self.event.src_path)
+                logging.error("Error copying manifest file %s", self.src_path)
                 self._send_alert(
                     "Error copying manifest file",
-                    self.event.src_path,
+                    self.src_path,
                 )
                 return
-            os.remove(self.event.src_path)
+            os.remove(self.src_path)
         else:
-            self.run_subprocess(["mv", self.event.src_path, archive])
+            self.run_subprocess(["mv", self.src_path, archive])
 
     def run_job(self) -> None:
         """Triggers the vast transfer service
@@ -248,13 +248,11 @@ class RunJob:
         event : FileCreatedEvent
             modified event file
         """
-        logging.info("Running job for %s", self.event.src_path)
-        self._send_alert("Running job", self.event.src_path)
+        logging.info("Running job for %s", self.src_path)
+        self._send_alert("Running job", self.src_path)
         if self.config.script:
             for command in self.config.script:
-                logging.info(
-                    "Found job, executing custom script for %s", self.event.src_path
-                )
+                logging.info("Found job, executing custom script for %s", self.src_path)
                 run = subprocess.run(
                     self.config.script[command],
                 )
@@ -276,15 +274,15 @@ class RunJob:
             if not transfer:
                 self._send_alert(
                     "Could not copy data to destination",
-                    self.event.src_path,
+                    self.src_path,
                 )
                 return
         if not self.trigger_transfer_service():
             self._send_alert(
                 "Could not trigger aind-data-transfer-service",
-                self.event.src_path,
+                self.src_path,
             )
             return
-        self._send_alert("Job complete", self.event.src_path)
-        logging.info("Job complete for %s", self.event.src_path)
+        self._send_alert("Job complete", self.src_path)
+        logging.info("Job complete for %s", self.src_path)
         self.move_manifest_to_archive()

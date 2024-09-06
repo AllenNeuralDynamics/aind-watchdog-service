@@ -287,7 +287,7 @@ class TestRunSubprocess(unittest.TestCase):
                     args=[], returncode=0
                 )
                 execute = RunJob(
-                    self.mock_event,
+                    self.mock_event.src_path,
                     self.manifest_config,
                     self.watch_config,
                 )
@@ -298,7 +298,7 @@ class TestRunSubprocess(unittest.TestCase):
                 mock_trigger_transfer.return_value = False
                 mock_copy_to_vast.return_value = True
                 execute = RunJob(
-                    self.mock_event,
+                    self.mock_event.src_path,
                     self.manifest_config,
                     self.watch_config,
                 )
@@ -311,7 +311,7 @@ class TestRunSubprocess(unittest.TestCase):
                 mock_trigger_transfer.return_value = True
                 mock_copy_to_vast.return_value = False
                 execute = RunJob(
-                    self.mock_event,
+                    self.mock_event.src_path,
                     self.manifest_config,
                     self.watch_config,
                 )
@@ -324,7 +324,7 @@ class TestRunSubprocess(unittest.TestCase):
                 mock_trigger_transfer.return_value = False
                 mock_copy_to_vast.return_value = False
                 execute = RunJob(
-                    self.mock_event,
+                    self.mock_event.src_path,
                     self.manifest_config,
                     self.watch_config,
                 )
@@ -359,7 +359,7 @@ class TestRunSubprocess(unittest.TestCase):
         mock_dir.return_value = True
         mock_move_mani.return_value = None
         execute = RunJob(
-            self.mock_event,
+            self.mock_event.src_path,
             self.manifest_with_run_script,
             self.watch_config,
         )
@@ -465,7 +465,7 @@ class TestRunSubprocess(unittest.TestCase):
                     args=[], returncode=0
                 )
                 execute = RunJob(
-                    self.mock_event,
+                    self.mock_event.src_path,
                     self.manifest_config_upload_only,
                     self.watch_config,
                 )

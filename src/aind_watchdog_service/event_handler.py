@@ -25,21 +25,30 @@ class EventHandler(FileSystemEventHandler):
         self.scheduler = scheduler
         self.config = config
         self.jobs: Dict[str, Job] = {}
+        self._startup_manifest_check()
 
-    def _load_manifest(self, event: FileCreatedEvent) -> ManifestConfig:
+    def _startup_manifest_check(self) -> None:
+        """ " Check for manifests to process in the manifest directory on startup"""
+        manifest_dir = Path(self.config.flag_dir).glob("*.y*")
+        for manifest in manifest_dir:
+            transfer_config = self._load_manifest(manifest)
+            if transfer_config:
+                self.schedule_job(manifest, transfer_config)
+
+    def _load_manifest(self, src_path: str) -> ManifestConfig:
         """Instructions to transfer to VAST
 
         Parameters
         ----------
-        event : FileCreatedEvent
-           file modified event
+        src_path : str
+            manifest file path to trigger
 
         Returns
         -------
         dict
            manifest configuration
         """
-        with open(event.src_path, "r", encoding="utf-8") as f:
+        with open(src_path, "r", encoding="utf-8") as f:
             try:
                 data = yaml.safe_load(f)
                 config = ManifestConfig(**data)
@@ -67,27 +76,27 @@ class EventHandler(FileSystemEventHandler):
         logging.info("Trigger time %s", trigger_time)
         return trigger_time
 
-    def schedule_job(self, event: FileCreatedEvent, job_config: ManifestConfig) -> None:
+    def schedule_job(self, src_path: str, job_config: ManifestConfig) -> None:
         """Schedule job to run
 
         Parameters
         ----------
-        event : FileCreatedEvent
-            event to trigger job
+        src_path : str
+            manifest file path to trigger
         config : dict
             configuration for the job
         """
         if not job_config.schedule_time:
-            logging.info("Scheduling job to run now %s", event.src_path)
-            run = RunJob(event, job_config, self.config)
+            logging.info("Scheduling job to run now %s", src_path)
+            run = RunJob(src_path, job_config, self.config)
             job_id = self.scheduler.add_job(run.run_job)
 
         else:
             trigger = self._get_trigger_time(job_config.schedule_time)
-            logging.info("Scheduling job to run at %s %s", trigger, event.src_path)
-            run = RunJob(event, job_config, self.config)
+            logging.info("Scheduling job to run at %s %s", trigger, src_path)
+            run = RunJob(src_path, job_config, self.config)
             job_id = self.scheduler.add_job(run.run_job, "date", run_date=trigger)
-        self.jobs[event.src_path] = job_id
+        self.jobs[src_path] = job_id
 
     def on_deleted(self, event: FileCreatedEvent) -> None:
         """Event handler for file deleted event
@@ -130,6 +139,6 @@ class EventHandler(FileSystemEventHandler):
             self.scheduler.remove_job(self.jobs[event.src_path].id)
             del self.jobs[event.src_path]
         logging.info("Found event file %s", event.src_path)
-        transfer_config = self._load_manifest(event)
+        transfer_config = self._load_manifest(event.src_path)
         if transfer_config:
-            self.schedule_job(event, transfer_config)
+            self.schedule_job(event.src_path, transfer_config)
