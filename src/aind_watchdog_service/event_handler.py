@@ -1,8 +1,10 @@
 """Event handler module"""
 
 import logging
+import time
 from datetime import datetime as dt
-from datetime import time, timedelta
+from datetime import time as t
+from datetime import timedelta
 from pathlib import Path
 from typing import Dict
 
@@ -48,15 +50,17 @@ class EventHandler(FileSystemEventHandler):
         dict
            manifest configuration
         """
+        logging.info("Loading manifest %s", src_path)
         with open(src_path, "r", encoding="utf-8") as f:
             try:
                 data = yaml.safe_load(f)
+                logging.info("Loaded manifest %s", data)
                 config = ManifestConfig(**data)
             except Exception as e:
                 logging.error("Error loading config %s", repr(e))
         return config
 
-    def _get_trigger_time(self, transfer_time: time) -> dt:
+    def _get_trigger_time(self, transfer_time: t) -> dt:
         """Get trigger time from the job
 
         Parameters
@@ -139,6 +143,7 @@ class EventHandler(FileSystemEventHandler):
             self.scheduler.remove_job(self.jobs[event.src_path].id)
             del self.jobs[event.src_path]
         logging.info("Found event file %s", event.src_path)
+        time.sleep(20)  # Wait for file to be written
         transfer_config = self._load_manifest(event.src_path)
         if transfer_config:
             self.schedule_job(event.src_path, transfer_config)
