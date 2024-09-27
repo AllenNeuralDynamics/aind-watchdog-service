@@ -80,13 +80,21 @@ class EventHandler(FileSystemEventHandler):
         if not job_config.schedule_time:
             logging.info("Scheduling job to run now %s", event.src_path)
             run = RunJob(event, job_config, self.config)
-            job_id = self.scheduler.add_job(run.run_job)
+            job_id = self.scheduler.add_job(
+                run.run_job,
+                misfire_grace_time=self.config.misfire_grace_time_s,
+            )
 
         else:
             trigger = self._get_trigger_time(job_config.schedule_time)
             logging.info("Scheduling job to run at %s %s", trigger, event.src_path)
             run = RunJob(event, job_config, self.config)
-            job_id = self.scheduler.add_job(run.run_job, "date", run_date=trigger)
+            job_id = self.scheduler.add_job(
+                run.run_job,
+                "date",
+                run_date=trigger,
+                misfire_grace_time=self.config.misfire_grace_time_s,
+            )
         self.jobs[event.src_path] = job_id
 
     def on_deleted(self, event: FileCreatedEvent) -> None:

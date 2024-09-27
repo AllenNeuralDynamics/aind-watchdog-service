@@ -21,3 +21,9 @@ class WatchConfig(BaseModel):
         description="Teams webhook url for user notification",
         title="Teams webhook url",
     )
+    misfire_grace_time_s: int | None = Field(
+        default=3 * 3600,
+        description="If the job scheduler is busy, wait this long before skipping a job."
+        + " If None, allow the job to run no matter how late it is",
+        title="Scheduler grace time",
+    )
