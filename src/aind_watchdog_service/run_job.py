@@ -113,7 +113,7 @@ class RunJob:
         subprocess.CompletedProcess
             subprocess completed process
         """
-        logging.info(f"Executing command: {cmd}")
+        logging.info("Executing command: %s", cmd)
         subproc = subprocess.run(
             cmd, check=False, stderr=subprocess.PIPE, stdout=subprocess.PIPE
         )
