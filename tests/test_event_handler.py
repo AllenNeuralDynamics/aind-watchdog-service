@@ -90,10 +90,14 @@ class TestEventHandler(unittest.TestCase):
         with patch.object(Path, "is_dir") as mock_dir:
             mock_dir.return_value = True
 
+    @patch.object(EventHandler, "_startup_manifest_check")
     @patch("apscheduler.schedulers.background.BackgroundScheduler")
-    def test_datetime(self, mock_scheduler: MagicMock):
+    def test_datetime(
+        self, mock_scheduler: MagicMock, mock_startup_manifest_check: MagicMock
+    ):
         """testing scheduler trigger time"""
         # mock_scheduler.return_value = MockScheduler()
+        mock_startup_manifest_check.return_value = None
         with patch.object(Path, "is_dir") as mock_dir:
             mock_dir.return_value = True
             with patch.object(Path, "is_file") as mock_file:
