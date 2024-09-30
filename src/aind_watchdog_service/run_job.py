@@ -203,7 +203,7 @@ class RunJob:
             s3_bucket=self.config.s3_bucket,
             platform=self.config.platform,
             subject_id=str(self.config.subject_id),
-            acq_datetime=self.config.acquisition_datetime,
+            acq_datetime=self.config.acquisition_datetime.strftime("%Y-%m-%d %H:%M:%S"),
             modalities=modality_configs,
             metadata_dir=PurePosixPath(self.config.destination) / self.config.name,
             process_capsule_id=self.config.capsule_id,
@@ -211,7 +211,7 @@ class RunJob:
             input_data_mount=self.config.mount,
             force_cloud_sync=self.config.force_cloud_sync,
         )
-
+        logging.info("Submitting job to aind-data-transfer-service")
         submit_request = SubmitJobRequest(upload_jobs=[upload_job_configs])
         post_request_content = json.loads(submit_request.model_dump_json(round_trip=True))
         submit_job_response = requests.post(
@@ -276,7 +276,11 @@ class RunJob:
                     self.src_path,
                 )
                 return
+        logging.info("Data copied to VAST for %s", self.src_path)
         if not self.trigger_transfer_service():
+            logging.error(
+                "Could not trigger aind-data-transfer-service for %s", self.src_path
+            )
             self._send_alert(
                 "Could not trigger aind-data-transfer-service",
                 self.src_path,
