@@ -54,7 +54,6 @@ class EventHandler(FileSystemEventHandler):
         with open(src_path, "r", encoding="utf-8") as f:
             try:
                 data = yaml.safe_load(f)
-                logging.info("Loaded manifest %s", data)
                 config = ManifestConfig(**data)
             except Exception as e:
                 logging.error("Error loading config %s", repr(e))
