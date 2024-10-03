@@ -1,16 +1,21 @@
 """Event handler module"""
 
+import datetime
 import logging
 import time
-from datetime import datetime as dt
-from datetime import timedelta
 from pathlib import Path
 from typing import Dict
 
 import yaml
 from apscheduler.job import Job
 from apscheduler.schedulers.background import BackgroundScheduler
-from watchdog.events import FileCreatedEvent, FileSystemEventHandler
+from watchdog.events import (
+    DirCreatedEvent,
+    DirDeletedEvent,
+    FileCreatedEvent,
+    FileDeletedEvent,
+    FileSystemEventHandler,
+)
 
 from aind_watchdog_service.models.manifest_config import ManifestConfig
 from aind_watchdog_service.models.watch_config import WatchConfig
@@ -32,9 +37,9 @@ class EventHandler(FileSystemEventHandler):
         """ " Check for manifests to process in the manifest directory on startup"""
         manifest_dir = Path(self.config.flag_dir).glob("*manifest*.*")
         for manifest in manifest_dir:
-            transfer_config = self._load_manifest(manifest)
+            transfer_config = self._load_manifest(str(manifest))
             if transfer_config:
-                self.schedule_job(manifest, transfer_config)
+                self.schedule_job(str(manifest), transfer_config)
 
     def _load_manifest(self, src_path: str) -> ManifestConfig:
         """Instructions to transfer to VAST
@@ -58,7 +63,7 @@ class EventHandler(FileSystemEventHandler):
                 logging.error("Error loading config %s", repr(e))
         return config
 
-    def _get_trigger_time(self, transfer_time: time) -> dt:
+    def _get_trigger_time(self, transfer_time: datetime.time) -> datetime.datetime:
         """Get trigger time from the job
 
         Parameters
@@ -67,13 +72,15 @@ class EventHandler(FileSystemEventHandler):
             time to trigger the job
         Returns
         -------
-        dt
+        datetime.datetime
             datetime object
         """
-        _now = dt.now()
-        trigger_time = dt.combine(_now.date(), transfer_time)
+        _now = datetime.datetime.now()
+        trigger_time = datetime.datetime.combine(_now.date(), transfer_time)
         trigger_time = (
-            trigger_time if trigger_time > _now else trigger_time + timedelta(days=1)
+            trigger_time
+            if trigger_time > _now
+            else trigger_time + datetime.timedelta(days=1)
         )
         logging.info("Trigger time %s", trigger_time)
         return trigger_time
@@ -100,12 +107,12 @@ class EventHandler(FileSystemEventHandler):
             job_id = self.scheduler.add_job(run.run_job, "date", run_date=trigger)
         self.jobs[src_path] = job_id
 
-    def on_deleted(self, event: FileCreatedEvent) -> None:
+    def on_deleted(self, event: FileDeletedEvent | DirDeletedEvent) -> None:
         """Event handler for file deleted event
 
         Parameters
         ----------
-        event : FileCreatedEvent
+        event : FileDeletedEvent | DirDeletedEvent
             file deleted event
 
         Returns
@@ -118,12 +125,12 @@ class EventHandler(FileSystemEventHandler):
             del self.jobs[event.src_path]
         logging.info("Jobs in queue %s", self.scheduler.get_jobs())
 
-    def on_created(self, event: FileCreatedEvent) -> None:
+    def on_created(self, event: FileCreatedEvent | DirCreatedEvent) -> None:
         """Event handler for file modified event
 
         Parameters
         ----------
-        event : FileCreatedEvent
+        event : FileCreatedEvent | DirCreatedEvent
             file modified event
 
         Returns
@@ -131,9 +138,10 @@ class EventHandler(FileSystemEventHandler):
         None
         """
         # Check if manifest file is being modified / created
-        if Path(event.src_path).is_dir():
+        _path = Path(str(event.src_path))
+        if isinstance(event, DirCreatedEvent) | _path.is_dir():
             return
-        if "manifest" not in event.src_path:
+        if "manifest" not in _path.name:
             return
         # If scheduled manifest is being modified, remove original job
         if event.src_path in self.jobs:
