@@ -9,7 +9,7 @@ from typing import Dict
 import yaml
 from apscheduler.job import Job
 from apscheduler.schedulers.background import BackgroundScheduler
-from watchdog.events import FileCreatedEvent, FileSystemEventHandler
+from watchdog.events import FileCreatedEvent, FileSystemEventHandler, FileDeletedEvent, DirDeletedEvent, DirCreatedEvent
 
 from aind_watchdog_service.models.manifest_config import ManifestConfig
 from aind_watchdog_service.models.watch_config import WatchConfig
@@ -99,12 +99,12 @@ class EventHandler(FileSystemEventHandler):
             job_id = self.scheduler.add_job(run.run_job, "date", run_date=trigger)
         self.jobs[src_path] = job_id
 
-    def on_deleted(self, event: FileCreatedEvent) -> None:
+    def on_deleted(self, event: FileDeletedEvent | DirDeletedEvent) -> None:
         """Event handler for file deleted event
 
         Parameters
         ----------
-        event : FileCreatedEvent
+        event : FileDeletedEvent | DirDeletedEvent
             file deleted event
 
         Returns
@@ -117,12 +117,12 @@ class EventHandler(FileSystemEventHandler):
             del self.jobs[event.src_path]
         logging.info("Jobs in queue %s", self.scheduler.get_jobs())
 
-    def on_created(self, event: FileCreatedEvent) -> None:
+    def on_created(self, event: FileCreatedEvent | DirCreatedEvent) -> None:
         """Event handler for file modified event
 
         Parameters
         ----------
-        event : FileCreatedEvent
+        event : FileCreatedEvent | DirCreatedEvent
             file modified event
 
         Returns
@@ -130,9 +130,10 @@ class EventHandler(FileSystemEventHandler):
         None
         """
         # Check if manifest file is being modified / created
-        if Path(event.src_path).is_dir():
+        _path = Path(str(event.src_path))
+        if isinstance(event, DirCreatedEvent) | _path.is_dir():
             return
-        if "manifest" not in event.src_path:
+        if "manifest" not in _path.name:
             return
         # If scheduled manifest is being modified, remove original job
         if event.src_path in self.jobs:
