@@ -3,7 +3,6 @@
 import logging
 import time
 from datetime import datetime as dt
-from datetime import time as t
 from datetime import timedelta
 from pathlib import Path
 from typing import Dict
@@ -59,7 +58,7 @@ class EventHandler(FileSystemEventHandler):
                 logging.error("Error loading config %s", repr(e))
         return config
 
-    def _get_trigger_time(self, transfer_time: t) -> dt:
+    def _get_trigger_time(self, transfer_time: time) -> dt:
         """Get trigger time from the job
 
         Parameters
