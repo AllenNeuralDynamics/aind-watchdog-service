@@ -4,7 +4,7 @@ import datetime
 import logging
 import time
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Union
 
 import yaml
 from apscheduler.job import Job
@@ -107,7 +107,7 @@ class EventHandler(FileSystemEventHandler):
             job_id = self.scheduler.add_job(run.run_job, "date", run_date=trigger)
         self.jobs[src_path] = job_id
 
-    def on_deleted(self, event: FileDeletedEvent | DirDeletedEvent) -> None:
+    def on_deleted(self, event: Union[FileDeletedEvent, DirDeletedEvent]) -> None:
         """Event handler for file deleted event
 
         Parameters
@@ -125,7 +125,7 @@ class EventHandler(FileSystemEventHandler):
             del self.jobs[event.src_path]
         logging.info("Jobs in queue %s", self.scheduler.get_jobs())
 
-    def on_created(self, event: FileCreatedEvent | DirCreatedEvent) -> None:
+    def on_created(self, event: Union[FileCreatedEvent, DirCreatedEvent]) -> None:
         """Event handler for file modified event
 
         Parameters
