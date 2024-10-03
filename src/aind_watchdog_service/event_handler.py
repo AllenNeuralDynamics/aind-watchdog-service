@@ -1,15 +1,21 @@
 """Event handler module"""
 
+import datetime
 import logging
 import time
-import datetime
 from pathlib import Path
 from typing import Dict
 
 import yaml
 from apscheduler.job import Job
 from apscheduler.schedulers.background import BackgroundScheduler
-from watchdog.events import FileCreatedEvent, FileSystemEventHandler, FileDeletedEvent, DirDeletedEvent, DirCreatedEvent
+from watchdog.events import (
+    DirCreatedEvent,
+    DirDeletedEvent,
+    FileCreatedEvent,
+    FileDeletedEvent,
+    FileSystemEventHandler,
+)
 
 from aind_watchdog_service.models.manifest_config import ManifestConfig
 from aind_watchdog_service.models.watch_config import WatchConfig
@@ -72,7 +78,9 @@ class EventHandler(FileSystemEventHandler):
         _now = datetime.datetime.now()
         trigger_time = datetime.datetime.combine(_now.date(), transfer_time)
         trigger_time = (
-            trigger_time if trigger_time > _now else trigger_time + datetime.timedelta(days=1)
+            trigger_time
+            if trigger_time > _now
+            else trigger_time + datetime.timedelta(days=1)
         )
         logging.info("Trigger time %s", trigger_time)
         return trigger_time
