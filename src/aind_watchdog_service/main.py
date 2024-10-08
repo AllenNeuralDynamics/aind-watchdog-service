@@ -154,7 +154,7 @@ def main():
         logging.error("If passing --flag-dir or --manifest-complete, both are required!")
         sys.exit(1)
 
-    zk_config = mpetk.mpeconfig.source_configuration("aind_watchdog_service", version=__version__, hosts="localhost:2181")
+    zk_config = mpetk.mpeconfig.source_configuration("aind_watchdog_service", version=__version__)
 
     watch_config: WatchConfig
     if (args.flag_dir is not None) and (args.manifest_complete is not None):
