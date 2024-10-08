@@ -22,7 +22,8 @@ dependencies = [
     'aind-data-transfer-models',
     'aind-data-schema-models>=0.4',
     'APScheduler',
-    'requests'
+    'requests',
+    'mpetk==0.5.2.dev2'
 ]
 
 [project.optional-dependencies]
