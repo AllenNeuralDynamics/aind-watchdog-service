@@ -287,7 +287,7 @@ class TestRunSubprocess(unittest.TestCase):
                     args=[], returncode=0
                 )
                 execute = RunJob(
-                    self.mock_event,
+                    self.mock_event.src_path,
                     self.manifest_config,
                     self.watch_config,
                 )
@@ -298,20 +298,24 @@ class TestRunSubprocess(unittest.TestCase):
                 mock_trigger_transfer.return_value = False
                 mock_copy_to_vast.return_value = True
                 execute = RunJob(
-                    self.mock_event,
+                    self.mock_event.src_path,
                     self.manifest_config,
                     self.watch_config,
                 )
-                execute.run_job()
-                mock_alert.assert_called_with(
-                    "Could not trigger aind-data-transfer-service",
-                    self.mock_event.src_path,
+                with self.assertLogs(level="ERROR") as log_context:
+                    execute.run_job()
+                # Assert that the error message was logged
+                self.assertEqual(len(log_context.records), 1)
+                self.assertEqual(
+                    log_context.records[0].getMessage(),
+                    f"Could not trigger aind-data-transfer-service for "
+                    f"{self.mock_event.src_path}",
                 )
 
                 mock_trigger_transfer.return_value = True
                 mock_copy_to_vast.return_value = False
                 execute = RunJob(
-                    self.mock_event,
+                    self.mock_event.src_path,
                     self.manifest_config,
                     self.watch_config,
                 )
@@ -324,7 +328,7 @@ class TestRunSubprocess(unittest.TestCase):
                 mock_trigger_transfer.return_value = False
                 mock_copy_to_vast.return_value = False
                 execute = RunJob(
-                    self.mock_event,
+                    self.mock_event.src_path,
                     self.manifest_config,
                     self.watch_config,
                 )
@@ -359,7 +363,7 @@ class TestRunSubprocess(unittest.TestCase):
         mock_dir.return_value = True
         mock_move_mani.return_value = None
         execute = RunJob(
-            self.mock_event,
+            self.mock_event.src_path,
             self.manifest_with_run_script,
             self.watch_config,
         )
@@ -465,7 +469,7 @@ class TestRunSubprocess(unittest.TestCase):
                     args=[], returncode=0
                 )
                 execute = RunJob(
-                    self.mock_event,
+                    self.mock_event.src_path,
                     self.manifest_config_upload_only,
                     self.watch_config,
                 )
