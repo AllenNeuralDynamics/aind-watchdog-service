@@ -62,3 +62,25 @@ jobs:
         asset_path: dist/aind-watchdog-service.exe
         asset_name: aind-watchdog-service.exe
         asset_content_type: application/vnd.microsoft.portable-executable
+
+  publish_to_pypi:
+    needs: build
+    if: always()  # Enable publishing
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Pull latest changes
+        run: git pull origin ${{ env.DEFAULT_BRANCH }}
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+      - name: Install dependencies
+        run: |
+          pip install --upgrade setuptools wheel twine build
+          python -m build
+          twine check dist/*.gz dist/*.whl
+      - name: Publish on PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.AIND_PYPI_TOKEN }}
