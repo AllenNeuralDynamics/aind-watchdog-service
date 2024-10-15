@@ -1,0 +1,919 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="prev" title="aind-watchdog-service" href="aind-watchdog-service.html" />
+
+    <link rel="shortcut icon" href="_static/favicon.ico"/><!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
+        <title>Models - aind-watchdog-service</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
+    <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">aind-watchdog-service</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo only-light" src="_static/light-logo.svg" alt="Light Logo"/>
+    <img class="sidebar-logo only-dark" src="_static/dark-logo.svg" alt="Dark Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">aind-watchdog-service</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Welcome to the Aind Watchdog Service documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aind-watchdog-service.html">aind-watchdog-service</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Models</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/AllenNeuralDynamics/aind-watchdog-service">GitHub Source Code</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="_sources/models.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="models">
+<h1>Models<a class="headerlink" href="#models" title="Link to this heading">¶</a></h1>
+<dl class="py class pydantic_model">
+<dt class="sig sig-object py" id="aind_watchdog_service.models.manifest_config.ManifestConfig">
+<em class="property"><span class="pre">pydantic</span> <span class="pre">model</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aind_watchdog_service.models.manifest_config.</span></span><span class="sig-name descname"><span class="pre">ManifestConfig</span></span><a class="reference external" href="https://github.com/AllenNeuralDynamics/aind-watchdog-service/tree/main/src//aind_watchdog_service/models/manifest_config.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aind_watchdog_service.models.manifest_config.ManifestConfig" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<p>Job configs for data transfer to VAST and executing a custom script</p>
+<p><details  class="autodoc_pydantic_collapsable_json">
+<summary>Show JSON schema</summary><div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">   </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ManifestConfig&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Job configs for data transfer to VAST and executing a custom script&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Unique name for session data assets&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Unique name&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;processor_full_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;User who processed the data&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Processor name&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;subject_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Subject ID&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Subject ID&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;integer&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;acquisition_datetime&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Acquisition datetime&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;format&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;date-time&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Acquisition datetime&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;schedule_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;anyOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">&quot;format&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;time&quot;</span><span class="p">,</span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;null&quot;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">         </span><span class="p">],</span>
+<span class="w">         </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Transfer time to schedule copy and upload. If None defaults to trigger the transfer immediately&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;APScheduler transfer time&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;force_cloud_sync&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Overwrite data in AWS&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Force cloud sync&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;boolean&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;transfer_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://aind-data-transfer-service/api/v1/submit_jobs&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Transfer endpoint for data transfer&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Transfer endpoint&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;platform&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Platform type&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;enum&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;MRI&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;exaSPIM&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;confocal&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;HCR&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;behavior&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;mesoSPIM&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;MERFISH&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;ISI&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;HSFP&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;ecephys&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;motor-observatory&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;single-plane-ophys&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;multiplane-ophys&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;SmartSPIM&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;FIP&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;SLAP2&quot;</span>
+<span class="w">         </span><span class="p">],</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Platform type&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;capsule_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;anyOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;null&quot;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">         </span><span class="p">],</span>
+<span class="w">         </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Capsule ID of pipeline to run&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Capsule&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;mount&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;anyOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;null&quot;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">         </span><span class="p">],</span>
+<span class="w">         </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Mount point for pipeline run&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Mount point&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;s3_bucket&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;$ref&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#/$defs/BucketType&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;private&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;s3 endpoint&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;S3 endpoint&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;project_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Project name&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Project name&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;destination&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Remote directory on VAST where to copy the data to.&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;examples&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;\\\\allen\\aind\\scratch\\test&quot;</span>
+<span class="w">         </span><span class="p">],</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Destination directory&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;modalities&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;additionalProperties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;items&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;array&quot;</span>
+<span class="w">         </span><span class="p">},</span>
+<span class="w">         </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">         </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;list of ModalityFile objects containing modality names and associated files or directories&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;modality files&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;schemas&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">         </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Where schema files to be uploaded are saved&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;items&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">         </span><span class="p">},</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Schema directory&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;array&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;script&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;additionalProperties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;items&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;array&quot;</span>
+<span class="w">         </span><span class="p">},</span>
+<span class="w">         </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">         </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Set of commands to run in subprocess.&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Commands&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">   </span><span class="p">},</span>
+<span class="w">   </span><span class="nt">&quot;$defs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;BucketType&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Types of s3 bucket users can write to through service&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;enum&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;private&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;open&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;scratch&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;archive&quot;</span>
+<span class="w">         </span><span class="p">],</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;BucketType&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">   </span><span class="p">},</span>
+<span class="w">   </span><span class="nt">&quot;additionalProperties&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;name&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;processor_full_name&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;subject_id&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;acquisition_datetime&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;platform&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;project_name&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;destination&quot;</span>
+<span class="w">   </span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</details></p><dl class="field-list simple">
+<dt class="field-odd">Config<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>extra</strong>: <em>str = forbid</em></p></li>
+</ul>
+</dd>
+<dt class="field-even">Fields<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.acquisition_datetime" title="aind_watchdog_service.models.manifest_config.ManifestConfig.acquisition_datetime"><code class="xref py py-obj docutils literal notranslate"><span class="pre">acquisition_datetime</span> <span class="pre">(datetime.datetime)</span></code></a></p></li>
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.capsule_id" title="aind_watchdog_service.models.manifest_config.ManifestConfig.capsule_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">capsule_id</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></a></p></li>
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.destination" title="aind_watchdog_service.models.manifest_config.ManifestConfig.destination"><code class="xref py py-obj docutils literal notranslate"><span class="pre">destination</span> <span class="pre">(str)</span></code></a></p></li>
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.force_cloud_sync" title="aind_watchdog_service.models.manifest_config.ManifestConfig.force_cloud_sync"><code class="xref py py-obj docutils literal notranslate"><span class="pre">force_cloud_sync</span> <span class="pre">(bool)</span></code></a></p></li>
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.modalities" title="aind_watchdog_service.models.manifest_config.ManifestConfig.modalities"><code class="xref py py-obj docutils literal notranslate"><span class="pre">modalities</span> <span class="pre">(Dict[Literal['MRI',</span> <span class="pre">'SPIM',</span> <span class="pre">'icephys',</span> <span class="pre">'confocal',</span> <span class="pre">'EMG',</span> <span class="pre">'slap',</span> <span class="pre">'fMOST',</span> <span class="pre">'fib',</span> <span class="pre">'behavior',</span> <span class="pre">'ISI',</span> <span class="pre">'merfish',</span> <span class="pre">'ecephys',</span> <span class="pre">'behavior-videos',</span> <span class="pre">'pophys'],</span> <span class="pre">List[str]])</span></code></a></p></li>
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.mount" title="aind_watchdog_service.models.manifest_config.ManifestConfig.mount"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mount</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></a></p></li>
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.name" title="aind_watchdog_service.models.manifest_config.ManifestConfig.name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">name</span> <span class="pre">(str)</span></code></a></p></li>
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.platform" title="aind_watchdog_service.models.manifest_config.ManifestConfig.platform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">platform</span> <span class="pre">(Literal['MRI',</span> <span class="pre">'exaSPIM',</span> <span class="pre">'confocal',</span> <span class="pre">'HCR',</span> <span class="pre">'behavior',</span> <span class="pre">'mesoSPIM',</span> <span class="pre">'MERFISH',</span> <span class="pre">'ISI',</span> <span class="pre">'HSFP',</span> <span class="pre">'ecephys',</span> <span class="pre">'motor-observatory',</span> <span class="pre">'single-plane-ophys',</span> <span class="pre">'multiplane-ophys',</span> <span class="pre">'SmartSPIM',</span> <span class="pre">'FIP',</span> <span class="pre">'SLAP2'])</span></code></a></p></li>
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.processor_full_name" title="aind_watchdog_service.models.manifest_config.ManifestConfig.processor_full_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">processor_full_name</span> <span class="pre">(str)</span></code></a></p></li>
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.project_name" title="aind_watchdog_service.models.manifest_config.ManifestConfig.project_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">project_name</span> <span class="pre">(str)</span></code></a></p></li>
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.s3_bucket" title="aind_watchdog_service.models.manifest_config.ManifestConfig.s3_bucket"><code class="xref py py-obj docutils literal notranslate"><span class="pre">s3_bucket</span> <span class="pre">(aind_data_transfer_models.s3_upload_configs.BucketType)</span></code></a></p></li>
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.schedule_time" title="aind_watchdog_service.models.manifest_config.ManifestConfig.schedule_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">schedule_time</span> <span class="pre">(datetime.time</span> <span class="pre">|</span> <span class="pre">None)</span></code></a></p></li>
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.schemas" title="aind_watchdog_service.models.manifest_config.ManifestConfig.schemas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">schemas</span> <span class="pre">(List[str])</span></code></a></p></li>
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.script" title="aind_watchdog_service.models.manifest_config.ManifestConfig.script"><code class="xref py py-obj docutils literal notranslate"><span class="pre">script</span> <span class="pre">(Dict[str,</span> <span class="pre">List[str]])</span></code></a></p></li>
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.subject_id" title="aind_watchdog_service.models.manifest_config.ManifestConfig.subject_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">subject_id</span> <span class="pre">(int)</span></code></a></p></li>
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.transfer_endpoint" title="aind_watchdog_service.models.manifest_config.ManifestConfig.transfer_endpoint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transfer_endpoint</span> <span class="pre">(str)</span></code></a></p></li>
+</ul>
+</dd>
+<dt class="field-odd">Validators<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.normalize_modalities" title="aind_watchdog_service.models.manifest_config.ManifestConfig.normalize_modalities"><code class="xref py py-obj docutils literal notranslate"><span class="pre">normalize_modalities</span></code></a> » <a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.modalities" title="aind_watchdog_service.models.manifest_config.ManifestConfig.modalities"><code class="xref py py-obj docutils literal notranslate"><span class="pre">modalities</span></code></a></p></li>
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.normalize_platform" title="aind_watchdog_service.models.manifest_config.ManifestConfig.normalize_platform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">normalize_platform</span></code></a> » <a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.platform" title="aind_watchdog_service.models.manifest_config.ManifestConfig.platform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">platform</span></code></a></p></li>
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.normalized_scheduled_time" title="aind_watchdog_service.models.manifest_config.ManifestConfig.normalized_scheduled_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">normalized_scheduled_time</span></code></a> » <a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.schedule_time" title="aind_watchdog_service.models.manifest_config.ManifestConfig.schedule_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">schedule_time</span></code></a></p></li>
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.validate_capsule" title="aind_watchdog_service.models.manifest_config.ManifestConfig.validate_capsule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_capsule</span></code></a> » <code class="xref py py-obj docutils literal notranslate"><span class="pre">all</span> <span class="pre">fields</span></code></p></li>
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.validate_destination_path" title="aind_watchdog_service.models.manifest_config.ManifestConfig.validate_destination_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_destination_path</span></code></a> » <a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.destination" title="aind_watchdog_service.models.manifest_config.ManifestConfig.destination"><code class="xref py py-obj docutils literal notranslate"><span class="pre">destination</span></code></a></p></li>
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.validate_modality_paths" title="aind_watchdog_service.models.manifest_config.ManifestConfig.validate_modality_paths"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_modality_paths</span></code></a> » <a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.modalities" title="aind_watchdog_service.models.manifest_config.ManifestConfig.modalities"><code class="xref py py-obj docutils literal notranslate"><span class="pre">modalities</span></code></a></p></li>
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.validate_schema_paths" title="aind_watchdog_service.models.manifest_config.ManifestConfig.validate_schema_paths"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_schema_paths</span></code></a> » <a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.schemas" title="aind_watchdog_service.models.manifest_config.ManifestConfig.schemas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">schemas</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="aind_watchdog_service.models.manifest_config.ManifestConfig.acquisition_datetime">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">acquisition_datetime</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">datetime</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="reference external" href="https://github.com/AllenNeuralDynamics/aind-watchdog-service/tree/main/src//aind_watchdog_service/models/manifest_config.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.acquisition_datetime" title="Link to this definition">¶</a></dt>
+<dd><p>Acquisition datetime</p>
+<dl class="field-list simple">
+<dt class="field-odd">Validated by<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.validate_capsule" title="aind_watchdog_service.models.manifest_config.ManifestConfig.validate_capsule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_capsule</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="aind_watchdog_service.models.manifest_config.ManifestConfig.capsule_id">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">capsule_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference external" href="https://github.com/AllenNeuralDynamics/aind-watchdog-service/tree/main/src//aind_watchdog_service/models/manifest_config.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.capsule_id" title="Link to this definition">¶</a></dt>
+<dd><p>Capsule ID of pipeline to run</p>
+<dl class="field-list simple">
+<dt class="field-odd">Validated by<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.validate_capsule" title="aind_watchdog_service.models.manifest_config.ManifestConfig.validate_capsule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_capsule</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="aind_watchdog_service.models.manifest_config.ManifestConfig.destination">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">destination</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="reference external" href="https://github.com/AllenNeuralDynamics/aind-watchdog-service/tree/main/src//aind_watchdog_service/models/manifest_config.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.destination" title="Link to this definition">¶</a></dt>
+<dd><p>Remote directory on VAST where to copy the data to.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Validated by<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.validate_capsule" title="aind_watchdog_service.models.manifest_config.ManifestConfig.validate_capsule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_capsule</span></code></a></p></li>
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.validate_destination_path" title="aind_watchdog_service.models.manifest_config.ManifestConfig.validate_destination_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_destination_path</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="aind_watchdog_service.models.manifest_config.ManifestConfig.force_cloud_sync">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">force_cloud_sync</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="reference external" href="https://github.com/AllenNeuralDynamics/aind-watchdog-service/tree/main/src//aind_watchdog_service/models/manifest_config.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.force_cloud_sync" title="Link to this definition">¶</a></dt>
+<dd><p>Overwrite data in AWS</p>
+<dl class="field-list simple">
+<dt class="field-odd">Validated by<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.validate_capsule" title="aind_watchdog_service.models.manifest_config.ManifestConfig.validate_capsule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_capsule</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="aind_watchdog_service.models.manifest_config.ManifestConfig.modalities">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">modalities</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List[str]]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="reference external" href="https://github.com/AllenNeuralDynamics/aind-watchdog-service/tree/main/src//aind_watchdog_service/models/manifest_config.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.modalities" title="Link to this definition">¶</a></dt>
+<dd><p>list of ModalityFile objects containing modality names and associated files or directories</p>
+<dl class="field-list simple">
+<dt class="field-odd">Validated by<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.normalize_modalities" title="aind_watchdog_service.models.manifest_config.ManifestConfig.normalize_modalities"><code class="xref py py-obj docutils literal notranslate"><span class="pre">normalize_modalities</span></code></a></p></li>
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.validate_capsule" title="aind_watchdog_service.models.manifest_config.ManifestConfig.validate_capsule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_capsule</span></code></a></p></li>
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.validate_modality_paths" title="aind_watchdog_service.models.manifest_config.ManifestConfig.validate_modality_paths"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_modality_paths</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="aind_watchdog_service.models.manifest_config.ManifestConfig.mount">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mount</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference external" href="https://github.com/AllenNeuralDynamics/aind-watchdog-service/tree/main/src//aind_watchdog_service/models/manifest_config.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.mount" title="Link to this definition">¶</a></dt>
+<dd><p>Mount point for pipeline run</p>
+<dl class="field-list simple">
+<dt class="field-odd">Validated by<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.validate_capsule" title="aind_watchdog_service.models.manifest_config.ManifestConfig.validate_capsule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_capsule</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="aind_watchdog_service.models.manifest_config.ManifestConfig.name">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="reference external" href="https://github.com/AllenNeuralDynamics/aind-watchdog-service/tree/main/src//aind_watchdog_service/models/manifest_config.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.name" title="Link to this definition">¶</a></dt>
+<dd><p>Unique name for session data assets</p>
+<dl class="field-list simple">
+<dt class="field-odd">Validated by<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.validate_capsule" title="aind_watchdog_service.models.manifest_config.ManifestConfig.validate_capsule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_capsule</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="aind_watchdog_service.models.manifest_config.ManifestConfig.platform">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">platform</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'MRI'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'exaSPIM'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'confocal'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'HCR'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'behavior'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'mesoSPIM'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'MERFISH'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'ISI'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'HSFP'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'ecephys'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'motor-observatory'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'single-plane-ophys'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'multiplane-ophys'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'SmartSPIM'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'FIP'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'SLAP2'</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">[Required]</span></em><a class="reference external" href="https://github.com/AllenNeuralDynamics/aind-watchdog-service/tree/main/src//aind_watchdog_service/models/manifest_config.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.platform" title="Link to this definition">¶</a></dt>
+<dd><p>Platform type</p>
+<dl class="field-list simple">
+<dt class="field-odd">Validated by<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.normalize_platform" title="aind_watchdog_service.models.manifest_config.ManifestConfig.normalize_platform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">normalize_platform</span></code></a></p></li>
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.validate_capsule" title="aind_watchdog_service.models.manifest_config.ManifestConfig.validate_capsule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_capsule</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="aind_watchdog_service.models.manifest_config.ManifestConfig.processor_full_name">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">processor_full_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="reference external" href="https://github.com/AllenNeuralDynamics/aind-watchdog-service/tree/main/src//aind_watchdog_service/models/manifest_config.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.processor_full_name" title="Link to this definition">¶</a></dt>
+<dd><p>User who processed the data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Validated by<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.validate_capsule" title="aind_watchdog_service.models.manifest_config.ManifestConfig.validate_capsule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_capsule</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="aind_watchdog_service.models.manifest_config.ManifestConfig.project_name">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">project_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="reference external" href="https://github.com/AllenNeuralDynamics/aind-watchdog-service/tree/main/src//aind_watchdog_service/models/manifest_config.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.project_name" title="Link to this definition">¶</a></dt>
+<dd><p>Project name</p>
+<dl class="field-list simple">
+<dt class="field-odd">Validated by<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.validate_capsule" title="aind_watchdog_service.models.manifest_config.ManifestConfig.validate_capsule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_capsule</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="aind_watchdog_service.models.manifest_config.ManifestConfig.s3_bucket">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">s3_bucket</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">BucketType</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">BucketType.PRIVATE</span></em><a class="reference external" href="https://github.com/AllenNeuralDynamics/aind-watchdog-service/tree/main/src//aind_watchdog_service/models/manifest_config.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.s3_bucket" title="Link to this definition">¶</a></dt>
+<dd><p>s3 endpoint</p>
+<dl class="field-list simple">
+<dt class="field-odd">Validated by<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.validate_capsule" title="aind_watchdog_service.models.manifest_config.ManifestConfig.validate_capsule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_capsule</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="aind_watchdog_service.models.manifest_config.ManifestConfig.schedule_time">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">schedule_time</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">time</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference external" href="https://github.com/AllenNeuralDynamics/aind-watchdog-service/tree/main/src//aind_watchdog_service/models/manifest_config.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.schedule_time" title="Link to this definition">¶</a></dt>
+<dd><p>Transfer time to schedule copy and upload. If None defaults to trigger the transfer immediately</p>
+<dl class="field-list simple">
+<dt class="field-odd">Validated by<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.normalized_scheduled_time" title="aind_watchdog_service.models.manifest_config.ManifestConfig.normalized_scheduled_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">normalized_scheduled_time</span></code></a></p></li>
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.validate_capsule" title="aind_watchdog_service.models.manifest_config.ManifestConfig.validate_capsule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_capsule</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="aind_watchdog_service.models.manifest_config.ManifestConfig.schemas">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">schemas</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="reference external" href="https://github.com/AllenNeuralDynamics/aind-watchdog-service/tree/main/src//aind_watchdog_service/models/manifest_config.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.schemas" title="Link to this definition">¶</a></dt>
+<dd><p>Where schema files to be uploaded are saved</p>
+<dl class="field-list simple">
+<dt class="field-odd">Validated by<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.validate_capsule" title="aind_watchdog_service.models.manifest_config.ManifestConfig.validate_capsule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_capsule</span></code></a></p></li>
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.validate_schema_paths" title="aind_watchdog_service.models.manifest_config.ManifestConfig.validate_schema_paths"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_schema_paths</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="aind_watchdog_service.models.manifest_config.ManifestConfig.script">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">script</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="reference external" href="https://github.com/AllenNeuralDynamics/aind-watchdog-service/tree/main/src//aind_watchdog_service/models/manifest_config.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.script" title="Link to this definition">¶</a></dt>
+<dd><p>Set of commands to run in subprocess.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Validated by<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.validate_capsule" title="aind_watchdog_service.models.manifest_config.ManifestConfig.validate_capsule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_capsule</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="aind_watchdog_service.models.manifest_config.ManifestConfig.subject_id">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">subject_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="reference external" href="https://github.com/AllenNeuralDynamics/aind-watchdog-service/tree/main/src//aind_watchdog_service/models/manifest_config.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.subject_id" title="Link to this definition">¶</a></dt>
+<dd><p>Subject ID</p>
+<dl class="field-list simple">
+<dt class="field-odd">Validated by<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.validate_capsule" title="aind_watchdog_service.models.manifest_config.ManifestConfig.validate_capsule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_capsule</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="aind_watchdog_service.models.manifest_config.ManifestConfig.transfer_endpoint">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">transfer_endpoint</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'http://aind-data-transfer-service/api/v1/submit_jobs'</span></em><a class="reference external" href="https://github.com/AllenNeuralDynamics/aind-watchdog-service/tree/main/src//aind_watchdog_service/models/manifest_config.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.transfer_endpoint" title="Link to this definition">¶</a></dt>
+<dd><p>Transfer endpoint for data transfer</p>
+<dl class="field-list simple">
+<dt class="field-odd">Validated by<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.validate_capsule" title="aind_watchdog_service.models.manifest_config.ManifestConfig.validate_capsule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_capsule</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method pydantic_validator">
+<dt class="sig sig-object py" id="aind_watchdog_service.models.manifest_config.ManifestConfig.normalize_modalities">
+<em class="property"><span class="pre">validator</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normalize_modalities</span></span><em class="autodoc_pydantic_validator_arrow property">&#160; <span class="pre">»</span>&#160; </em><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.modalities" title="aind_watchdog_service.models.manifest_config.ManifestConfig.modalities"><em class="xref py py-obj"><span class="pre">modalities</span></em></a><a class="reference external" href="https://github.com/AllenNeuralDynamics/aind-watchdog-service/tree/main/src//aind_watchdog_service/models/manifest_config.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.normalize_modalities" title="Link to this definition">¶</a></dt>
+<dd><p>Normalize modalities</p>
+</dd></dl>
+
+<dl class="py method pydantic_validator">
+<dt class="sig sig-object py" id="aind_watchdog_service.models.manifest_config.ManifestConfig.normalize_platform">
+<em class="property"><span class="pre">validator</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normalize_platform</span></span><em class="autodoc_pydantic_validator_arrow property">&#160; <span class="pre">»</span>&#160; </em><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.platform" title="aind_watchdog_service.models.manifest_config.ManifestConfig.platform"><em class="xref py py-obj"><span class="pre">platform</span></em></a><a class="reference external" href="https://github.com/AllenNeuralDynamics/aind-watchdog-service/tree/main/src//aind_watchdog_service/models/manifest_config.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.normalize_platform" title="Link to this definition">¶</a></dt>
+<dd><p>Normalize modalities</p>
+</dd></dl>
+
+<dl class="py method pydantic_validator">
+<dt class="sig sig-object py" id="aind_watchdog_service.models.manifest_config.ManifestConfig.normalized_scheduled_time">
+<em class="property"><span class="pre">validator</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normalized_scheduled_time</span></span><em class="autodoc_pydantic_validator_arrow property">&#160; <span class="pre">»</span>&#160; </em><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.schedule_time" title="aind_watchdog_service.models.manifest_config.ManifestConfig.schedule_time"><em class="xref py py-obj"><span class="pre">schedule_time</span></em></a><a class="reference external" href="https://github.com/AllenNeuralDynamics/aind-watchdog-service/tree/main/src//aind_watchdog_service/models/manifest_config.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.normalized_scheduled_time" title="Link to this definition">¶</a></dt>
+<dd><p>Normalize scheduled time</p>
+</dd></dl>
+
+<dl class="py method pydantic_validator">
+<dt class="sig sig-object py" id="aind_watchdog_service.models.manifest_config.ManifestConfig.validate_capsule">
+<em class="property"><span class="pre">validator</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_capsule</span></span><em class="autodoc_pydantic_validator_arrow property">&#160; <span class="pre">»</span>&#160; </em><em class="xref py py-obj"><span class="pre">all</span> <span class="pre">fields</span></em><a class="reference external" href="https://github.com/AllenNeuralDynamics/aind-watchdog-service/tree/main/src//aind_watchdog_service/models/manifest_config.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.validate_capsule" title="Link to this definition">¶</a></dt>
+<dd><p>Validate capsule and mount</p>
+</dd></dl>
+
+<dl class="py method pydantic_validator">
+<dt class="sig sig-object py" id="aind_watchdog_service.models.manifest_config.ManifestConfig.validate_destination_path">
+<em class="property"><span class="pre">validator</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_destination_path</span></span><em class="autodoc_pydantic_validator_arrow property">&#160; <span class="pre">»</span>&#160; </em><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.destination" title="aind_watchdog_service.models.manifest_config.ManifestConfig.destination"><em class="xref py py-obj"><span class="pre">destination</span></em></a><a class="reference external" href="https://github.com/AllenNeuralDynamics/aind-watchdog-service/tree/main/src//aind_watchdog_service/models/manifest_config.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.validate_destination_path" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method pydantic_validator">
+<dt class="sig sig-object py" id="aind_watchdog_service.models.manifest_config.ManifestConfig.validate_modality_paths">
+<em class="property"><span class="pre">validator</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_modality_paths</span></span><em class="autodoc_pydantic_validator_arrow property">&#160; <span class="pre">»</span>&#160; </em><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.modalities" title="aind_watchdog_service.models.manifest_config.ManifestConfig.modalities"><em class="xref py py-obj"><span class="pre">modalities</span></em></a><a class="reference external" href="https://github.com/AllenNeuralDynamics/aind-watchdog-service/tree/main/src//aind_watchdog_service/models/manifest_config.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.validate_modality_paths" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method pydantic_validator">
+<dt class="sig sig-object py" id="aind_watchdog_service.models.manifest_config.ManifestConfig.validate_schema_paths">
+<em class="property"><span class="pre">validator</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_schema_paths</span></span><em class="autodoc_pydantic_validator_arrow property">&#160; <span class="pre">»</span>&#160; </em><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.schemas" title="aind_watchdog_service.models.manifest_config.ManifestConfig.schemas"><em class="xref py py-obj"><span class="pre">schemas</span></em></a><a class="reference external" href="https://github.com/AllenNeuralDynamics/aind-watchdog-service/tree/main/src//aind_watchdog_service/models/manifest_config.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.validate_schema_paths" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class pydantic_model">
+<dt class="sig sig-object py" id="aind_watchdog_service.models.watch_config.WatchConfig">
+<em class="property"><span class="pre">pydantic</span> <span class="pre">model</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aind_watchdog_service.models.watch_config.</span></span><span class="sig-name descname"><span class="pre">WatchConfig</span></span><a class="reference external" href="https://github.com/AllenNeuralDynamics/aind-watchdog-service/tree/main/src//aind_watchdog_service/models/watch_config.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aind_watchdog_service.models.watch_config.WatchConfig" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<p>Configuration for rig</p>
+<p><details  class="autodoc_pydantic_collapsable_json">
+<summary>Show JSON schema</summary><div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">   </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;WatchConfig&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Configuration for rig&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;flag_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Directory for watchdog to poll&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Poll directory&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;manifest_complete&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Manifest directory for triggered data&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Manifest complete directory&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;webhook_url&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;anyOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;null&quot;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">         </span><span class="p">],</span>
+<span class="w">         </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Teams webhook url for user notification&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Teams webhook url&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;misfire_grace_time_s&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;anyOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;integer&quot;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;null&quot;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">         </span><span class="p">],</span>
+<span class="w">         </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10800</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;If the job scheduler is busy, wait this long before skipping a job. If None, allow the job to run no matter how late it is&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Scheduler grace time&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">   </span><span class="p">},</span>
+<span class="w">   </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;flag_dir&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;manifest_complete&quot;</span>
+<span class="w">   </span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</details></p><dl class="field-list simple">
+<dt class="field-odd">Fields<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.watch_config.WatchConfig.flag_dir" title="aind_watchdog_service.models.watch_config.WatchConfig.flag_dir"><code class="xref py py-obj docutils literal notranslate"><span class="pre">flag_dir</span> <span class="pre">(str)</span></code></a></p></li>
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.watch_config.WatchConfig.manifest_complete" title="aind_watchdog_service.models.watch_config.WatchConfig.manifest_complete"><code class="xref py py-obj docutils literal notranslate"><span class="pre">manifest_complete</span> <span class="pre">(str)</span></code></a></p></li>
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.watch_config.WatchConfig.misfire_grace_time_s" title="aind_watchdog_service.models.watch_config.WatchConfig.misfire_grace_time_s"><code class="xref py py-obj docutils literal notranslate"><span class="pre">misfire_grace_time_s</span> <span class="pre">(int</span> <span class="pre">|</span> <span class="pre">None)</span></code></a></p></li>
+<li><p><a class="reference internal" href="#aind_watchdog_service.models.watch_config.WatchConfig.webhook_url" title="aind_watchdog_service.models.watch_config.WatchConfig.webhook_url"><code class="xref py py-obj docutils literal notranslate"><span class="pre">webhook_url</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="aind_watchdog_service.models.watch_config.WatchConfig.flag_dir">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">flag_dir</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="reference external" href="https://github.com/AllenNeuralDynamics/aind-watchdog-service/tree/main/src//aind_watchdog_service/models/watch_config.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aind_watchdog_service.models.watch_config.WatchConfig.flag_dir" title="Link to this definition">¶</a></dt>
+<dd><p>Directory for watchdog to poll</p>
+</dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="aind_watchdog_service.models.watch_config.WatchConfig.manifest_complete">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">manifest_complete</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="reference external" href="https://github.com/AllenNeuralDynamics/aind-watchdog-service/tree/main/src//aind_watchdog_service/models/watch_config.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aind_watchdog_service.models.watch_config.WatchConfig.manifest_complete" title="Link to this definition">¶</a></dt>
+<dd><p>Manifest directory for triggered data</p>
+</dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="aind_watchdog_service.models.watch_config.WatchConfig.misfire_grace_time_s">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">misfire_grace_time_s</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10800</span></em><a class="reference external" href="https://github.com/AllenNeuralDynamics/aind-watchdog-service/tree/main/src//aind_watchdog_service/models/watch_config.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aind_watchdog_service.models.watch_config.WatchConfig.misfire_grace_time_s" title="Link to this definition">¶</a></dt>
+<dd><p>If the job scheduler is busy, wait this long before skipping a job. If None, allow the job to run no matter how late it is</p>
+</dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="aind_watchdog_service.models.watch_config.WatchConfig.webhook_url">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">webhook_url</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference external" href="https://github.com/AllenNeuralDynamics/aind-watchdog-service/tree/main/src//aind_watchdog_service/models/watch_config.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aind_watchdog_service.models.watch_config.WatchConfig.webhook_url" title="Link to this definition">¶</a></dt>
+<dd><p>Teams webhook url for user notification</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          <a class="prev-page" href="aind-watchdog-service.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">aind-watchdog-service</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            Made with 
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Models</a><ul>
+<li><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig"><code class="docutils literal notranslate"><span class="pre">ManifestConfig</span></code></a><ul>
+<li><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.acquisition_datetime"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.acquisition_datetime</span></code></a></li>
+<li><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.capsule_id"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.capsule_id</span></code></a></li>
+<li><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.destination"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.destination</span></code></a></li>
+<li><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.force_cloud_sync"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.force_cloud_sync</span></code></a></li>
+<li><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.modalities"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.modalities</span></code></a></li>
+<li><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.mount"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.mount</span></code></a></li>
+<li><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.name"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.name</span></code></a></li>
+<li><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.platform"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.platform</span></code></a></li>
+<li><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.processor_full_name"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.processor_full_name</span></code></a></li>
+<li><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.project_name"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.project_name</span></code></a></li>
+<li><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.s3_bucket"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.s3_bucket</span></code></a></li>
+<li><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.schedule_time"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.schedule_time</span></code></a></li>
+<li><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.schemas"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.schemas</span></code></a></li>
+<li><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.script"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.script</span></code></a></li>
+<li><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.subject_id"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.subject_id</span></code></a></li>
+<li><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.transfer_endpoint"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.transfer_endpoint</span></code></a></li>
+<li><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.normalize_modalities"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.normalize_modalities</span></code></a></li>
+<li><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.normalize_platform"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.normalize_platform</span></code></a></li>
+<li><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.normalized_scheduled_time"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.normalized_scheduled_time</span></code></a></li>
+<li><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.validate_capsule"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.validate_capsule</span></code></a></li>
+<li><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.validate_destination_path"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.validate_destination_path</span></code></a></li>
+<li><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.validate_modality_paths"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.validate_modality_paths</span></code></a></li>
+<li><a class="reference internal" href="#aind_watchdog_service.models.manifest_config.ManifestConfig.validate_schema_paths"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.validate_schema_paths</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#aind_watchdog_service.models.watch_config.WatchConfig"><code class="docutils literal notranslate"><span class="pre">WatchConfig</span></code></a><ul>
+<li><a class="reference internal" href="#aind_watchdog_service.models.watch_config.WatchConfig.flag_dir"><code class="docutils literal notranslate"><span class="pre">WatchConfig.flag_dir</span></code></a></li>
+<li><a class="reference internal" href="#aind_watchdog_service.models.watch_config.WatchConfig.manifest_complete"><code class="docutils literal notranslate"><span class="pre">WatchConfig.manifest_complete</span></code></a></li>
+<li><a class="reference internal" href="#aind_watchdog_service.models.watch_config.WatchConfig.misfire_grace_time_s"><code class="docutils literal notranslate"><span class="pre">WatchConfig.misfire_grace_time_s</span></code></a></li>
+<li><a class="reference internal" href="#aind_watchdog_service.models.watch_config.WatchConfig.webhook_url"><code class="docutils literal notranslate"><span class="pre">WatchConfig.webhook_url</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=a58bc63e"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/scripts/furo.js?v=5fa4622c"></script>
+    </body>
+</html>

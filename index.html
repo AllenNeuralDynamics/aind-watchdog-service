@@ -1,0 +1,613 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="aind-watchdog-service" href="aind-watchdog-service.html" />
+
+    <link rel="shortcut icon" href="_static/favicon.ico"/><!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
+        <title>aind-watchdog-service</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
+    <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="#"><div class="brand">aind-watchdog-service</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="#">
+  
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo only-light" src="_static/light-logo.svg" alt="Light Logo"/>
+    <img class="sidebar-logo only-dark" src="_static/dark-logo.svg" alt="Dark Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">aind-watchdog-service</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Welcome to the Aind Watchdog Service documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aind-watchdog-service.html">aind-watchdog-service</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/AllenNeuralDynamics/aind-watchdog-service">GitHub Source Code</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="_sources/index.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="welcome-to-the-aind-watchdog-service-documentation">
+<h1>Welcome to the Aind Watchdog Service documentation!<a class="headerlink" href="#welcome-to-the-aind-watchdog-service-documentation" title="Link to this heading">¶</a></h1>
+</section>
+<section id="aind-watchdog-service">
+<h1>aind-watchdog-service<a class="headerlink" href="#aind-watchdog-service" title="Link to this heading">¶</a></h1>
+<a class="reference external image-reference" href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-brightgreen" />
+</a>
+<a class="reference external image-reference" href="https://img.shields.io/badge/code%20style-black-black"><img alt="Code Style" src="https://img.shields.io/badge/code%20style-black-black" />
+</a>
+<a class="reference external image-reference" href="https://github.com/semantic-release/semantic-release"><img alt="semantic-release: angular" src="https://img.shields.io/badge/semantic--release-angular-e10079?logo=semantic-release" />
+</a>
+<a class="reference external image-reference" href="https://img.shields.io/badge/interrogate-100.0%25-brightgreen"><img alt="Interrogate" src="https://img.shields.io/badge/interrogate-100.0%25-brightgreen" />
+</a>
+<a class="reference external image-reference" href="https://img.shields.io/badge/coverage-100%25-brightgreen?logo=codecov"><img alt="Coverage" src="https://img.shields.io/badge/coverage-100%25-brightgreen?logo=codecov" />
+</a>
+<a class="reference external image-reference" href="https://img.shields.io/badge/python-%3E=3.7-blue?logo=python"><img alt="Python" src="https://img.shields.io/badge/python-%3E=3.7-blue?logo=python" />
+</a>
+</section>
+<section id="summary">
+<h1>Summary<a class="headerlink" href="#summary" title="Link to this heading">¶</a></h1>
+<p>With aind-watchdog-service, you can configure a directory for the app to watch, where manifest files (or beacon files) are dropped containing src files from an acquisition labeled by modality. The program can be configured with a web-hook URL to send messages to a Teams channel when data staging is complete and data transfer has been triggered through <a class="reference external" href="https://github.com/AllenNeuralDynamics/aind-data-transfer-service">aind-data-transfer-service</a>. Pipeline capsule ids can be added if triggering pipelines is necessary post-acquisition.</p>
+</section>
+<section id="usage">
+<h1>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>There are two options for configuring the watchdog service.</p>
+<ul>
+<li><p>Create a watch_config file as yaml. Create an environment variable called WATCH_CONFIG containing the location of the config file.</p></li>
+<li><p>Review src/aind-watchdog-service/models/watch_config.py for configuration parameters</p></li>
+<li><p>watch_config.yml must include:</p>
+<ul>
+<li><p><strong>flag_dir</strong>: directory watchdog observer will monitor for manifest files</p></li>
+<li><p><strong>manifest_complete</strong>: where watchdog will place completed manifest files</p></li>
+<li><p><strong>webhook_url</strong>: to receive Teams notifications <strong>OPTIONAL</strong></p></li>
+</ul>
+</li>
+<li><p>Run the command line interface to execute the the service. For options pass the -h parameter.</p></li>
+</ul>
+</li>
+<li><p>Manifest files must be saved as yaml and contain <em>manifest</em> in the file name. The manifest file must contain the following keys <em>optional keys are marked as such</em>:</p>
+<ul>
+<li><p><strong>name</strong>: name of directory for the dataset stored on VAST</p></li>
+<li><p><strong>processor_full_name</strong>: full name of the person who acquired the data</p></li>
+<li><p><strong>subject_id</strong>: mouse id</p></li>
+<li><p><strong>acquisition_datetime</strong>: datetime of when data were acquired</p></li>
+<li><p><strong>platform</strong>: platform name as defined in aind-data-schema-models</p></li>
+<li><p><strong>modalities</strong>: modality name with source files or directories listed per modality</p></li>
+<li><p><strong>project_name</strong>: project name as seen in the project and funding sources smart sheet</p></li>
+<li><p><strong>schemas</strong>: location of rig.json, session.json and data_description.json</p></li>
+<li><p><strong>s3_bucket</strong>: private, public or scratch</p></li>
+<li><p><strong>schedule_time</strong>: when to schedule the transfer pipeline. Defaults to immediately if not set <strong>OPTIONAL</strong></p></li>
+<li><p><strong>capsule_id</strong>: Code Ocean pipeline or capsule id to trigger <strong>OPTIONAL</strong></p></li>
+<li><p><strong>mount</strong>: Code Ocean pipeline or capsule id mount point <strong>OPTIONAL</strong></p></li>
+</ul>
+</li>
+</ul>
+<p><strong>If you are specifying a capsule id to run a pipeline, you must input the data name of the data mounted to the pipeline. If it is not specified, CO will run the asset mounted to the pipeline and not the dataset that was uploaded.</strong></p>
+</section>
+<section id="windows-system-installation">
+<h1>Windows System Installation<a class="headerlink" href="#windows-system-installation" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Install (copy) exe to the desired location <em>As</em> of 7/1 - exe is temporarily located here //allen/aind/scratch/ariellel/aind-watchdog-service.exe*</p></li>
+<li><p>Create a directory where manifest files will be dropped</p></li>
+<li><p>Create a watch_config.yaml file.</p></li>
+<li><p>Add watch_config.yaml path to env var titled WATCH_CONFIG</p></li>
+<li><p>Create a scheduled task (see below)</p></li>
+<li><p>Start watchdog through the created task</p></li>
+<li><p>Check Task Manager to verify watchdog is running</p></li>
+</ul>
+</section>
+<section id="configure-task-scheduler-to-control-and-monitor-aind-watchdog-service">
+<h1>Configure Task Scheduler to control and monitor aind-watchdog-service<a class="headerlink" href="#configure-task-scheduler-to-control-and-monitor-aind-watchdog-service" title="Link to this heading">¶</a></h1>
+<p><strong>Windows Task Scheduler</strong>
+<em>Pre-requisites: Must be logged in as a user with admin privileges or logged in under the service account. If you are logged in under the service account and that is the only account that runs on the computer, you will not need to configure this task for all users</em></p>
+<ul>
+<li><p>Select the windows button, type in Task Scheduler and run program</p></li>
+<li><p>Highlight Task Scheduler Library in the left panel. In the right panel select New Folder and create a new folder called AIND</p>
+<a class="reference external image-reference" href="./assets/task_scheduler_main.png"><img alt="Task Scheduler" src="assets/task_scheduler_main.png" />
+</a>
+</li>
+<li><p>Right click on the AIND folder and select Create Task…</p></li>
+</ul>
+<a class="reference external image-reference" href="./assets/create_task.png"><img alt="Create Task" src="assets/create_task.png" />
+</a>
+<ul class="simple">
+<li><p>Update the first panel by creating a name for the scheduled task with a description. Select Run whether user is logged on or not. Select Run with highest priviliges</p></li>
+</ul>
+<a class="reference external image-reference" href="./assets/first_pane.png"><img alt="First Panel" src="assets/first_pane.png" />
+</a>
+<ul class="simple">
+<li><p>Go to the Triggers panel and create two new triggers. One will start aind-watchdog-service at start up and the other will start it at user log on. Replicate the panels shown below to configure these two triggers.</p></li>
+</ul>
+<a class="reference external image-reference" href="./assets/start_up_trigger.png"><img alt="Start Up" src="assets/start_up_trigger.png" />
+</a>
+<a class="reference external image-reference" href="./assets/log_on.png"><img alt="Log On" src="assets/log_on.png" />
+</a>
+<ul class="simple">
+<li><p><strong>Notice the delay time for each task. This is necessary so that Windows boot order does not accidentally miss the task</strong></p></li>
+<li><p>This final trigger panel should look like this:</p></li>
+</ul>
+<a class="reference external image-reference" href="./assets/final_trigger.png"><img alt="Final Trigger" src="assets/final_trigger.png" />
+</a>
+<ul class="simple">
+<li><p>The Actions panel is where the action is set to start aind-watchdog-service. Be sure to specify the location of your local .exe copy of aind-watchdog-service.</p></li>
+</ul>
+<a class="reference external image-reference" href="./assets/action.png"><img alt="Action Start" src="assets/action.png" />
+</a>
+<ul class="simple">
+<li><p>The final Action panel should look like this</p></li>
+</ul>
+<a class="reference external image-reference" href="./assets/final_action_panel.png"><img alt="Final Action Panel" src="assets/final_action_panel.png" />
+</a>
+<ul class="simple">
+<li><p>Because we have specified the task to run for all users, you will be asked to enter your credentials. <em>The credentials you enter should be for an account with admin priviliges. If you are not logged in as the correct account you will need to log out and log back in as an authorized user and restart the process</em></p></li>
+<li><p>After entering the user credentials you may be kicked out of the scheduled task. If that happens, right-click on the scheduled task called aind-watchdog-service and select properties to continue configuring the task (skip this step if you did not get kicked off)</p></li>
+</ul>
+<a class="reference external image-reference" href="./assets/enter_configuration.png"><img alt="Re-Enter Configuration" src="assets/enter_configuration.png" />
+</a>
+<ul class="simple">
+<li><p>Select the Settings panel and uncheck Stop the task if it runs longer than. You do not want aind-watchdog-service to get clobbered by the system. Make sure the Settings panel looks exactly as shown below</p></li>
+</ul>
+<a class="reference external image-reference" href="./assets/settings_panel.png"><img alt="Settings Configuration" src="assets/settings_panel.png" />
+</a>
+<ul class="simple">
+<li><p>You may have to enter the user credentials again.</p></li>
+<li><p>Once the task is configured, select okay to enter the main Task Scheduler Panel. You will now be able to start the task through Task Scheduler by selecting Run in the left panel of the main UI</p></li>
+</ul>
+<a class="reference external image-reference" href="./assets/run.png"><img alt="Run" src="assets/run.png" />
+</a>
+<ul class="simple">
+<li><p>After selecting Run open Task Manager to verify that two icons of watchdog are active. This is only one instance but the Observer in aind-watchdog-service creates a second thread making it appear that two instances are running.</p></li>
+<li><p>To stop aind-watchdog-service, go to the main UI where you selected Run and select End. You should see the task stop in Task Manager. <em>Task scheduler doesn’t always hold onto the second process thread. You may have to end that task manually through Task Manager before restarting a new instance in Task Scheduler</em></p></li>
+</ul>
+</section>
+<section id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h1>
+<p>To use the software, in the root directory, run</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</pre></div>
+</div>
+<p>To develop the code, run</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.<span class="o">[</span>dev<span class="o">]</span>
+</pre></div>
+</div>
+<section id="contributing">
+<h2>Contributing<a class="headerlink" href="#contributing" title="Link to this heading">¶</a></h2>
+<section id="linters-and-testing">
+<h3>Linters and testing<a class="headerlink" href="#linters-and-testing" title="Link to this heading">¶</a></h3>
+<p>There are several libraries used to run linters, check documentation, and run tests.</p>
+<ul class="simple">
+<li><p>Please test your changes using the <strong>coverage</strong> library, which will run the tests and log a coverage report:</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>coverage<span class="w"> </span>run<span class="w"> </span>-m<span class="w"> </span>unittest<span class="w"> </span>discover<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>coverage<span class="w"> </span>report
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Use <strong>interrogate</strong> to check that modules, methods, etc. have been documented thoroughly:</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>interrogate<span class="w"> </span>.
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Use <strong>flake8</strong> to check that code is up to standards (no unused imports, etc.):</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>flake8<span class="w"> </span>.
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Use <strong>black</strong> to automatically format the code into PEP standards:</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>black<span class="w"> </span>.
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Use <strong>isort</strong> to automatically sort import statements:</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>isort<span class="w"> </span>.
+</pre></div>
+</div>
+</section>
+<section id="pull-requests">
+<h3>Pull requests<a class="headerlink" href="#pull-requests" title="Link to this heading">¶</a></h3>
+<p>For internal members, please create a branch. For external members, please fork the repository and open a pull request from the fork. We’ll primarily use <a class="reference external" href="https://github.com/angular/angular/blob/main/CONTRIBUTING.md#commit">Angular</a> style for commit messages. Roughly, they should follow the pattern:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;type&gt;(&lt;scope&gt;): &lt;short summary&gt;
+</pre></div>
+</div>
+<p>where scope (optional) describes the packages affected by the code changes and type (mandatory) is one of:</p>
+<ul class="simple">
+<li><p><strong>build</strong>: Changes that affect build tools or external dependencies (example scopes: pyproject.toml, setup.py)</p></li>
+<li><p><strong>ci</strong>: Changes to our CI configuration files and scripts (examples: .github/workflows/ci.yml)</p></li>
+<li><p><strong>docs</strong>: Documentation only changes</p></li>
+<li><p><strong>feat</strong>: A new feature</p></li>
+<li><p><strong>fix</strong>: A bugfix</p></li>
+<li><p><strong>perf</strong>: A code change that improves performance</p></li>
+<li><p><strong>refactor</strong>: A code change that neither fixes a bug nor adds a feature</p></li>
+<li><p><strong>test</strong>: Adding missing tests or correcting existing tests</p></li>
+</ul>
+</section>
+<section id="semantic-release">
+<h3>Semantic Release<a class="headerlink" href="#semantic-release" title="Link to this heading">¶</a></h3>
+<p>The table below, from <a class="reference external" href="https://github.com/semantic-release/semantic-release">semantic release</a>, shows which commit message gets you which release type when <code class="docutils literal notranslate"><span class="pre">semantic-release</span></code> runs (using the default configuration):</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Commit message</p></th>
+<th class="head"><p>Release type</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">fix(pencil):</span> <span class="pre">stop</span> <span class="pre">graphite</span> <span class="pre">breaking</span> <span class="pre">when</span> <span class="pre">too</span> <span class="pre">much</span> <span class="pre">pressure</span> <span class="pre">applied</span></code></p></td>
+<td><p><span class="raw-html-md"><del>Patch</del></span> Fix Release, Default release</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">feat(pencil):</span> <span class="pre">add</span> <span class="pre">'graphiteWidth'</span> <span class="pre">option</span></code></p></td>
+<td><p><span class="raw-html-md"><del>Minor</del></span> Feature Release</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">perf(pencil):</span> <span class="pre">remove</span> <span class="pre">graphiteWidth</span> <span class="pre">option``&lt;br&gt;&lt;br&gt;``BREAKING</span> <span class="pre">CHANGE:</span> <span class="pre">The</span> <span class="pre">graphiteWidth</span> <span class="pre">option</span> <span class="pre">has</span> <span class="pre">been</span> <span class="pre">removed.``&lt;br&gt;``The</span> <span class="pre">default</span> <span class="pre">graphite</span> <span class="pre">width</span> <span class="pre">of</span> <span class="pre">10mm</span> <span class="pre">is</span> <span class="pre">always</span> <span class="pre">used</span> <span class="pre">for</span> <span class="pre">performance</span> <span class="pre">reasons.</span></code></p></td>
+<td><p><span class="raw-html-md"><del>Major</del></span> Breaking Release <span class="raw-html-md"><br /></span> (Note that the <span class="raw-html-md"><code class="docutils literal"><span class="pre">BREAKING CHANGE: </span></code></span> token must be in the footer of the commit)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="documentation">
+<h3>Documentation<a class="headerlink" href="#documentation" title="Link to this heading">¶</a></h3>
+<p>To generate the rst files source files for documentation, run</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sphinx-apidoc<span class="w"> </span>-o<span class="w"> </span>doc_template/source/<span class="w"> </span>src
+</pre></div>
+</div>
+<p>Then to create the documentation HTML files, run</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sphinx-build<span class="w"> </span>-b<span class="w"> </span>html<span class="w"> </span>doc_template/source/<span class="w"> </span>doc_template/build/html
+</pre></div>
+</div>
+<p>More info on sphinx installation can be found <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/installation.html">here</a>.</p>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Welcome to the Aind Watchdog Service documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aind-watchdog-service.html">aind-watchdog-service</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="aind-watchdog-service.html#aind_watchdog_service.alert_bot.AlertBot"><code class="docutils literal notranslate"><span class="pre">AlertBot</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="aind-watchdog-service.html#aind_watchdog_service.alert_bot.AlertBot.send_message"><code class="docutils literal notranslate"><span class="pre">AlertBot.send_message()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="aind-watchdog-service.html#aind_watchdog_service.event_handler.EventHandler"><code class="docutils literal notranslate"><span class="pre">EventHandler</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="aind-watchdog-service.html#aind_watchdog_service.event_handler.EventHandler.on_created"><code class="docutils literal notranslate"><span class="pre">EventHandler.on_created()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="aind-watchdog-service.html#aind_watchdog_service.event_handler.EventHandler.on_deleted"><code class="docutils literal notranslate"><span class="pre">EventHandler.on_deleted()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="aind-watchdog-service.html#aind_watchdog_service.event_handler.EventHandler.schedule_job"><code class="docutils literal notranslate"><span class="pre">EventHandler.schedule_job()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="aind-watchdog-service.html#aind_watchdog_service.logging_config.setup_logging"><code class="docutils literal notranslate"><span class="pre">setup_logging()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="aind-watchdog-service.html#aind_watchdog_service.main.WatchdogService"><code class="docutils literal notranslate"><span class="pre">WatchdogService</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="aind-watchdog-service.html#aind_watchdog_service.main.WatchdogService.initiate_observer"><code class="docutils literal notranslate"><span class="pre">WatchdogService.initiate_observer()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="aind-watchdog-service.html#aind_watchdog_service.main.WatchdogService.initiate_scheduler"><code class="docutils literal notranslate"><span class="pre">WatchdogService.initiate_scheduler()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="aind-watchdog-service.html#aind_watchdog_service.main.WatchdogService.start_service"><code class="docutils literal notranslate"><span class="pre">WatchdogService.start_service()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="aind-watchdog-service.html#aind_watchdog_service.main.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="aind-watchdog-service.html#aind_watchdog_service.main.parse_args"><code class="docutils literal notranslate"><span class="pre">parse_args()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="aind-watchdog-service.html#aind_watchdog_service.main.read_config"><code class="docutils literal notranslate"><span class="pre">read_config()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="aind-watchdog-service.html#aind_watchdog_service.main.start_watchdog"><code class="docutils literal notranslate"><span class="pre">start_watchdog()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="aind-watchdog-service.html#aind_watchdog_service.run_job.RunJob"><code class="docutils literal notranslate"><span class="pre">RunJob</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="aind-watchdog-service.html#aind_watchdog_service.run_job.RunJob.copy_to_vast"><code class="docutils literal notranslate"><span class="pre">RunJob.copy_to_vast()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="aind-watchdog-service.html#aind_watchdog_service.run_job.RunJob.execute_linux_command"><code class="docutils literal notranslate"><span class="pre">RunJob.execute_linux_command()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="aind-watchdog-service.html#aind_watchdog_service.run_job.RunJob.execute_windows_command"><code class="docutils literal notranslate"><span class="pre">RunJob.execute_windows_command()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="aind-watchdog-service.html#aind_watchdog_service.run_job.RunJob.move_manifest_to_archive"><code class="docutils literal notranslate"><span class="pre">RunJob.move_manifest_to_archive()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="aind-watchdog-service.html#aind_watchdog_service.run_job.RunJob.run_job"><code class="docutils literal notranslate"><span class="pre">RunJob.run_job()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="aind-watchdog-service.html#aind_watchdog_service.run_job.RunJob.run_subprocess"><code class="docutils literal notranslate"><span class="pre">RunJob.run_subprocess()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="aind-watchdog-service.html#aind_watchdog_service.run_job.RunJob.trigger_transfer_service"><code class="docutils literal notranslate"><span class="pre">RunJob.trigger_transfer_service()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">Models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="models.html#aind_watchdog_service.models.manifest_config.ManifestConfig"><code class="docutils literal notranslate"><span class="pre">ManifestConfig</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="models.html#aind_watchdog_service.models.manifest_config.ManifestConfig.acquisition_datetime"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.acquisition_datetime</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#aind_watchdog_service.models.manifest_config.ManifestConfig.capsule_id"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.capsule_id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#aind_watchdog_service.models.manifest_config.ManifestConfig.destination"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.destination</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#aind_watchdog_service.models.manifest_config.ManifestConfig.force_cloud_sync"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.force_cloud_sync</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#aind_watchdog_service.models.manifest_config.ManifestConfig.modalities"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.modalities</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#aind_watchdog_service.models.manifest_config.ManifestConfig.mount"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.mount</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#aind_watchdog_service.models.manifest_config.ManifestConfig.name"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#aind_watchdog_service.models.manifest_config.ManifestConfig.platform"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.platform</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#aind_watchdog_service.models.manifest_config.ManifestConfig.processor_full_name"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.processor_full_name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#aind_watchdog_service.models.manifest_config.ManifestConfig.project_name"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.project_name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#aind_watchdog_service.models.manifest_config.ManifestConfig.s3_bucket"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.s3_bucket</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#aind_watchdog_service.models.manifest_config.ManifestConfig.schedule_time"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.schedule_time</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#aind_watchdog_service.models.manifest_config.ManifestConfig.schemas"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.schemas</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#aind_watchdog_service.models.manifest_config.ManifestConfig.script"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.script</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#aind_watchdog_service.models.manifest_config.ManifestConfig.subject_id"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.subject_id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#aind_watchdog_service.models.manifest_config.ManifestConfig.transfer_endpoint"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.transfer_endpoint</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#aind_watchdog_service.models.manifest_config.ManifestConfig.normalize_modalities"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.normalize_modalities</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#aind_watchdog_service.models.manifest_config.ManifestConfig.normalize_platform"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.normalize_platform</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#aind_watchdog_service.models.manifest_config.ManifestConfig.normalized_scheduled_time"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.normalized_scheduled_time</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#aind_watchdog_service.models.manifest_config.ManifestConfig.validate_capsule"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.validate_capsule</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#aind_watchdog_service.models.manifest_config.ManifestConfig.validate_destination_path"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.validate_destination_path</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#aind_watchdog_service.models.manifest_config.ManifestConfig.validate_modality_paths"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.validate_modality_paths</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#aind_watchdog_service.models.manifest_config.ManifestConfig.validate_schema_paths"><code class="docutils literal notranslate"><span class="pre">ManifestConfig.validate_schema_paths</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="models.html#aind_watchdog_service.models.watch_config.WatchConfig"><code class="docutils literal notranslate"><span class="pre">WatchConfig</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="models.html#aind_watchdog_service.models.watch_config.WatchConfig.flag_dir"><code class="docutils literal notranslate"><span class="pre">WatchConfig.flag_dir</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#aind_watchdog_service.models.watch_config.WatchConfig.manifest_complete"><code class="docutils literal notranslate"><span class="pre">WatchConfig.manifest_complete</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#aind_watchdog_service.models.watch_config.WatchConfig.misfire_grace_time_s"><code class="docutils literal notranslate"><span class="pre">WatchConfig.misfire_grace_time_s</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#aind_watchdog_service.models.watch_config.WatchConfig.webhook_url"><code class="docutils literal notranslate"><span class="pre">WatchConfig.webhook_url</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/AllenNeuralDynamics/aind-watchdog-service">GitHub Source Code</a></li>
+</ul>
+</div>
+</section>
+</section>
+</section>
+<section id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="aind-watchdog-service.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">aind-watchdog-service</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            Made with 
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=a58bc63e"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/scripts/furo.js?v=5fa4622c"></script>
+    </body>
+</html>
