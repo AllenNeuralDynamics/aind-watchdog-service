@@ -14,7 +14,6 @@ from aind_data_transfer_models.core import (
     ModalityConfigs,
     SubmitJobRequest,
 )
-from watchdog.events import FileCreatedEvent
 
 from aind_watchdog_service.alert_bot import AlertBot
 from aind_watchdog_service.models.manifest_config import ManifestConfig
@@ -33,12 +32,12 @@ class RunJob:
 
     def __init__(
         self,
-        event: FileCreatedEvent,
+        src_path: str,
         config: ManifestConfig,
         watch_config: WatchConfig,
     ):
         """initialize RunJob class"""
-        self.event = event
+        self.src_path = src_path
         self.config = config
         self.watch_config = watch_config
 
@@ -114,7 +113,7 @@ class RunJob:
         subprocess.CompletedProcess
             subprocess completed process
         """
-        logging.info(f"Executing command: {cmd}")
+        logging.info("Executing command: %s", cmd)
         subproc = subprocess.run(
             cmd, check=False, stderr=subprocess.PIPE, stdout=subprocess.PIPE
         )
@@ -204,7 +203,7 @@ class RunJob:
             s3_bucket=self.config.s3_bucket,
             platform=self.config.platform,
             subject_id=str(self.config.subject_id),
-            acq_datetime=self.config.acquisition_datetime,
+            acq_datetime=self.config.acquisition_datetime.strftime("%Y-%m-%d %H:%M:%S"),
             modalities=modality_configs,
             metadata_dir=PurePosixPath(self.config.destination) / self.config.name,
             process_capsule_id=self.config.capsule_id,
@@ -212,7 +211,7 @@ class RunJob:
             input_data_mount=self.config.mount,
             force_cloud_sync=self.config.force_cloud_sync,
         )
-
+        logging.info("Submitting job to aind-data-transfer-service")
         submit_request = SubmitJobRequest(upload_jobs=[upload_job_configs])
         post_request_content = json.loads(submit_request.model_dump_json(round_trip=True))
         submit_job_response = requests.post(
@@ -228,17 +227,17 @@ class RunJob:
         """Move manifest file to archive"""
         archive = self.watch_config.manifest_complete
         if PLATFORM == "windows":
-            copy_file = self.execute_windows_command(self.event.src_path, archive)
+            copy_file = self.execute_windows_command(self.src_path, archive)
             if not copy_file:
-                logging.error("Error copying manifest file %s", self.event.src_path)
+                logging.error("Error copying manifest file %s", self.src_path)
                 self._send_alert(
                     "Error copying manifest file",
-                    self.event.src_path,
+                    self.src_path,
                 )
                 return
-            os.remove(self.event.src_path)
+            os.remove(self.src_path)
         else:
-            self.run_subprocess(["mv", self.event.src_path, archive])
+            self.run_subprocess(["mv", self.src_path, archive])
 
     def run_job(self) -> None:
         """Triggers the vast transfer service
@@ -248,13 +247,11 @@ class RunJob:
         event : FileCreatedEvent
             modified event file
         """
-        logging.info("Running job for %s", self.event.src_path)
-        self._send_alert("Running job", self.event.src_path)
+        logging.info("Running job for %s", self.src_path)
+        self._send_alert("Running job", self.src_path)
         if self.config.script:
             for command in self.config.script:
-                logging.info(
-                    "Found job, executing custom script for %s", self.event.src_path
-                )
+                logging.info("Found job, executing custom script for %s", self.src_path)
                 run = subprocess.run(
                     self.config.script[command],
                 )
@@ -276,15 +273,19 @@ class RunJob:
             if not transfer:
                 self._send_alert(
                     "Could not copy data to destination",
-                    self.event.src_path,
+                    self.src_path,
                 )
                 return
+        logging.info("Data copied to VAST for %s", self.src_path)
         if not self.trigger_transfer_service():
+            logging.error(
+                "Could not trigger aind-data-transfer-service for %s", self.src_path
+            )
             self._send_alert(
                 "Could not trigger aind-data-transfer-service",
-                self.event.src_path,
+                self.src_path,
             )
             return
-        self._send_alert("Job complete", self.event.src_path)
-        logging.info("Job complete for %s", self.event.src_path)
+        self._send_alert("Job complete", self.src_path)
+        logging.info("Job complete for %s", self.src_path)
         self.move_manifest_to_archive()

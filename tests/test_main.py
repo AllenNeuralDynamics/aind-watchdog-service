@@ -88,14 +88,17 @@ class TestWatchdogService(unittest.TestCase):
     @patch("logging.info")
     @patch("aind_watchdog_service.main.EventHandler")
     @patch("aind_watchdog_service.main.WatchdogService.initiate_observer")
+    @patch.object(EventHandler, "_startup_manifest_check")
     def test_start(
         self,
+        mock_startup_manifest_check: MagicMock,
         mock_observer: MagicMock,
         mock_event_handler: MagicMock,
         mock_log_info: MagicMock,
         mock_log_err: MagicMock,
     ):
         """initiate observer test"""
+        mock_startup_manifest_check.return_value = None
         with patch.object(Path, "is_dir") as mock_dir:
             mock_dir.return_value = True
             with patch.object(Path, "is_file") as mock_file:
