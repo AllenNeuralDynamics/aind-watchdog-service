@@ -17,10 +17,9 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Setup SSH
-      run: ssh-add - <<< '${{ secrets.MPETK_SSH }}'
     - name: Install dependencies
       run: | 
+        ssh-add - <<< '${{ secrets.MPETK_SSH }}'
         python -m pip install -e .[dev]
     - name: Run linter checks
       run: flake8 . && interrogate --verbose .

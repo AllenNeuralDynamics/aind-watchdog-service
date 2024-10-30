@@ -20,10 +20,9 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: 3.9
-    - name: Setup SSH
-      run: ssh-add - <<< '${{ secrets.MPETK_SSH }}'
     - name: Install dependencies
       run: | 
+        ssh-add - <<< '${{ secrets.MPETK_SSH }}'
         python -m pip install -e .[dev] --no-cache-dir
     - name: Get Python version and Update README.md
       run: |
