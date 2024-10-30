@@ -23,6 +23,7 @@ dependencies = [
     'aind-data-schema-models>=0.4',
     'APScheduler',
     'requests',
+    # 'mpetk@git+ssh://git@github.com/AllenNeuralDynamics/mpetk.git@0.5.2.dev2'
     'mpetk@git+ssh://git@github.com/AllenNeuralDynamics/mpetk.git@0.5.2.dev2'
 ]
 
