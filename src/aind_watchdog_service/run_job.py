@@ -113,7 +113,7 @@ class RunJob:
         subprocess.CompletedProcess
             subprocess completed process
         """
-        logging.info("Executing command: %s", cmd)
+        logging.info("Executing command: %s", cmd, extra={'weblog': True})
         subproc = subprocess.run(
             cmd, check=False, stderr=subprocess.PIPE, stdout=subprocess.PIPE
         )
@@ -247,11 +247,14 @@ class RunJob:
         event : FileCreatedEvent
             modified event file
         """
-        logging.info("Running job for %s", self.src_path)
+        logging.info("Running job for %s", self.src_path, extra={'weblog': True})
         self._send_alert("Running job", self.src_path)
         if self.config.script:
             for command in self.config.script:
-                logging.info("Found job, executing custom script for %s", self.src_path)
+                logging.info(
+                    "Found job, executing custom script for %s", self.src_path,
+                    extra={'weblog': True},
+                )
                 run = subprocess.run(
                     self.config.script[command],
                 )
@@ -276,7 +279,7 @@ class RunJob:
                     self.src_path,
                 )
                 return
-        logging.info("Data copied to VAST for %s", self.src_path)
+        logging.info("Data copied to VAST for %s", self.src_path, extra={'weblog': True})
         if not self.trigger_transfer_service():
             logging.error(
                 "Could not trigger aind-data-transfer-service for %s", self.src_path
@@ -287,5 +290,5 @@ class RunJob:
             )
             return
         self._send_alert("Job complete", self.src_path)
-        logging.info("Job complete for %s", self.src_path)
+        logging.info("Job complete for %s", self.src_path, extra={'weblog': True})
         self.move_manifest_to_archive()

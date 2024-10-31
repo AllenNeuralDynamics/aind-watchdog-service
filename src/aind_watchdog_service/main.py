@@ -5,6 +5,7 @@ import logging
 import os
 import sys
 import time
+import mpetk
 from pathlib import Path
 
 import yaml
@@ -13,8 +14,9 @@ from pydantic import ValidationError
 from watchdog.observers import Observer
 
 from aind_watchdog_service.event_handler import EventHandler
-from aind_watchdog_service.logging_config import setup_logging
 from aind_watchdog_service.models.watch_config import WatchConfig
+
+from aind_watchdog_service import __version__
 
 
 class WatchdogService:
@@ -37,19 +39,6 @@ class WatchdogService:
         """
         self.watch_config = watch_config
         self.scheduler = None
-        self._setup_logging(log_dir)
-
-    def _setup_logging(self, log_dir):
-        """Setup logging
-        Parameters
-        ----------
-        log_dir : Path
-            Directory to store logs
-        """
-        log_fp = Path(log_dir)
-        if not log_fp.exists():
-            log_fp.mkdir(parents=True)
-        setup_logging(log_file=log_fp / "aind-watchdog-service.log")
 
     def initiate_scheduler(self) -> None:
         """Starts APScheduler"""
@@ -165,10 +154,13 @@ def main():
         logging.error("If passing --flag-dir or --manifest-complete, both are required!")
         sys.exit(1)
 
+    zk_config = mpetk.mpeconfig.source_configuration(
+        "aind_watchdog_service", version=__version__
+    )
+
     watch_config: WatchConfig
     if (args.flag_dir is not None) and (args.manifest_complete is not None):
         try:
-
             watch_config = WatchConfig(
                 flag_dir=args.flag_dir,
                 manifest_complete=args.manifest_complete,
@@ -179,23 +171,17 @@ def main():
                 "Error constructing WatchConfig model from cli arguments: %s", e
             )
     else:
-        configuration = (
-            args.config_path if args.config_path else os.getenv("WATCH_CONFIG")
+        if "flag_dir" not in zk_config or "manifest_complete" not in zk_config:
+            raise ValueError(
+                "Zookeeper configuration configured incorrectly. "
+                "Missing either flag_dir or manifest_complete fields"
+            )
+        webhook_url = zk_config["webhook_url"] if "webhook_url" in zk_config else None
+        watch_config = WatchConfig(
+            flag_dir=zk_config["flag_dir"],
+            manifest_complete=zk_config["manifest_complete"],
+            webhook_url=webhook_url,
         )
-
-        if not configuration:
-            logging.error(
-                "Environment variable WATCH_CONFIG not set and a path was not passed.\
-                    Please set and restart"
-            )
-            raise AttributeError(
-                "Environment variable WATCH_CONFIG not set. Please set and restart"
-            )
-        if not Path(configuration).exists():
-            logging.error("Configuration file %s does not exist", configuration)
-            raise FileNotFoundError(f"Configuration file {configuration} does not exist")
-
-        watch_config = read_config(configuration)
 
     start_watchdog(watch_config)
 

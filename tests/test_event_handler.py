@@ -84,7 +84,10 @@ class TestEventHandler(unittest.TestCase):
         event_handler.on_created(mock_event)
         with patch.object(Path, "is_dir") as mock_dir:
             mock_dir.return_value = False
-            mock_log_info.assert_called_with("Found event file %s", mock_event.src_path)
+            mock_log_info.assert_called_with(
+                "Found event file %s",
+                mock_event.src_path, extra={'weblog': True},
+            )
             mock_vast_transfer.assert_called_once()
             mock_schedule_job.assert_called_once()
         with patch.object(Path, "is_dir") as mock_dir:

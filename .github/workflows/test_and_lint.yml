@@ -19,6 +19,8 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: | 
+        eval `ssh-agent -s`
+        ssh-add - <<< '${{ secrets.MPETK_SSH }}'
         python -m pip install -e .[dev]
     - name: Run linter checks
       run: flake8 . && interrogate --verbose .

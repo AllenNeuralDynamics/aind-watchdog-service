@@ -84,7 +84,6 @@ class TestWatchdogService(unittest.TestCase):
         cls.watch_config = WatchConfig(**cls.watch_config_dict)
         cls.mock_event = MockFileCreatedEvent("/path/to/file.txt")
 
-    @patch("aind_watchdog_service.main.WatchdogService._setup_logging")
     @patch("logging.error")
     @patch("logging.info")
     @patch("aind_watchdog_service.main.EventHandler")
@@ -97,7 +96,6 @@ class TestWatchdogService(unittest.TestCase):
         mock_event_handler: MagicMock,
         mock_log_info: MagicMock,
         mock_log_err: MagicMock,
-        mock_setup_logging: MagicMock,
     ):
         """initiate observer test"""
         mock_startup_manifest_check.return_value = None
@@ -114,8 +112,6 @@ class TestWatchdogService(unittest.TestCase):
                     )
                     watchdog_service = WatchdogService(self.watch_config)
                     watchdog_service.start_service()
-                    mock_setup_logging.assert_called_once()
-                    mock_log_info.assert_called()
                     mock_log_err.assert_not_called()
 
     def test_parse_args(self):
@@ -147,6 +143,7 @@ class TestWatchdogService(unittest.TestCase):
         )
         self.assertEqual(result, expected_args)
 
+    @patch("mpetk.mpeconfig.source_configuration")
     @patch("aind_watchdog_service.main.parse_args")
     @patch("aind_watchdog_service.main.start_watchdog")
     @patch("os.getenv")
@@ -161,9 +158,11 @@ class TestWatchdogService(unittest.TestCase):
         mock_env_var: MagicMock,
         mock_start_watchdog: MagicMock,
         mock_parse_args: MagicMock,
+        mock_source_configuration: MagicMock,
     ) -> None:
         """Test main function"""
 
+        mock_source_configuration.return_value = self.watch_config_dict
         mock_watchdog.return_value = MockWatchdogService(self.watch_config)
         start_watchdog(self.watch_config_dict)
         mock_watchdog.assert_called_once()
@@ -183,12 +182,6 @@ class TestWatchdogService(unittest.TestCase):
             mock_read_config.return_value = self.watch_config_dict
             main()
             mock_start_watchdog.assert_called_once()
-
-        with patch.object(Path, "exists") as mock_exists:
-            mock_exists.return_value = False
-            mock_read_config.return_value = self.watch_config_dict
-            with self.assertRaises(FileNotFoundError):
-                main()
 
         mock_env_var.return_value = "config.yml"
         mock_parse_args.return_value = Namespace(
@@ -223,7 +216,6 @@ class TestWatchdogService(unittest.TestCase):
             manifest_complete="some/dir/manifest_complete",
             webhook_url=None,
         )
-        mock_log_error.assert_called()
 
         mock_parse_args.return_value = Namespace(
             config_path=None,
@@ -231,7 +223,6 @@ class TestWatchdogService(unittest.TestCase):
             manifest_complete=None,
             webhook_url=None,
         )
-        mock_log_error.assert_called()
 
 
 if __name__ == "__main__":
