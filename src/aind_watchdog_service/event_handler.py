@@ -156,7 +156,7 @@ class EventHandler(FileSystemEventHandler):
             logging.info("Deleting job %s", event.src_path)
             self.scheduler.remove_job(self.jobs[event.src_path].id)
             del self.jobs[event.src_path]
-        logging.info("Found event file %s", event.src_path, extra={'weblog':True})
+        logging.info("Found event file %s", event.src_path, extra={'weblog': True})
         time.sleep(10)  # Wait for file to be written
         transfer_config = self._load_manifest(event.src_path)
         if transfer_config:
