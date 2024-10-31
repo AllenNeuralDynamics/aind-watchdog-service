@@ -16,8 +16,9 @@ jobs:
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v3
 
-    - run: eval `ssh-agent -s`
-    - run: ssh-add - <<< '${{ secrets.MPETK_SSH }}'
+    - run: |
+        ssh-agent -s
+        echo '${{ secrets.MPETK_SSH }}' | ssh-add -
     - run: pip install -e .[publish]
     - run: pip list
     - run: python build_watchdog.py
