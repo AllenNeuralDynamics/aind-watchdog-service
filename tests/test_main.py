@@ -143,6 +143,7 @@ class TestWatchdogService(unittest.TestCase):
         )
         self.assertEqual(result, expected_args)
 
+    @patch("mpetk.mpeconfig.source_configuration")
     @patch("aind_watchdog_service.main.parse_args")
     @patch("aind_watchdog_service.main.start_watchdog")
     @patch("os.getenv")
@@ -157,9 +158,11 @@ class TestWatchdogService(unittest.TestCase):
         mock_env_var: MagicMock,
         mock_start_watchdog: MagicMock,
         mock_parse_args: MagicMock,
+        mock_source_configuration: MagicMock,
     ) -> None:
         """Test main function"""
 
+        mock_source_configuration.return_value = self.watch_config_dict
         mock_watchdog.return_value = MockWatchdogService(self.watch_config)
         start_watchdog(self.watch_config_dict)
         mock_watchdog.assert_called_once()
