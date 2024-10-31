@@ -309,7 +309,7 @@ class TestRunSubprocess(unittest.TestCase):
                 self.assertEqual(
                     log_context.records[0].getMessage(),
                     f"Could not trigger aind-data-transfer-service for "
-                    f"{self.mock_event.src_path}",
+                    f"{self.mock_event.src_path},",
                 )
 
                 mock_trigger_transfer.return_value = True

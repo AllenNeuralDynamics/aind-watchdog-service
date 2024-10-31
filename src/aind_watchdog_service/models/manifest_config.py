@@ -148,16 +148,19 @@ class ManifestConfig(BaseModel):
     @field_validator("destination", mode="after")
     @classmethod
     def validate_destination_path(cls, value: str) -> str:
+        """Converts path string to posix"""
         return cls._path_to_posix(value)
 
     @field_validator("schemas", mode="after")
     @classmethod
     def validate_schema_paths(cls, value: List[str]) -> List[str]:
+        """Converts path strings to posix"""
         return [cls._path_to_posix(path) for path in value]
 
     @field_validator("modalities", mode="after")
     @classmethod
     def validate_modality_paths(cls, value: Dict[Any, List[str]]) -> Dict[Any, List[str]]:
+        """Converts modality path strings to posix"""
         return {
             modality: [cls._path_to_posix(path) for path in paths]
             for modality, paths in value.items()
@@ -165,4 +168,5 @@ class ManifestConfig(BaseModel):
 
     @staticmethod
     def _path_to_posix(path: str) -> str:
+        """Converts path string to posix"""
         return str(Path(path).as_posix())

@@ -154,7 +154,9 @@ def main():
         logging.error("If passing --flag-dir or --manifest-complete, both are required!")
         sys.exit(1)
 
-    zk_config = mpetk.mpeconfig.source_configuration("aind_watchdog_service", version=__version__)
+    zk_config = mpetk.mpeconfig.source_configuration(
+        "aind_watchdog_service", version=__version__
+    )
 
     watch_config: WatchConfig
     if (args.flag_dir is not None) and (args.manifest_complete is not None):
@@ -170,10 +172,16 @@ def main():
             )
     else:
         if "flag_dir" not in zk_config or "manifest_complete" not in zk_config:
-            raise ValueError(f"Zookeeper configuration configured incorrectly. "
-                             f"Missing either flag_dir or manifest_complete fields")
+            raise ValueError(
+                "Zookeeper configuration configured incorrectly. "
+                "Missing either flag_dir or manifest_complete fields"
+            )
         webhook_url = zk_config["webhook_url"] if "webhook_url" in zk_config else None
-        watch_config = WatchConfig(flag_dir=zk_config["flag_dir"], manifest_complete=zk_config["manifest_complete"], webhook_url=webhook_url)
+        watch_config = WatchConfig(
+            flag_dir=zk_config["flag_dir"],
+            manifest_complete=zk_config["manifest_complete"],
+            webhook_url=webhook_url,
+        )
 
     start_watchdog(watch_config)
 
