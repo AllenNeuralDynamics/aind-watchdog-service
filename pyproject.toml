@@ -19,12 +19,11 @@ dynamic = ["version"]
 dependencies = [
     'watchdog',
     'pyyaml',
-    'aind-data-transfer-models',
-    'aind-data-schema-models>=0.4',
+    'aind-data-transfer-models>=0.13.2',
+    'aind-data-schema-models',
     'APScheduler',
     'requests',
-    # 'mpetk@git+ssh://git@github.com/AllenNeuralDynamics/mpetk.git@0.5.2.dev2'
-    'mpetk@git+ssh://git@github.com/AllenNeuralDynamics/mpetk.git@0.5.2.dev2'
+    'mpetk@git+ssh://git@github.com/AllenNeuralDynamics/mpetk.git@0.5.2.dev2',
 ]
 
 [project.optional-dependencies]
