@@ -23,7 +23,7 @@ dependencies = [
     'aind-data-schema-models',
     'APScheduler',
     'requests',
-    'mpetk@git+https://github.com/AllenNeuralDynamics/mpetk.git',
+    'mpetk==0.5.2.dev2',
 ]
 
 [project.optional-dependencies]
