@@ -274,6 +274,10 @@ class RunJob:
         else:
             transfer = self.copy_to_vast()
             if not transfer:
+                logging.error(
+                    "Could not copy data to destination",
+                    self.src_path,
+                )
                 self._send_alert(
                     "Could not copy data to destination",
                     self.src_path,
