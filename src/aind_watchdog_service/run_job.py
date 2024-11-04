@@ -107,7 +107,7 @@ class RunJob:
         ----------
         cmd : list
             command to execute
-
+            
         Returns
         -------
         subprocess.CompletedProcess
@@ -137,27 +137,58 @@ class RunJob:
         # Robocopy used over xcopy for better performance
         # /j: unbuffered I/O (to speed up copy)
         # /e: copy subdirectories (includes empty subdirs), /r:5: retry 5 times
+
+        #TODO: likely better way to go about doing this that doesn't iteratively robocopy individual filepaths
+        
         if not Path(src).exists():
             return False
         if Path(src).is_dir():
-            run = self.run_subprocess(
-                ["robocopy", src, dest, "/z", "/e", "/j", "/r:5"],
-            )
+            
+            #sort files by size
+            smallFiles = [file for root, dirs, file in os.walk(src) if (os.path.getsize( os.path.join(root, file) )//1024) < 100000] #small files are < 100 mb
+            largeFiles = [file for root, dirs, file in os.walk(src) if (os.path.getsize( os.path.join(root, file) )//1024) > 100000] #large files are > 100 mb
+
+            #run large robocopy
+            for file in largeFiles:
+                run = self.run_subprocess(
+                    ["robocopy", file, dest, "/z", "/e", "/j", "/r:5"],
+                )
+                if run.returncode > 7:
+                    return False
+
+            #run small robocopy
+            for file in smallFiles:
+                run = self.run_subprocess(
+                    ["robocopy", file, dest, "/z", "/e", "/r:5"],
+                )
+                if run.returncode > 7:
+                    return False
         else:
-            run = self.run_subprocess(
-                [
-                    "robocopy",
-                    str(Path(src).parent),
-                    dest,
-                    Path(src).name,
-                    "/j",
-                    "/r:5",
-                ]
-            )
+            
+            #sort files by size
+            smallFiles = [file for root, dirs, file in os.walk(str(Path(src).parent)) if (os.path.getsize( os.path.join(root, file) )//1024) < 100000] #small files are < 100 mb
+            largeFiles = [file for root, dirs, file in os.walk(str(Path(src).parent)) if (os.path.getsize( os.path.join(root, file) )//1024) > 100000] #large files are > 100 mb
+
+            #run large robocopy
+            for file in largeFiles:
+                run = self.run_subprocess(
+                    ["robocopy", file, dest, "/z", "/e", "/j", "/r:5"],
+                )
+                if run.returncode > 7:
+                    return False
+
+            #run small robocopy
+            for file in smallFiles:
+                run = self.run_subprocess(
+                    ["robocopy", file, dest, "/z", "/e", "/r:5"],
+                )
+                if run.returncode > 7:
+                    return False
+
         # Robocopy return code documenttion:
         # https://learn.microsoft.com/en-us/troubleshoot/windows-server/backup-and-storage/return-codes-used-robocopy-utility # noqa
-        if run.returncode > 7:
-            return False
+        # if run.returncode > 7:
+        #     return False
         return True
 
     def execute_linux_command(self, src: str, dest: str) -> bool:
