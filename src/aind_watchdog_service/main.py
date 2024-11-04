@@ -52,8 +52,9 @@ class WatchdogService:
         observer = Observer()
         watch_directory = self.watch_config.flag_dir
         if not Path(watch_directory).exists():
-            logging.error("Directory %s does not exist", watch_directory)
-            raise FileNotFoundError(f"Directory {watch_directory} does not exist")
+            Path(watch_directory).mkdir(parents=True,exist_ok=True)
+            # logging.error("Directory %s does not exist", watch_directory)
+            # raise FileNotFoundError(f"Directory {watch_directory} does not exist")
         if not Path(self.watch_config.manifest_complete).exists():
             Path(self.watch_config.manifest_complete).mkdir(parents=True, exist_ok=True)
         event_handler = EventHandler(self.scheduler, self.watch_config)
