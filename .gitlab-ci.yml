@@ -7,8 +7,8 @@ variables:
 
 build:
     script:
-        - set PIP_EXTRA_INDEX_URL=https://pypi.org/simple
-        - python -m pip install -e .[publish]
+        # - set PIP_EXTRA_INDEX_URL=https://pypi.org/simple
+        - python -m pip install -e .[publish] --extra-index-url https://pypi.org/simple
         - python build_watchdog.py
 
 
