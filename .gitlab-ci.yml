@@ -1,0 +1,36 @@
+variables:
+  ARTIFACT_PATH: dist/
+
+  PY_VERSION: '3.9.5'
+  CONDA_SPECS: pip=21.0.1 setuptools=52.0.0
+
+
+build:
+    script:
+        - python -m pip install -e .[publish]
+        - python build_watchdog.py
+
+
+# Check that pyinstaller collected everything right and the executable runs
+can_i_run_test:
+  stage: test
+  except:
+      variables:
+        - $CI_COMMIT_MESSAGE =~ /skip-ci/
+  tags:
+    - windows
+    - python
+ 
+  script:
+    - timeout -k 1 30 $ARTIFACT_PATH//aind-watchdog-service/aind-watchdog-service.exe -v
+
+# build_docs:
+#   extends: build
+#   stage: build
+#   # before_script: 
+#   script: 
+#     - python -m pip install -r requirements_dev.txt
+#     - sphinx-build -M html docs/sphinx/source/ public_html
+
+
+include: 'http://aibspi.corp.alleninstitute.org/infrastructure/mpeci/raw/master/resources/gitlab-ci-template.yml'
