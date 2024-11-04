@@ -22,7 +22,7 @@ can_i_run_test:
     - python
  
   script:
-    - timeout -k 1 30 $ARTIFACT_PATH//aind-watchdog-service/aind-watchdog-service.exe -v
+    - timeout -k 1 30 $ARTIFACT_PATH//aind-watchdog-service.exe -v
 
 # build_docs:
 #   extends: build

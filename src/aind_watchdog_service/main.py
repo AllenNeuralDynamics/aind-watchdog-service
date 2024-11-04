@@ -96,6 +96,7 @@ def parse_args(args_list: list[str]) -> argparse.Namespace:
     """
 
     parser = argparse.ArgumentParser(description="Watchdog service")
+    parser.add_argument("-v", "--version", action="version", version=__version__)
     parser.add_argument(
         "-c",
         "--config-path",
