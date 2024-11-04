@@ -2,7 +2,7 @@ variables:
   ARTIFACT_PATH: dist/
 
   PY_VERSION: '3.11'
-  CONDA_SPECS: pip=21.0.1 setuptools=52.0.0
+  CONDA_SPECS: pip=24.2 setuptools=69.5.1
 
 
 build:
