@@ -45,7 +45,7 @@ docs = [
 
 publish = [
     'setuptools==69.5.1',
-    'pyinstaller==6.6.0',
+    'pyinstaller==6.2.0',
 ]
 
 [tool.setuptools.packages.find]
