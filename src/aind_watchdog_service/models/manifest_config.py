@@ -13,6 +13,7 @@ from pydantic import (
     Field,
     field_validator,
     model_validator,
+    computed_field,
 )
 from typing_extensions import Annotated, Self
 
@@ -90,6 +91,17 @@ class ManifestConfig(BaseModel):
     script: Dict[str, List[str]] = Field(
         default={}, description="Set of commands to run in subprocess.", title="Commands"
     )
+
+    @computed_field
+    @property
+    def log_tags(self) -> Self:
+        self.log_tags = {
+            "name": self.name,
+            "subject_id": self.subject_id,
+            "project_name": self.project_name,
+            "modalities": list(self.modalities.keys()),
+            "script": self.script,
+        }
 
     @field_validator("schedule_time", mode="before")
     @classmethod

@@ -7,6 +7,7 @@ import platform
 import subprocess
 from pathlib import Path, PurePosixPath
 from typing import Optional
+import time
 
 import requests
 from aind_data_transfer_models.core import (
@@ -113,7 +114,7 @@ class RunJob:
         subprocess.CompletedProcess
             subprocess completed process
         """
-        logging.info("Executing command: %s", cmd, extra={'weblog': True})
+        logging.debug("Executing command: %s", cmd)
         subproc = subprocess.run(
             cmd, check=False, stderr=subprocess.PIPE, stdout=subprocess.PIPE
         )
@@ -247,25 +248,32 @@ class RunJob:
         event : FileCreatedEvent
             modified event file
         """
-        logging.info("Running job for %s", self.src_path, extra={'weblog': True})
+        start_time = time.time()
+        logging.info(
+            {"Action": "Running job"} | self.config.log_tags,
+            extra={"weblog": True},
+        )
         self._send_alert("Running job", self.src_path)
         if self.config.script:
             for command in self.config.script:
                 logging.info(
-                    "Found job, executing custom script for %s", self.src_path,
-                    extra={'weblog': True},
+                    "Found job, executing custom script",
+                    self.src_path,
                 )
                 run = subprocess.run(
                     self.config.script[command],
                 )
                 if run.returncode != 0:
-                    logging.error("Error running script %s", command)
+                    logging.error(
+                        {"Error running script": command} | self.config.log_tags
+                    )
                     self._send_alert(
                         "Error running script",
                         f"Could not execute {command} for {self.config.name}",
                     )
                     return
                 else:
+                    logging.info(f"script executed: Ran {command} for {self.config.name}")
                     self._send_alert(
                         "Script executed",
                         f"Ran {command} for {self.config.name}",
@@ -274,25 +282,31 @@ class RunJob:
         else:
             transfer = self.copy_to_vast()
             if not transfer:
-                logging.error(
-                    "Could not copy data to destination",
-                    self.src_path,
-                )
+                logging.error({"Error": "Could not copy to VAST"} | self.config.log_tags)
                 self._send_alert(
                     "Could not copy data to destination",
                     self.src_path,
                 )
                 return
-        logging.info("Data copied to VAST for %s", self.src_path, extra={'weblog': True})
+        logging.info("Data copied to VAST for %s", self.src_path, extra={"weblog": True})
+
         if not self.trigger_transfer_service():
             logging.error(
-                "Could not trigger aind-data-transfer-service for %s", self.src_path
+                {"Error": "Could not trigger aind-data-transfer-service"}
+                | self.config.log_tags
             )
             self._send_alert(
                 "Could not trigger aind-data-transfer-service",
                 self.src_path,
             )
             return
+
+        end_time = time.time()
+
         self._send_alert("Job complete", self.src_path)
-        logging.info("Job complete for %s", self.src_path, extra={'weblog': True})
+        logging.info(
+            {"Action": "Job complete", "Duration_s": end_time - start_time}
+            | self.config.log_tags,
+            extra={"weblog": True},
+        )
         self.move_manifest_to_archive()
