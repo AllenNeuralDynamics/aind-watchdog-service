@@ -42,22 +42,6 @@ class RunJob:
         self.config = config
         self.watch_config = watch_config
 
-    def _send_alert(self, title: str, message: Optional[str] = None) -> None:
-        """wrapper for AlertBot configured
-
-        Parameters
-        ----------
-        title : str
-            message to send
-        send : bool
-            send to Teams
-        message: str
-            Message to go in Teams card
-        """
-        if self.watch_config.webhook_url:
-            alert_bot = AlertBot(self.watch_config.webhook_url)
-            alert_bot.send_message(title, message)
-
     def copy_to_vast(self) -> bool:
         """Determine platform and copy files to VAST
 
@@ -83,11 +67,9 @@ class RunJob:
                         transfer = self.execute_linux_command(file, destination_directory)
                     if not transfer:
                         logging.error("Error copying files %s", file)
-                        self._send_alert("Error copying files", str(file))
                         return False
                 else:
                     logging.error("File not found %s", file)
-                    self._send_alert("File not found", file)
                     return False
         for schema in self.config.schemas:
             destination_directory = os.path.join(destination, parent_directory)
@@ -97,7 +79,6 @@ class RunJob:
                 transfer = self.execute_linux_command(schema, destination_directory)
             if not transfer:
                 logging.error("Error copying schema %s", schema)
-                self._send_alert("Error copying schema", schema)
                 return False
         return True
 
@@ -231,10 +212,6 @@ class RunJob:
             copy_file = self.execute_windows_command(self.src_path, archive)
             if not copy_file:
                 logging.error("Error copying manifest file %s", self.src_path)
-                self._send_alert(
-                    "Error copying manifest file",
-                    self.src_path,
-                )
                 return
             os.remove(self.src_path)
         else:
@@ -253,41 +230,11 @@ class RunJob:
             {"Action": "Running job"} | self.config.log_tags,
             extra={"weblog": True},
         )
-        self._send_alert("Running job", self.src_path)
-        if self.config.script:
-            for command in self.config.script:
-                logging.info(
-                    "Found job, executing custom script",
-                    self.src_path,
-                )
-                run = subprocess.run(
-                    self.config.script[command],
-                )
-                if run.returncode != 0:
-                    logging.error(
-                        {"Error running script": command} | self.config.log_tags
-                    )
-                    self._send_alert(
-                        "Error running script",
-                        f"Could not execute {command} for {self.config.name}",
-                    )
-                    return
-                else:
-                    logging.info(f"script executed: Ran {command} for {self.config.name}")
-                    self._send_alert(
-                        "Script executed",
-                        f"Ran {command} for {self.config.name}",
-                    )
 
-        else:
-            transfer = self.copy_to_vast()
-            if not transfer:
-                logging.error({"Error": "Could not copy to VAST"} | self.config.log_tags)
-                self._send_alert(
-                    "Could not copy data to destination",
-                    self.src_path,
-                )
-                return
+        transfer = self.copy_to_vast()
+        if not transfer:
+            logging.error({"Error": "Could not copy to VAST"} | self.config.log_tags)
+            return
         logging.info("Data copied to VAST for %s", self.src_path, extra={"weblog": True})
 
         if not self.trigger_transfer_service():
@@ -295,15 +242,10 @@ class RunJob:
                 {"Error": "Could not trigger aind-data-transfer-service"}
                 | self.config.log_tags
             )
-            self._send_alert(
-                "Could not trigger aind-data-transfer-service",
-                self.src_path,
-            )
             return
 
         end_time = time.time()
 
-        self._send_alert("Job complete", self.src_path)
         logging.info(
             {"Action": "Job complete", "Duration_s": end_time - start_time}
             | self.config.log_tags,

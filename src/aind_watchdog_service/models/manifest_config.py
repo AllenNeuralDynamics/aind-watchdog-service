@@ -30,7 +30,7 @@ Modality = Annotated[
 
 
 class ManifestConfig(BaseModel):
-    """Job configs for data transfer to VAST and executing a custom script"""
+    """Job configs for data transfer to VAST"""
 
     model_config = ConfigDict(extra="forbid")
     name: str = Field(
@@ -89,18 +89,19 @@ class ManifestConfig(BaseModel):
         title="Schema directory",
     )
     script: Dict[str, List[str]] = Field(
-        default={}, description="Set of commands to run in subprocess.", title="Commands"
+        default={},
+        description="Set of commands to run in subprocess. - DEPRECATED - NONFUNCTIONAL",
+        title="Commands",
     )
 
     @computed_field
     @property
-    def log_tags(self) -> Self:
-        self.log_tags = {
+    def log_tags(self) -> dict:
+        return {
             "name": self.name,
             "subject_id": self.subject_id,
             "project_name": self.project_name,
             "modalities": list(self.modalities.keys()),
-            "script": self.script,
         }
 
     @field_validator("schedule_time", mode="before")

@@ -5,7 +5,7 @@ from typing import Optional, Union
 from pydantic import BaseModel, Field
 
 
-class WatchConfig(BaseModel):
+class WatchConfig(BaseModel, extra="ignore"):
     """Configuration for rig"""
 
     flag_dir: str = Field(
@@ -15,11 +15,6 @@ class WatchConfig(BaseModel):
         ...,
         description="Manifest directory for triggered data",
         title="Manifest complete directory",
-    )
-    webhook_url: Optional[str] = Field(
-        default=None,
-        description="Teams webhook url for user notification",
-        title="Teams webhook url",
     )
     misfire_grace_time_s: Union[int, None] = Field(
         default=3 * 3600,

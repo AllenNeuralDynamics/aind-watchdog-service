@@ -52,7 +52,7 @@ class WatchdogService:
         observer = Observer()
         watch_directory = self.watch_config.flag_dir
         if not Path(watch_directory).exists():
-            Path(watch_directory).mkdir(parents=True,exist_ok=True)
+            Path(watch_directory).mkdir(parents=True, exist_ok=True)
             # logging.error("Directory %s does not exist", watch_directory)
             # raise FileNotFoundError(f"Directory {watch_directory} does not exist")
         if not Path(self.watch_config.manifest_complete).exists():
@@ -159,6 +159,8 @@ def main():
     zk_config = mpetk.mpeconfig.source_configuration(
         "aind_watchdog_service", version=__version__
     )
+
+    watch_config = WatchConfig(**zk_config)
 
     watch_config: WatchConfig
     if (args.flag_dir is not None) and (args.manifest_complete is not None):
