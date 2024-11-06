@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.2.dev4 (2024-11-05)
+* Remove teams alert
+* Remove script running
+* Fix log_tags bug
+
 ## 0.1.2.dev3 (2024-11-05)
 * Update log messages
 
