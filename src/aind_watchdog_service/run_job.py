@@ -235,7 +235,14 @@ class RunJob:
         if not transfer:
             logging.error({"Error": "Could not copy to VAST"} | self.config.log_tags)
             return
-        logging.info("Data copied to VAST for %s", self.src_path, extra={"weblog": True})
+        after_copy_time = time.time()
+        logging.info(
+            {
+                "Action": "Data copied to VAST",
+                "Duration_s": int(after_copy_time - start_time),
+            }
+            | self.config.log_tags
+        )
 
         if not self.trigger_transfer_service():
             logging.error(
@@ -243,11 +250,17 @@ class RunJob:
                 | self.config.log_tags
             )
             return
-
         end_time = time.time()
+        logging.info(
+            {
+                "Action": "AIND Data Transfer Service notified",
+                "Duration_s": int(end_time - after_copy_time),
+            }
+            | self.config.log_tags
+        )
 
         logging.info(
-            {"Action": "Job complete", "Duration_s": end_time - start_time}
+            {"Action": "Job complete", "Duration_s": int(end_time - start_time)}
             | self.config.log_tags,
             extra={"weblog": True},
         )
