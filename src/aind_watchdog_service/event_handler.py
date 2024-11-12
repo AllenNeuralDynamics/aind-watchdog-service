@@ -96,7 +96,7 @@ class EventHandler(FileSystemEventHandler):
             configuration for the job
         """
         if not job_config.schedule_time:
-            logging.info("Scheduling job to run now %s", src_path)
+            # logging.info("Scheduling job to run now %s", src_path)
             run = RunJob(src_path, job_config, self.config)
             job_id = self.scheduler.add_job(
                 run.run_job,
@@ -105,7 +105,7 @@ class EventHandler(FileSystemEventHandler):
 
         else:
             trigger = self._get_trigger_time(job_config.schedule_time)
-            logging.info("Scheduling job to run at %s %s", trigger, src_path)
+            # logging.info("Scheduling job to run at %s %s", trigger, src_path)
             run = RunJob(src_path, job_config, self.config)
             job_id = self.scheduler.add_job(
                 run.run_job,
@@ -113,6 +113,15 @@ class EventHandler(FileSystemEventHandler):
                 run_date=trigger,
                 misfire_grace_time=self.config.misfire_grace_time_s,
             )
+        logging.info(
+            {
+                "Action": "Job Scheduled",
+                "Scheduled Time": job_config.schedule_time or "now",
+            }
+            | job_config.log_tags,
+            extra={"weblog": True},
+        )
+
         self.jobs[src_path] = job_id
 
     def on_deleted(self, event: Union[FileDeletedEvent, DirDeletedEvent]) -> None:
@@ -156,7 +165,7 @@ class EventHandler(FileSystemEventHandler):
             logging.info("Deleting job %s", event.src_path)
             self.scheduler.remove_job(self.jobs[event.src_path].id)
             del self.jobs[event.src_path]
-        logging.info("Found event file %s", event.src_path, extra={'weblog': True})
+        logging.info("Found event file %s", event.src_path)  # log schedule time
         time.sleep(10)  # Wait for file to be written
         transfer_config = self._load_manifest(event.src_path)
         if transfer_config:
