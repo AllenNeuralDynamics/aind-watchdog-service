@@ -139,6 +139,15 @@ class RunJob:
         # Robocopy return code documenttion:
         # https://learn.microsoft.com/en-us/troubleshoot/windows-server/backup-and-storage/return-codes-used-robocopy-utility # noqa
         if run.returncode > 7:
+            logging.error(
+                {
+                    "Error": "Could not copy file",
+                    "File": src,
+                    "Destination": dest,
+                    "Robocopy Return Code": run.returncode,
+                }
+                | self.config.log_tags
+            )
             return False
         return True
 
@@ -166,6 +175,15 @@ class RunJob:
         else:
             run = self.run_subprocess(["rsync", "-t", src, dest])
         if run.returncode != 0:
+            logging.error(
+                {
+                    "Error": "Could not copy file",
+                    "File": src,
+                    "Destination": dest,
+                    "Rsync Return Code": run.returncode,
+                }
+                | self.config.log_tags
+            )
             return False
         return True
 

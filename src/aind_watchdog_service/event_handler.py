@@ -6,6 +6,7 @@ import time
 from pathlib import Path
 from typing import Dict, Union
 
+import apscheduler
 import yaml
 from apscheduler.job import Job
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -60,7 +61,8 @@ class EventHandler(FileSystemEventHandler):
                 data = yaml.safe_load(f)
                 config = ManifestConfig(**data)
             except Exception as e:
-                logging.error("Error loading config %s", repr(e))
+                logging.exception("Error loading manifest")
+                return
         return config
 
     def _get_trigger_time(self, transfer_time: datetime.time) -> datetime.datetime:
@@ -138,7 +140,20 @@ class EventHandler(FileSystemEventHandler):
         """
         if event.src_path in self.jobs:
             logging.info("Deleting job %s", event.src_path)
-            self.scheduler.remove_job(self.jobs[event.src_path].id)
+            try:
+                self.scheduler.remove_job(self.jobs[event.src_path].id)
+                logging.info(
+                    {
+                        "Action": "Manifest deleted",
+                        "File": event.src_path,
+                    },
+                    extra={"weblog": True},
+                )
+            except apscheduler.jobstores.base.JobLookupError:
+                logging.info(
+                    "No apscheduler job for %s, this probably means the job ran successfully and this deletion is part of the move to manifest_completed",
+                    event.src_path,
+                )
             del self.jobs[event.src_path]
         logging.info("Jobs in queue %s", self.scheduler.get_jobs())
 
@@ -170,3 +185,5 @@ class EventHandler(FileSystemEventHandler):
         transfer_config = self._load_manifest(event.src_path)
         if transfer_config:
             self.schedule_job(event.src_path, transfer_config)
+        print(self.scheduler.get_jobs())
+        pass

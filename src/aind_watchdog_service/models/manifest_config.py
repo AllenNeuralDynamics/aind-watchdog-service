@@ -11,9 +11,11 @@ from pydantic import (
     BeforeValidator,
     ConfigDict,
     Field,
+    field_serializer,
     field_validator,
     model_validator,
     computed_field,
+    PlainSerializer,
 )
 from typing_extensions import Annotated, Self
 
@@ -94,7 +96,6 @@ class ManifestConfig(BaseModel):
         title="Commands",
     )
 
-    @computed_field
     @property
     def log_tags(self) -> dict:
         return {
@@ -183,3 +184,7 @@ class ManifestConfig(BaseModel):
     def _path_to_posix(path: str) -> str:
         """Converts path string to posix"""
         return str(Path(path).as_posix())
+
+    @field_serializer("s3_bucket")
+    def serialize_enum(self, s3_bucket: BucketType):
+        return s3_bucket.value
