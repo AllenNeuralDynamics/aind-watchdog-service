@@ -16,7 +16,7 @@ from watchdog.observers import Observer
 from aind_watchdog_service.event_handler import EventHandler
 from aind_watchdog_service.models.watch_config import WatchConfig
 
-from aind_watchdog_service import __version__
+from aind_watchdog_service import __version__, integration_test
 
 
 class WatchdogService:
@@ -48,7 +48,7 @@ class WatchdogService:
 
     def initiate_observer(self) -> None:
         """Starts Watchdog observer"""
-        logging.info("Starting observer")
+        logging.info(f"Starting observer, Watching {self.watch_config.flag_dir}")
         observer = Observer()
         watch_directory = self.watch_config.flag_dir
         if not Path(watch_directory).exists():
@@ -118,6 +118,8 @@ def parse_args(args_list: list[str]) -> argparse.Namespace:
         "-w", "--webhook-url", type=str, help="Teams webhook url for user notification"
     )
 
+    parser.add_argument("--test", action="store_true")
+
     return parser.parse_args(args_list)
 
 
@@ -143,10 +145,8 @@ def read_config(config_path: str) -> WatchConfig:
             sys.exit(1)
 
 
-def main():
-    """Main function to parse arguments and start watchdog service"""
-
-    args = parse_args(sys.argv[1:])
+def main(args):
+    """Main function start watchdog service"""
 
     if args.config_path:
         args.flag_dir = None
@@ -191,4 +191,10 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+
+    args = parse_args(sys.argv[1:])
+
+    if args.test:
+        integration_test.run_test()
+    else:
+        main(args)
