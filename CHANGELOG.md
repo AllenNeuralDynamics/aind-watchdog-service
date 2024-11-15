@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.2.dev6 (2024-11-06)
+* Add more info in logging
+* Add fn to drop test manifest with `aind_watchdog_service.exe --test`
+
 ## 0.1.2.dev5 (2024-11-06)
 * Tweak logging
 
