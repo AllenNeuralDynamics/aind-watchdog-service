@@ -1,6 +1,15 @@
 # Changelog
 
-## 0.1.2.dev6 (2024-11-06)
+## 0.1.2 (2024-11-15)
+* Production release
+* Move into SIPE's infrastructure and ownership
+* Add mpetk - configuration with zookeeper and logging to server
+* Add more informative logs to improve transfer process tracking
+* Remove "script" argument of manifest allowing arbitrary code execution
+* Create manifest directory on app startup
+* Add function to test a deployed instance with `aind_watchdog_service.exe --test`
+
+## 0.1.2.dev6 (2024-11-15)
 * Add more info in logging
 * Add fn to drop test manifest with `aind_watchdog_service.exe --test`
 
