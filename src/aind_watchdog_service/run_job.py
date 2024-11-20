@@ -58,18 +58,12 @@ class RunJob:
             if not destination_directory.is_dir():
                 destination_directory.mkdir(parents=True)
             for file in modalities[modality]:
-                if Path(file).exists():
-                    if PLATFORM == "windows":
-                        transfer = self.execute_windows_command(
-                            file, destination_directory
-                        )
-                    else:
-                        transfer = self.execute_linux_command(file, destination_directory)
-                    if not transfer:
-                        logging.error("Error copying files %s", file)
-                        return False
+                if PLATFORM == "windows":
+                    transfer = self.execute_windows_command(file, destination_directory)
                 else:
-                    logging.error("File not found %s", file)
+                    transfer = self.execute_linux_command(file, destination_directory)
+                if not transfer:
+                    logging.error("Error copying files %s", file)
                     return False
         for schema in self.config.schemas:
             destination_directory = os.path.join(destination, parent_directory)
@@ -120,6 +114,14 @@ class RunJob:
         # /j: unbuffered I/O (to speed up copy)
         # /e: copy subdirectories (includes empty subdirs), /r:5: retry 5 times
         if not Path(src).exists():
+            logging.error(
+                {
+                    "Error": "Could not copy file",
+                    "File": src,
+                    "Destination": dest,
+                }
+                | self.config.log_tags
+            )
             return False
         if Path(src).is_dir():
             run = self.run_subprocess(
@@ -169,6 +171,14 @@ class RunJob:
         # Rsync used over cp for better performance
         # -r: recursive, -t: preserve modification times
         if not Path(src).exists():
+            logging.error(
+                {
+                    "Error": "Could not copy file",
+                    "File": src,
+                    "Destination": dest,
+                }
+                | self.config.log_tags
+            )
             return False
         if Path(src).is_dir():
             run = self.run_subprocess(["rsync", "-r", "-t", src, dest])
